@@ -1,0 +1,69 @@
+// src/pages/admin/SettingsPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useConfig } from '../../contexts/ConfigContext';
+import { useNotification } from '../../contexts/NotificationContext';
+import { Button } from '../../components/common';
+import FormSettings from './settings/FormSettings';
+import TimelineSettings from './settings/TimelineSettings';
+import MeasuresSettings from './settings/MeasuresSettings';
+import { FileText, Clock, Shield } from 'lucide-react';
+
+const SettingsPage = ({ features }) => {
+    const { user } = useAuth();
+    const { getCompanyConfig, updateCompanyConfig } = useConfig();
+    const { addToast } = useNotification();
+    const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
+    
+    const tabs = [
+        { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'constructorFormularios', component: FormSettings },
+        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'constructorLineasTiempo', component: TimelineSettings },
+        { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5" />, feature: 'medidasPorDefecto', component: MeasuresSettings },
+    ];
+
+    const visibleTabs = tabs.filter(tab => features && features[tab.feature]);
+    const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || '');
+    
+    const handleSave = () => {
+        updateCompanyConfig(user.companyId, config);
+        addToast("Configuración guardada con éxito.", "success");
+    };
+    
+    useEffect(() => {
+        if(visibleTabs.length > 0 && !visibleTabs.find(t => t.id === activeTab)) {
+            setActiveTab(visibleTabs[0].id)
+        }
+    },[visibleTabs, activeTab]);
+
+    const ActiveComponent = visibleTabs.find(tab => tab.id === activeTab)?.component;
+
+    return (
+        <div className="space-y-6">
+             <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-slate-800">Configuración</h1>
+                <div className="flex items-center gap-2">
+                    <Button onClick={handleSave} variant="primary">
+                        Guardar Cambios
+                    </Button>
+                </div>
+            </div>
+            
+            <div className="border-b border-slate-200">
+                <nav className="-mb-px flex space-x-6 overflow-x-auto">
+                    {visibleTabs.map(tab => (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium ${activeTab === tab.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+            
+            {ActiveComponent && <ActiveComponent config={config} setConfig={setConfig} />}
+        </div>
+    );
+};
+
+export default SettingsPage;
