@@ -69,6 +69,9 @@ export const allPermissions = {
   config_puede_gestionar_medidas_defecto: "Gestionar la lista de medidas predefinidas",
   config_puede_gestionar_plantillas: "Gestionar plantillas de comunicación",
   config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
+  config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
+  soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte",
+  config_puede_gestionar_declaracion: "Editar la declaración de veracidad del formulario",
 
   // Módulo: Soporte
   soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte",
