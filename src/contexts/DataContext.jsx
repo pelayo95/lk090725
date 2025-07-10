@@ -15,9 +15,10 @@ export const DataProvider = ({ children }) => {
     const [companies, setCompanies] = useLocalStorage('companies', initialData.companies);
     const [complaints, setComplaints] = useLocalStorage('complaints', initialData.complaints);
     const [plans, setPlans] = useLocalStorage('plans', initialData.plans);
-    const [roles, setRoles] = useLocalStorage('roles', initialData.roles);
-    // Se añade el estado para las plantillas de comunicación, que faltaba.
-    const [communicationTemplates, setCommunicationTemplates] = useLocalStorage('communicationTemplates', initialData.communicationTemplates);
+    // Se añade un fallback a un objeto vacío para evitar errores si initialData.roles es undefined
+    const [roles, setRoles] = useLocalStorage('roles', initialData.roles || {});
+    // Se añade un fallback para las plantillas por robustez
+    const [communicationTemplates, setCommunicationTemplates] = useLocalStorage('communicationTemplates', initialData.communicationTemplates || {});
     
     const addComplaint = (complaintData, companyId) => {
         const password = Math.floor(100000 + Math.random() * 900000).toString();
@@ -95,7 +96,6 @@ export const DataProvider = ({ children }) => {
         updateCompany, 
         plans, setPlans,
         roles, setRoles,
-        // Se exporta el nuevo estado para que esté disponible en toda la app.
         communicationTemplates, setCommunicationTemplates 
     };
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
