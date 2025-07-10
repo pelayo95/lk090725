@@ -10,7 +10,7 @@ import WitnessesField from '../../components/form-fields/WitnessesField';
 import DocumentsField from '../../components/form-fields/DocumentsField';
 import AccusedPersonsField from '../../components/form-fields/AccusedPersonsField';
 import ReviewStep from './ReviewStep';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
 
 const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
@@ -21,17 +21,17 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     const config = useMemo(() => getCompanyConfig(companyId), [companyId, getCompanyConfig]);
     const reviewStep = {id: 'review', title: 'Revisar y Enviar', description: 'Revise la información antes de enviar.'};
     const formSteps = useMemo(() => [...config.formSteps, reviewStep], [config.formSteps]);
-    
+        
     const [currentStep, setCurrentStep] = useState(0);
-    const [formData, setFormData] = useState({ accusedPersons: [{id: uuidv4(), name: '', position: '', dependency: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }] });
+    const [formData, setFormData] = useState({ accusedPersons: [{id: uuidv4(), name: '', position: '', relacion: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }] });
     const [editingFromReview, setEditingFromReview] = useState(false);
-    
-    // Obtiene la fecha de hoy en formato YYYY-MM-DD para usarla como máximo en el input de fecha.
+    const [declarationAccepted, setDeclarationAccepted] = useState(false); // Nuevo estado para la declaración
+        
     const today = new Date().toISOString().split("T")[0];
 
     const handleInputChange = (dataKey, value) => {
         setFormData(prev => {
-            const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
+            const newState = JSON.parse(JSON.stringify(prev));
             setNestedValue(newState, dataKey, value);
             return newState;
         });
@@ -45,12 +45,16 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
             return;
         }
 
-        if (editingFromReview) {
-            setCurrentStep(formSteps.length - 1); // Go back to review step
-            setEditingFromReview(false); // Reset flag
-        } else if (isReviewStep) { // Submit form
+        if (isReviewStep) {
+            if (!declarationAccepted) {
+                alert("Debe aceptar la declaración de veracidad para poder enviar la denuncia.");
+                return;
+            }
             const newComplaint = addComplaint({ originalData: formData }, companyId);
             onSuccess(newComplaint);
+        } else if (editingFromReview) {
+            setCurrentStep(formSteps.length - 1);
+            setEditingFromReview(false);
         } else {
             setCurrentStep(prev => Math.min(prev + 1, formSteps.length - 1));
         }
@@ -70,7 +74,7 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     
     const step = formSteps[currentStep];
 
-    return (
+   return (
         <Card>
             <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-700">{step.title}</h2>
@@ -79,7 +83,14 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
             
             <form ref={formRef}>
                 {isReviewStep ? (
-                    <ReviewStep formData={formData} formSteps={config.formSteps} onEdit={goToStep} />
+                    <ReviewStep 
+                        formData={formData} 
+                        formSteps={config.formSteps} 
+                        onEdit={goToStep}
+                        declarationText={config.complaintDeclarationText}
+                        declarationAccepted={declarationAccepted}
+                        onDeclarationChange={setDeclarationAccepted}
+                    />
                 ) : (
                     <div className="space-y-4">
                         {step.fields.map(field => {
