@@ -69,4 +69,5 @@ export const allPermissions = {
   config_puede_gestionar_formularios: "Acceder al constructor de formularios",
   config_puede_gestionar_timelines: "Acceder al constructor de líneas de tiempo",
   config_puede_gestionar_medidas_defecto: "Gestionar la lista de medidas predefinidas",
+  config_puede_gestionar_plantillas: "Gestionar plantillas de comunicación", // Nuevo permiso
 };
