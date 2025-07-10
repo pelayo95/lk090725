@@ -1,20 +1,20 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { Shield, ChevronRight, CheckCircle } from 'lucide-react';
+// src/pages/public/PublicPortal.jsx
+import React, { useState } from 'react';
+import { Shield, ChevronRight, CheckCircle, Copy } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
-import { useConfig } from '../../contexts/ConfigContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, ConfirmationModal } from '../../components/common';
-// Asumiremos que estos componentes se crearán a continuación
 import ComplaintForm from './ComplaintForm'; 
 import StatusCheckPage from './StatusCheckPage';
 import StatusDetailPage from './StatusDetailPage';
 
-
 const PublicPortal = () => {
-    const [view, setView] = useState('selectCompany'); // selectCompany, form, success, statusCheck, statusDetail
+    const [view, setView] = useState('selectCompany');
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [caseInfo, setCaseInfo] = useState(null);
     const [loggedInCase, setLoggedInCase] = useState(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const { addToast } = useNotification();
 
     const { companies, holidays } = useData();
     
@@ -45,6 +45,21 @@ const PublicPortal = () => {
         setView('statusDetail');
     };
 
+    const copyToClipboard = (text) => {
+        // Usa un textarea temporal para copiar al portapapeles
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            addToast(`'${text}' copiado al portapapeles`, 'success');
+        } catch (err) {
+            addToast('Error al copiar', 'error');
+        }
+        document.body.removeChild(textArea);
+    };
+
     const renderContent = () => {
         switch (view) {
             case 'form':
@@ -54,18 +69,30 @@ const PublicPortal = () => {
                     <Card className="text-center">
                         <CheckCircle className="inline-block w-16 h-16 text-emerald-500"/>
                         <h2 className="text-2xl font-bold text-slate-800 mt-4">Denuncia Enviada Exitosamente</h2>
-                        <p className="text-slate-600 mt-2">Guarde los siguientes datos para hacer seguimiento de su caso.</p>
-                        <div className="mt-4 space-y-2 text-left bg-slate-50 p-4 rounded-lg inline-block">
+                        <p className="text-slate-600 mt-2 mb-6">Guarde sus credenciales en un lugar seguro. Las necesitará para hacer seguimiento de su caso.</p>
+                        
+                        <div className="mt-4 space-y-4 text-left bg-slate-100 p-6 rounded-lg inline-block w-full max-w-md">
                             <div>
-                                <p className="text-xs text-slate-500">Código del caso:</p>
-                                <p className="text-xl font-mono text-indigo-700">{caseInfo?.id}</p>
+                                <label className="text-sm font-medium text-slate-600">Código del Caso</label>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.id}</p>
+                                    <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.id)}>
+                                        <Copy className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                             <div>
-                                <p className="text-xs text-slate-500">Contraseña:</p>
-                                <p className="text-xl font-mono text-indigo-700">{caseInfo?.password}</p>
+                                <label className="text-sm font-medium text-slate-600">Contraseña de Seguimiento</label>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.password}</p>
+                                    <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.password)}>
+                                        <Copy className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                        <Button onClick={() => setView('selectCompany')} className="mt-6">Volver al Inicio</Button>
+
+                        <Button onClick={() => setView('selectCompany')} className="mt-8">Volver al Inicio</Button>
                     </Card>
                 );
             case 'statusCheck':
