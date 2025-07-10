@@ -1,13 +1,32 @@
 // src/config/defaultConfig.js
+import { uuidv4 } from '../utils/uuid';
+
+const legalDefinitions = {
+    acosoSexual: "Acoso Sexual (Art. 2° Código del Trabajo): El que una persona realice en forma indebida, por cualquier medio, requerimientos de carácter sexual, no consentidos por quien los recibe y que amenacen o perjudiquen su situación laboral o sus oportunidades en el empleo.",
+    acosoLaboral: "Acoso Laboral (Art. 2° Código del Trabajo): Toda conducta que constituya agresión u hostigamiento reiterados, ejercida por el empleador o por uno o más trabajadores, en contra de otro u otros trabajadores, por cualquier medio, y que tenga como resultado para el o los afectados su menoscabo, maltrato o humillación, o bien que amenace o perjudique su situación laboral o sus oportunidades en el empleo.",
+    violenciaTrabajo: "Violencia en el Trabajo (Art. 2° Código del Trabajo): Aquellas conductas que afecten a las y los trabajadores, con ocasión de la prestación de servicios, por parte de clientes, proveedores o usuarios, entre otros."
+};
 
 /**
  * Define la configuración por defecto para una nueva empresa.
- * Esto incluye la estructura del formulario de denuncia, los ajustes de la línea de tiempo y las medidas de resguardo.
  */
 export const defaultConfig = {
     formSteps: [
         { id: "s1", title: "Tipo de Conducta", description: "Seleccione el tipo de conducta que desea denunciar.", fields: [
-            { id: "f1", label: "Tipo de Conducta", type: "radio", dataKey: "case.type", required: true, options: ["Acoso Sexual", "Acoso Laboral", "Violencia en el Trabajo"], description: "Elija una opción." }
+            { 
+                id: "f1", 
+                label: "Tipo de Conducta", 
+                type: "radio", 
+                dataKey: "case.type", 
+                required: true, 
+                // Opciones ahora son objetos con valor y definición
+                options: [
+                    { value: "Acoso Sexual", definition: legalDefinitions.acosoSexual },
+                    { value: "Acoso Laboral", definition: legalDefinitions.acosoLaboral },
+                    { value: "Violencia en el Trabajo", definition: legalDefinitions.violenciaTrabajo }
+                ], 
+                description: "Elija una opción para ver su definición legal." 
+            }
         ]},
         { id: "s2", title: "Identificación del Denunciante", description: "Sus datos son confidenciales y no serán revelados al denunciado.", fields: [
             { id: "f2", label: "Nombre Completo", type: "text", dataKey: "complainant.name", required: false, description: "", editableOnManage: true },
