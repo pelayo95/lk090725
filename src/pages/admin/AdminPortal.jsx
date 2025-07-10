@@ -1,12 +1,13 @@
+// src/pages/admin/AdminPortal.jsx
 import React, { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import AdminLayout from './AdminLayout';
-// Asumiremos que estos componentes se crearán a continuación
 import Dashboard from './Dashboard';
 import CaseDetailPage from './CaseDetailPage';
 import UserManagementPage from './UserManagementPage';
 import SettingsPage from './SettingsPage';
+import SupportPage from './SupportPage'; // Nuevo
 
 const AdminPortal = () => {
     const { user } = useAuth();
@@ -27,6 +28,8 @@ const AdminPortal = () => {
         content = <UserManagementPage />;
     } else if (view === 'settings') {
         content = <SettingsPage features={features} />;
+    } else if (view === 'support') {
+        content = <SupportPage />; // Nuevo
     } else {
         content = <Dashboard />;
     }
