@@ -5,10 +5,8 @@ import { useConfig } from '../../contexts/ConfigContext';
 import { Card, Button } from '../../components/common';
 import { getNestedValue } from '../../utils/objectUtils';
 import { calculateEndDate } from '../../services/dateUtils';
-// El ChatTab se creará en el siguiente paso
-// import ChatTab from '../../components/shared/ChatTab';
-
-const PlaceholderChat = () => <div className="p-4 bg-slate-100 rounded-md text-center text-slate-500">El chat estará disponible pronto.</div>;
+import ChatTab from '../../components/shared/ChatTab';
+import { uuidv4 } from '../../utils/uuid';
 
 const StatusDetailPage = ({ complaint, onBack, holidays }) => {
     const { complaints: allComplaints, updateComplaint, plans, companies } = useData();
@@ -75,6 +73,20 @@ const StatusDetailPage = ({ complaint, onBack, holidays }) => {
         return "Proceso Finalizado";
     }, [timelineEvents, currentComplaint]);
 
+    const handleSendMessage = (text) => {
+        const newMessage = {
+            id: uuidv4(), text, senderId: 'complainant', senderName: 'Denunciante',
+            timestamp: new Date().toISOString()
+        };
+        const newAuditLog = [ ...currentComplaint.auditLog,
+            { id: uuidv4(), action: `Denunciante envió un mensaje.`, userId: "public", timestamp: new Date().toISOString() }
+        ];
+        updateComplaint(currentComplaint.id, {
+            chatMessages: [...(currentComplaint.chatMessages || []), newMessage],
+            auditLog: newAuditLog
+        }, null); 
+    };
+
     const activeMeasures = (currentComplaint.safeguardMeasures || []).filter(m => m.status === "Implementada");
 
     return (
@@ -102,7 +114,15 @@ const StatusDetailPage = ({ complaint, onBack, holidays }) => {
                        </div>
                 )}
                 
-                {features.canalComunicacionDenunciante && <PlaceholderChat />}
+                {features.canalComunicacionDenunciante && <ChatTab 
+                    title="Comunicaciones con Gestor"
+                    messages={currentComplaint.chatMessages || []}
+                    onSendMessage={handleSendMessage}
+                    currentUserId="complainant"
+                    placeholder="Escribe un mensaje..."
+                    currentUserColor="bg-sky-100"
+                    otherUserColor="bg-slate-200"
+                />}
                 
                 <div>
                       <h3 className="text-lg font-semibold text-indigo-700 mb-2">Detalles de su Denuncia</h3>
@@ -114,14 +134,33 @@ const StatusDetailPage = ({ complaint, onBack, holidays }) => {
                                     {step.fields.map(field => {
                                         const value = getNestedValue(currentComplaint.originalData, field.dataKey);
                                         if (!value || (Array.isArray(value) && value.length === 0)) return null;
+
+                                        // Manejo especial para 'accusedPersons' para mostrar todos los detalles
+                                        if (field.type === 'accusedPersons' && Array.isArray(value)) {
+                                            return (
+                                                <div key={field.id} className="grid grid-cols-3 gap-2">
+                                                    <dt className="text-slate-500">{field.label}:</dt>
+                                                    <dd className="col-span-2 text-slate-700 font-medium space-y-2">
+                                                        {value.map((person, i) => (
+                                                            <div key={person.id} className="text-xs p-2 border rounded-md bg-slate-50">
+                                                                <p><span className="font-semibold">Nombre:</span> {person.name || 'N/A'}</p>
+                                                                <p><span className="font-semibold">Cargo:</span> {person.position || 'N/A'}</p>
+                                                                <p><span className="font-semibold">Tipo:</span> {person.employeeType || 'N/A'}</p>
+                                                                {person.employerName && <p><span className="font-semibold">Empleador:</span> {person.employerName}</p>}
+                                                            </div>
+                                                        ))}
+                                                    </dd>
+                                                </div>
+                                            );
+                                        }
+
                                         let displayValue = Array.isArray(value) ? value.join(', ') : value;
                                         if (field.type === 'witnesses' && Array.isArray(value)) {
                                             displayValue = value.map(w => w.name).join(', ') || 'N/A';
                                         } else if (field.type === 'documents' && Array.isArray(value)) {
                                             displayValue = value.map(d => d.fileName || 'Archivo').join(', ') || 'N/A';
-                                        } else if (field.type === 'accusedPersons' && Array.isArray(value)) {
-                                            displayValue = value.map(p => p.name).join(', ');
                                         }
+                                        
                                         return (
                                             <div key={field.id} className="grid grid-cols-3 gap-2">
                                                 <dt className="text-slate-500">{field.label}:</dt>
