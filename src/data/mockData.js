@@ -5,6 +5,7 @@ import { uuidv4 } from '../utils/uuid';
 import { allPermissions } from './permissions';
 
 // Helper para generar un objeto con todos los permisos activados al máximo nivel.
+// Esta función asegura que roles como "Administrador" siempre tengan acceso a todo lo nuevo.
 const generateAllPermissionsEnabled = () => {
   return Object.keys(allPermissions).reduce((acc, key) => {
     if (key.includes('_alcance')) {
