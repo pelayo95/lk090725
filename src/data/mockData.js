@@ -152,5 +152,23 @@ export const initialData = {
         permissions: defaultAuditorPermissions,
       }
     ]
-  }
+  },
+  supportTickets: [
+    {
+      id: "TICKET-001",
+      companyId: "empresa-a",
+      subject: "Duda sobre configuración de roles",
+      status: "Abierto",
+      createdAt: "2025-07-10T10:00:00Z",
+      createdBy: "adminA1",
+      messages: [
+        {
+          id: uuidv4(),
+          text: "Hola, tengo una duda sobre cómo configurar un rol para un auditor externo. ¿Me pueden ayudar?",
+          senderId: "adminA1",
+          senderName: "Admin A",
+          timestamp: "2025-07-10T10:00:00Z"
+        }
+      ]
+    }
 };
