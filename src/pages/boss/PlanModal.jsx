@@ -7,7 +7,10 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 const PermissionGroup = ({ title, keys, permissions, onPermissionChange, onToggleAll, defaultOpen = false }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
+    
     const booleanPermissions = keys.filter(k => !k.includes('_alcance'));
+    const scopePermissions = keys.filter(k => k.includes('_alcance'));
+    
     const allSelected = booleanPermissions.length > 0 && booleanPermissions.every(k => permissions[k]);
 
     return (
@@ -18,17 +21,35 @@ const PermissionGroup = ({ title, keys, permissions, onPermissionChange, onToggl
             </button>
             {isOpen && (
                 <div className="p-4 bg-white">
-                    <div className="flex justify-end mb-3">
-                        <Button type="button" variant="secondary" size="sm" onClick={() => onToggleAll(keys, !allSelected)}>
-                            {allSelected ? 'Deseleccionar Todo' : 'Seleccionar Todo'}
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-                        {keys.map(key => {
-                            if (key.includes('_alcance')) {
+                    {booleanPermissions.length > 0 && (
+                        <div className="border-b pb-4 mb-4">
+                            <div className="flex justify-end mb-3">
+                                <Button type="button" variant="secondary" size="sm" onClick={() => onToggleAll(keys, !allSelected)}>
+                                    {allSelected ? 'Deseleccionar Todo' : 'Seleccionar Todo'}
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                                {booleanPermissions.map(key => (
+                                    <label key={key} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-md cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={!!permissions[key]}
+                                            onChange={e => onPermissionChange(key, e.target.checked)}
+                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        <span className="text-sm text-slate-700">{allPermissions[key]}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
+                    {scopePermissions.length > 0 && (
+                         <div className="space-y-4">
+                            {scopePermissions.map(key => {
                                 const options = key.includes('agenda') ? ['propia', 'empresa'] : ['todos', 'asignados', 'propios'];
                                 return (
-                                    <div key={key} className="md:col-span-2 p-3 border rounded-md bg-white">
+                                    <div key={key}>
                                         <Select
                                             label={allPermissions[key]}
                                             value={permissions[key] || options[0]}
@@ -38,20 +59,15 @@ const PermissionGroup = ({ title, keys, permissions, onPermissionChange, onToggl
                                         </Select>
                                     </div>
                                 )
-                            }
-                            return (
-                                <label key={key} className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-md cursor-pointer">
-                                    <input type="checkbox" checked={!!permissions[key]} onChange={e => onPermissionChange(key, e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
-                                    <span className="text-sm text-slate-700">{allPermissions[key]}</span>
-                                </label>
-                            )
-                        })}
-                    </div>
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
         </Card>
-    );
-};
+    )
+}
+
 
 const PlanModal = ({ isOpen, onClose, onSave, plan }) => {
     const [name, setName] = useState('');
