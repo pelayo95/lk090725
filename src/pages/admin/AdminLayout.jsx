@@ -25,7 +25,6 @@ const AdminLayout = ({ children }) => {
             id: 'dashboard', 
             label: 'Dashboard', 
             icon: <LayoutDashboard className="w-5 h-5"/>, 
-            // El acceso se concede si tiene permiso para ver CUALQUIER parte del dashboard
             permission: [
                 'dashboard_ver_kpis', 
                 'casos_ver_listado', 
@@ -37,7 +36,6 @@ const AdminLayout = ({ children }) => {
             id: 'settings', 
             label: 'Configuración', 
             icon: <Settings className="w-5 h-5"/>, 
-            // El acceso a Configuración se concede si tiene al menos uno de los permisos de configuración
             permission: [
                 'config_puede_gestionar_roles', 
                 'config_puede_gestionar_formularios',
@@ -56,7 +54,6 @@ const AdminLayout = ({ children }) => {
                 </div>
                 <nav className="flex-1 px-2 py-4 space-y-1">
                     {navItems.map(item => {
-                        // Comprobar si el usuario tiene el permiso necesario
                         const hasPermission = Array.isArray(item.permission)
                             ? item.permission.some(p => user.permissions[p])
                             : user.permissions[item.permission];
