@@ -2,10 +2,11 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/common';
-import { LogOut, Building, Package } from 'lucide-react';
+import { LogOut, Building, Package, LifeBuoy } from 'lucide-react';
 import BossDashboard from './BossDashboard';
 import PlanManagementPage from './PlanManagementPage';
 import BossSettingsPage from './BossSettingsPage';
+import BossSupportPage from './BossSupportPage';
 
 const BossPortal = () => {
     const { user, logout } = useAuth();
@@ -16,6 +17,8 @@ const BossPortal = () => {
         content = <PlanManagementPage />;
     } else if (view === 'settings') {
         content = <BossSettingsPage />;
+    } else if (view === 'support') {
+        content = <BossSupportPage />;
     } else {
         content = <BossDashboard />;
     }
@@ -42,6 +45,9 @@ const BossPortal = () => {
                         </Button>
                          <Button variant={view === 'settings' ? 'primary' : 'secondary'} onClick={() => window.location.hash = '#boss/settings'}>
                             <Building className="w-4 h-4"/> Empresas
+                        </Button>
+                        <Button variant={view === 'support' ? 'primary' : 'secondary'} onClick={() => window.location.hash = '#boss/support'}>
+                            <LifeBuoy className="w-4 h-4"/> Soporte
                         </Button>
                         <Button onClick={logout} variant="ghost">
                             <LogOut className="w-4 h-4"/> Cerrar Sesión
