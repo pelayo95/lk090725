@@ -107,7 +107,25 @@ export const initialData = {
        id: "CASO-001", companyId: "empresa-a", password: "123", status: "Cerrada", severity: "Leve",
        createdAt: "2025-07-10T09:00:00Z", closedAt: "2025-07-10T10:00:00Z", investigatorIds: ["adminA1", "investigadorA1"],
        receptionType: 'interna', internalAction: 'investigar', originalData: { case: { type: "Violencia en el Trabajo" }, complainant: { name: "Carlos Soto" }, accusedPersons: [{id: uuidv4(), name: 'Supervisor X', position: 'Supervisor', dependency: 'Gerencia', employeeType: 'Trabajador de mi misma empresa', employerName: ''}] },
-       editedData: {}, managements: [], safeguardMeasures: [], internalComments: [], auditLog: [], timelineProgress: {}, caseFiles: [], sanctions: [], otherMeasures: [],
+       editedData: {}, 
+       managements: [], 
+       safeguardMeasures: [
+         {
+           id: uuidv4(),
+           text: "Prohibición de contacto entre las partes.",
+           status: "Implementada",
+           assignedTo: "adminA1",
+           startDate: "2025-07-11",
+           endDate: "2025-08-11",
+           description: "Se ha instruido a ambas partes a no tener contacto por ningún medio durante el proceso de investigación."
+         }
+       ], 
+       internalComments: [], 
+       auditLog: [], 
+       timelineProgress: {}, 
+       caseFiles: [], 
+       sanctions: [], 
+       otherMeasures: [],
        chatMessages: [ { id: uuidv4(), text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-07-10T10:00:00Z' } ]
      },
   ],
@@ -151,7 +169,7 @@ export const initialData = {
         permissions: defaultAuditorPermissions,
       }
     ]
-  }, // <-- ESTA COMA FALTABA
+  },
   supportTickets: [
     {
       id: "TICKET-001",
