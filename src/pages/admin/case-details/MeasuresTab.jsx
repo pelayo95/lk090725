@@ -24,12 +24,12 @@ const MeasuresTab = ({ complaint }) => {
         let updatedMeasures;
         let action;
 
-        if (itemData.id) { // Editing
+        if (itemData.id) {
             updatedMeasures = complaint.safeguardMeasures.map(m => m.id === itemData.id ? { ...m, ...itemData } : m);
             action = `Medida de resguardo editada: "${itemData.text}"`;
-        } else { // Adding
+        } else {
             const newItem = { id: uuidv4(), ...itemData };
-            updatedMeasures = [...complaint.safeguardMeasures, newItem];
+            updatedMeasures = [...(complaint.safeguardMeasures || []), newItem];
             action = `Nueva medida de resguardo creada: "${newItem.text}"`;
         }
         
@@ -60,9 +60,11 @@ const MeasuresTab = ({ complaint }) => {
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Medidas de Resguardo</h3>
-                <Button onClick={handleAddClick} variant="primary">
-                    <Plus className="w-4 h-4"/> Añadir Medida
-                </Button>
+                {user.permissions.medidas_puede_crear && (
+                    <Button onClick={handleAddClick} variant="primary">
+                        <Plus className="w-4 h-4"/> Añadir Medida
+                    </Button>
+                )}
             </div>
             <div className="space-y-3">
                 {complaint.safeguardMeasures.length > 0 ? (
@@ -70,11 +72,19 @@ const MeasuresTab = ({ complaint }) => {
                         <div key={m.id} className="p-3 border rounded-lg bg-white">
                              <div className="flex justify-between items-start">
                                 <p className="text-slate-800 flex-1">{m.text}</p>
-                                <Button variant="ghost" className="p-1 h-auto" onClick={() => handleEditClick(m)}><Edit className="w-4 h-4 text-slate-500"/></Button>
+                                {user.permissions.medidas_puede_editar && (
+                                    <Button variant="ghost" className="p-1 h-auto" onClick={() => handleEditClick(m)}><Edit className="w-4 h-4 text-slate-500"/></Button>
+                                )}
                             </div>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 mt-2">
                                 <div className="flex-1 min-w-[150px]">
-                                    <Select value={m.status} onChange={e => handleStatusChange(m.id, e.target.value)} id={`measure-status-${m.id}`} className="text-xs p-1">
+                                    <Select 
+                                        value={m.status} 
+                                        onChange={e => handleStatusChange(m.id, e.target.value)} 
+                                        id={`measure-status-${m.id}`} 
+                                        className="text-xs p-1"
+                                        disabled={!user.permissions.medidas_puede_cambiar_estado}
+                                    >
                                         {['Discusión', 'Aprobación', 'Implementación', 'Implementada', 'Seguimiento', 'Revisión'].map(s => <option key={s} value={s}>{s}</option>)}
                                     </Select>
                                 </div>
