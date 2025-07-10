@@ -24,37 +24,42 @@ function App() {
     const RenderedPortal = useMemo(() => {
         const portal = hash.split('/')[0] || '#public';
         
-        // Si hay un usuario logueado y sus permisos están cargados
-        if (user && user.permissions) {
-            // Si el usuario es el "Boss"
-            if (user.permissions.isBoss) {
-                // Si no está en el portal del boss, redirigir
-                if (portal !== '#boss') {
-                    window.location.hash = '#boss/dashboard';
-                    return null; // Renderizar nada mientras se redirige
-                }
-                return <BossPortal />;
-            } 
-            // Para cualquier otro usuario autenticado (Admin, Investigador, etc.)
-            else {
-                // Si no está en el portal de admin, redirigir
-                if (portal !== '#admin') {
-                     window.location.hash = '#admin';
-                     return null; // Renderizar nada mientras se redirige
-                }
-                return <AdminPortal />;
+        // Primero, manejamos el caso de un usuario no autenticado o en proceso de carga.
+        if (!user || !user.permissions) {
+            if (portal === '#admin' || portal === '#boss') {
+                return <LoginScreen />;
             }
+            // Para cualquier otra ruta, mostramos el portal público.
+            return <PublicPortal />;
         }
 
-        // Si no hay usuario, manejar rutas públicas y de login
-        switch (portal) {
-            case '#admin':
-            case '#boss':
-                return <LoginScreen />;
-            case '#public':
-            default:
-                return <PublicPortal />;
+        // Si llegamos aquí, el usuario está logueado y sus permisos están cargados.
+        
+        // Caso 1: El usuario es el "Boss".
+        if (user.permissions.isBoss) {
+            // Si no está en la URL correcta, lo redirigimos.
+            if (portal !== '#boss') {
+                window.location.hash = '#boss/dashboard';
+                return null; // No renderizar nada mientras se redirige.
+            }
+            // Si está en la URL correcta, mostramos su portal.
+            return <BossPortal />;
         }
+        
+        // Caso 2: El usuario es un Admin/Investigador de una empresa.
+        if (!user.permissions.isBoss) {
+            // Si no está en la URL correcta, lo redirigimos.
+            if (portal !== '#admin') {
+                 window.location.hash = '#admin';
+                 return null; // No renderizar nada mientras se redirige.
+            }
+            // Si está en la URL correcta, mostramos su portal.
+            return <AdminPortal />;
+        }
+
+        // Como último recurso, si ninguna condición se cumple, mostramos el portal público.
+        return <PublicPortal />;
+
     }, [hash, user]);
 
     return RenderedPortal;
