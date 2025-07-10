@@ -7,7 +7,6 @@ import { getNestedValue } from '../../utils/objectUtils';
 const ReviewStep = ({ formData, formSteps, onEdit, declarationText, declarationAccepted, onDeclarationChange }) => (
     <div className="space-y-6">
         {formSteps.map((step, stepIndex) => {
-            // Verifica si hay algún dato para este paso antes de renderizarlo
             const hasData = step.fields.some(field => {
                 const value = getNestedValue(formData, field.dataKey);
                 return value !== undefined && value !== null && value !== '' && (!Array.isArray(value) || value.length > 0);
