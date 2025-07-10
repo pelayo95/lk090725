@@ -79,22 +79,20 @@ const TimelineTab = ({ complaint, onNavigate }) => {
         updateComplaint(complaint.id, { timelineProgress: newProgress, auditLog: newAuditLog }, user);
     };
     
-    // Nueva función para manejar clics en sub-etapas interactivas
+    // Función actualizada para manejar todos los clics interactivos
     const handleSubStepClick = (subStep) => {
-        switch (subStep.id) {
-            case 'sub1': // Designar investigadores
-                // Podríamos hacer scroll a la sección de investigadores en la misma página si estuviera visible
-                // Por ahora, un simple log o alerta puede indicar la acción.
-                console.log("Navegando a la sección de investigadores...");
-                break;
-            case 'sub2': // Notificar recepción
-                onNavigate('communications'); // Llama a la función pasada por props para cambiar de pestaña
-                break;
-            case 'sub4': // Determinar medidas de resguardo
-                onNavigate('measures');
-                break;
-            default:
-                break;
+        const communicationSteps = ['sub2', 'sub3', 'sub5', 'sub15'];
+        const managementSteps = ['sub6', 'sub7', 'sub8', 'sub9', 'sub10'];
+
+        if (communicationSteps.includes(subStep.id)) {
+            onNavigate('communications');
+        } else if (managementSteps.includes(subStep.id)) {
+            onNavigate('managements');
+        } else if (subStep.id === 'sub1') {
+            console.log("Navegando a la sección de investigadores...");
+            // Aquí se podría implementar un scroll a la sección de asignación
+        } else if (subStep.id === 'sub4') {
+            onNavigate('measures');
         }
     };
 
@@ -130,7 +128,8 @@ const TimelineTab = ({ complaint, onNavigate }) => {
                                             const subKey = `${event.id}_${i}`;
                                             const isSubCompleted = complaint.timelineProgress?.[subKey];
                                             const isSubDisabled = !user.permissions.timeline_puede_marcar_etapas || isDisabled;
-                                            const isInteractive = ['sub1', 'sub2', 'sub4'].includes(sub.id);
+                                            // Se actualiza la lista de IDs interactivos
+                                            const isInteractive = ['sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6', 'sub7', 'sub8', 'sub9', 'sub10', 'sub15'].includes(sub.id);
 
                                             return (
                                                 <li key={sub.id || i} className="flex items-center gap-2">
