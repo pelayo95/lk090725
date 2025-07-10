@@ -5,7 +5,7 @@ import { useData } from '../../contexts/DataContext';
 import { getNestedValue, setNestedValue } from '../../utils/objectUtils';
 import { Card, Button, Input, Select, TextArea } from '../../components/common';
 import { RadioGroup } from '../../components/form-fields/RadioGroup';
-import RutInput from '../../components/form-fields/RutInput.jsx';
+import RutInput from '../../components/form-fields/RutInput';
 import WitnessesField from '../../components/form-fields/WitnessesField';
 import DocumentsField from '../../components/form-fields/DocumentsField';
 import AccusedPersonsField from '../../components/form-fields/AccusedPersonsField';
@@ -26,6 +26,9 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     const [formData, setFormData] = useState({ accusedPersons: [{id: uuidv4(), name: '', position: '', dependency: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }] });
     const [editingFromReview, setEditingFromReview] = useState(false);
     
+    // Obtiene la fecha de hoy en formato YYYY-MM-DD para usarla como máximo en el input de fecha.
+    const today = new Date().toISOString().split("T")[0];
+
     const handleInputChange = (dataKey, value) => {
         setFormData(prev => {
             const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
@@ -92,7 +95,7 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
                                 case 'radio':
                                     return <RadioGroup {...commonProps} value={value} onChange={e => handleInputChange(field.dataKey, e.target.value)} options={field.options || []} name={field.dataKey} />;
                                 case 'select':
-                                    return <Select {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)}><option value="">-- Seleccione --</option>{(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}</Select>;
+                                    return <Select {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)}><option value="">-- Seleccione --</option>{(field.options || []).map(opt => <option key={opt.value || opt} value={opt.value || opt}>{opt.value || opt}</option>)}</Select>;
                                 case 'witnesses':
                                     return <WitnessesField {...commonProps} value={value} onChange={newValue => handleInputChange(field.dataKey, newValue)} />;
                                 case 'documents':
@@ -101,6 +104,9 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
                                     return <AccusedPersonsField {...commonProps} value={value} onChange={newValue => handleInputChange(field.dataKey, newValue)} />;
                                 case 'rut':
                                     return <RutInput {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} />;
+                                case 'date':
+                                    // Se añade el atributo 'max' para la validación
+                                    return <Input type="date" {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} max={today} />;
                                 default:
                                     return <Input type={field.type} {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} />;
                             }
