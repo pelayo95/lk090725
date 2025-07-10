@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
-    Briefcase, LogOut, LayoutDashboard, Users, Settings 
+    Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy
 } from 'lucide-react';
 import { Button } from '../../components/common';
 
@@ -25,13 +25,10 @@ const AdminLayout = ({ children }) => {
             id: 'dashboard', 
             label: 'Dashboard', 
             icon: <LayoutDashboard className="w-5 h-5"/>, 
-            permission: [
-                'dashboard_ver_kpis', 
-                'casos_ver_listado', 
-                'dashboard_ver_agenda'
-            ] 
+            permission: ['dashboard_ver_kpis', 'casos_ver_listado', 'dashboard_ver_agenda'] 
         },
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5"/>, permission: 'config_usuarios_puede_ver_lista' },
+        { id: 'support', label: 'Soporte', icon: <LifeBuoy className="w-5 h-5"/>, permission: 'soporte_puede_crear_ver_tickets' },
         { 
             id: 'settings', 
             label: 'Configuración', 
@@ -40,7 +37,9 @@ const AdminLayout = ({ children }) => {
                 'config_puede_gestionar_roles', 
                 'config_puede_gestionar_formularios',
                 'config_puede_gestionar_timelines',
-                'config_puede_gestionar_medidas_defecto'
+                'config_puede_gestionar_medidas_defecto',
+                'config_puede_gestionar_plantillas',
+                'config_puede_gestionar_notificaciones'
             ]
         },
     ];
