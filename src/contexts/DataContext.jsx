@@ -1,5 +1,5 @@
 // src/contexts/DataContext.jsx
-import React, { useContext, createContext } from 'react';
+import React, { useContext, createContext, useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotification } from './NotificationContext';
 import { initialData } from '../data/mockData';
@@ -11,14 +11,22 @@ export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
     const { addToast } = useNotification();
+    
+    // Estado para asegurar que los datos de localStorage se carguen antes de renderizar los hijos
+    const [isLoading, setIsLoading] = useState(true);
+
     const [holidays, setHolidays] = useLocalStorage('holidays', initialData.holidays);
     const [companies, setCompanies] = useLocalStorage('companies', initialData.companies);
     const [complaints, setComplaints] = useLocalStorage('complaints', initialData.complaints);
     const [plans, setPlans] = useLocalStorage('plans', initialData.plans);
-    // Se añade un fallback a un objeto vacío para evitar errores si initialData.roles es undefined
     const [roles, setRoles] = useLocalStorage('roles', initialData.roles || {});
-    // Se añade un fallback para las plantillas por robustez
     const [communicationTemplates, setCommunicationTemplates] = useLocalStorage('communicationTemplates', initialData.communicationTemplates || {});
+
+    // useEffect con un array de dependencias vacío se ejecuta una sola vez después del primer render.
+    // Para este punto, todos los hooks useLocalStorage han inicializado su estado.
+    useEffect(() => {
+        setIsLoading(false);
+    }, []);
     
     const addComplaint = (complaintData, companyId) => {
         const password = Math.floor(100000 + Math.random() * 900000).toString();
@@ -98,5 +106,12 @@ export const DataProvider = ({ children }) => {
         roles, setRoles,
         communicationTemplates, setCommunicationTemplates 
     };
+
+    // Mientras los datos se hidratan desde localStorage, mostramos una pantalla de carga.
+    // Esto previene que los componentes hijos (como AuthContext) accedan a datos indefinidos.
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen bg-slate-100 text-slate-600">Cargando datos de la aplicación...</div>;
+    }
+
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
