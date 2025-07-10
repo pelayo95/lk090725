@@ -11,14 +11,23 @@ import { uuidv4 } from '../../utils/uuid';
 import CreateCompanyModal from './CreateCompanyModal';
 import CompanyEditPanel from './CompanyEditPanel';
 import { allPermissions } from '../../data/permissions';
+import { permissionToFeatureMap } from '../../data/permissionFeatureMap'; // Nuevo import
 
-// Helper para generar todos los permisos para el nuevo rol de admin
-const generateAllPermissionsEnabled = () => {
+// Helper para generar los permisos del admin por defecto, basado en el plan de la empresa.
+const generateAdminPermissionsForPlan = (planFeatures) => {
   return Object.keys(allPermissions).reduce((acc, key) => {
-    if (key.includes('_alcance')) {
-      acc[key] = key.includes('agenda') ? 'empresa' : 'todos';
+    const featureKey = permissionToFeatureMap[key];
+    
+    // Si el permiso no depende de un plan (null) o si la funcionalidad está incluida en el plan, se otorga el permiso.
+    if (featureKey === null || planFeatures[featureKey]) {
+        if (key.includes('_alcance')) {
+          acc[key] = key.includes('agenda') ? 'empresa' : 'todos';
+        } else {
+          acc[key] = true;
+        }
     } else {
-      acc[key] = true;
+        // Si la funcionalidad no está en el plan, el permiso se deniega.
+        acc[key] = false;
     }
     return acc;
   }, {});
@@ -48,22 +57,25 @@ const CompanyManagementPage = () => {
             adminEmail: newCompanyData.adminEmail,
         };
         
-        // 1. Generar un ID de rol único para la nueva empresa
         const defaultAdminRoleId = `rol_admin_${companyId}`;
 
-        // 2. Crear el nuevo rol de Administrador con todos los permisos
+        // Encontrar las funcionalidades del plan seleccionado
+        const selectedPlan = plans.find(p => p.id === newCompanyData.planId);
+        const planFeatures = selectedPlan ? selectedPlan.features : {};
+
+        // Crear el nuevo rol de Administrador con los permisos basados en el plan
         const newAdminRole = {
             id: defaultAdminRoleId,
             name: "Administrador General",
             isDefaultAdmin: true,
-            permissions: generateAllPermissionsEnabled(),
+            permissions: generateAdminPermissionsForPlan(planFeatures),
         };
 
         const newAdminUser = {
             uid: uuidv4(),
             email: newCompanyData.adminEmail,
             password: newCompanyData.password,
-            roleId: defaultAdminRoleId, // <<< CORRECCIÓN: Usar el ID de rol recién generado
+            roleId: defaultAdminRoleId,
             companyId: companyId,
             name: newCompanyData.adminName,
             rut: newCompanyData.adminRut,
@@ -71,7 +83,6 @@ const CompanyManagementPage = () => {
             phone: newCompanyData.adminPhone
         };
         
-        // 4. Actualizar todos los estados
         setCompanies(prev => [...prev, newCompany]);
         setAllUsers(prev => [...prev, newAdminUser]);
         setRoles(prev => ({
