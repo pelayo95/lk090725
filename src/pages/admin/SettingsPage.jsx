@@ -7,21 +7,25 @@ import { Button } from '../../components/common';
 import FormSettings from './settings/FormSettings';
 import TimelineSettings from './settings/TimelineSettings';
 import MeasuresSettings from './settings/MeasuresSettings';
-import { FileText, Clock, Shield } from 'lucide-react';
+import RoleManagementPage from './settings/RoleManagementPage'; // Importar nuevo componente
+import { FileText, Clock, Shield, Users } from 'lucide-react';
 
-const SettingsPage = ({ features }) => {
+const SettingsPage = () => {
     const { user } = useAuth();
     const { getCompanyConfig, updateCompanyConfig } = useConfig();
     const { addToast } = useNotification();
     const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
     
+    // Añadir el nuevo tab de roles
     const tabs = [
-        { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'constructorFormularios', component: FormSettings },
-        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'constructorLineasTiempo', component: TimelineSettings },
-        { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5" />, feature: 'medidasPorDefecto', component: MeasuresSettings },
+        { id: 'roles', label: 'Roles y Permisos', icon: <Users className="w-5 h-5"/>, feature: 'config_puede_gestionar_roles', component: RoleManagementPage },
+        { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'config_puede_gestionar_formularios', component: FormSettings },
+        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'config_puede_gestionar_timelines', component: TimelineSettings },
+        { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5" />, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
     ];
 
-    const visibleTabs = tabs.filter(tab => features && features[tab.feature]);
+    // Filtrar tabs basado en los permisos del usuario
+    const visibleTabs = tabs.filter(tab => user.permissions[tab.feature]);
     const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || '');
     
     const handleSave = () => {
