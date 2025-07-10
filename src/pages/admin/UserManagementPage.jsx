@@ -6,7 +6,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, Input, Select, ConfirmationModal } from '../../components/common';
 import { AddItemModal } from '../../components/common/AddItemModal';
 import { Plus, Trash } from 'lucide-react';
-import { uuidv4 } from '../../../utils/uuid';
+import { uuidv4 } from '../../utils/uuid'; // Ruta corregida
 
 const UserManagementPage = () => {
     const { user, allUsers, setAllUsers } = useAuth();
@@ -19,7 +19,15 @@ const UserManagementPage = () => {
     const companyRoles = roles[user.companyId] || [];
 
     const handleCreateUser = (newUserData) => {
-        // ... (lógica de creación sin cambios)
+        const newUser = {
+            ...newUserData,
+            uid: uuidv4(),
+            companyId: user.companyId,
+            lastVisited: {},
+        };
+        setAllUsers(prev => [...prev, newUser]);
+        addToast("Usuario creado con éxito", "success");
+        setIsModalOpen(false);
     };
 
     const handleDeleteUser = () => {
@@ -72,7 +80,28 @@ const UserManagementPage = () => {
                     </tbody>
                  </table>
             </Card>
-            {/* ... (código del AddItemModal sin cambios) */}
+            <AddItemModal
+                 isOpen={isModalOpen}
+                 onClose={() => setIsModalOpen(false)}
+                 onSubmit={handleCreateUser}
+                 title="Crear Nuevo Usuario"
+                 initialState={{ name: '', email: '', roleId: companyRoles[0]?.id || '', password: 'password' }}
+            >
+                {(formData, handleChange) => (
+                     <>
+                        <Input label="Nombre Completo" id="new-user-name" value={formData.name} onChange={e => handleChange('name', e.target.value)} required />
+                        <Input label="Email" id="new-user-email" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required />
+                        {user.permissions.config_usuarios_puede_asignar_rol && (
+                            <Select label="Rol" id="new-user-role" value={formData.roleId} onChange={e => handleChange('roleId', e.target.value)}>
+                                {companyRoles.map(role => (
+                                    <option key={role.id} value={role.id}>{role.name}</option>
+                                ))}
+                            </Select>
+                        )}
+                        <Input label="Contraseña Temporal" id="new-user-pass" type="text" value={formData.password} onChange={e => handleChange('password', e.target.value)} required />
+                    </>
+                )}
+            </AddItemModal>
             {userToDelete && (
                 <ConfirmationModal
                     isOpen={!!userToDelete}
