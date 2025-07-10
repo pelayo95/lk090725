@@ -1,4 +1,4 @@
-// src/App.js
+// src/App.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import PublicPortal from './pages/public/PublicPortal';
@@ -7,39 +7,50 @@ import BossPortal from './pages/boss/BossPortal';
 import LoginScreen from './pages/LoginScreen';
 
 /**
- * Main application component responsible for routing.
- * It determines which portal to render based on the URL hash and user authentication status.
+ * Componente principal de la aplicación, responsable del enrutamiento.
+ * Determina qué portal renderizar basado en el hash de la URL y el estado de autenticación del usuario.
  */
 function App() {
     const [hash, setHash] = useState(window.location.hash);
-    const { user } = useAuth();
+    const { user } = useAuth(); // El objeto 'user' ahora contiene el objeto 'permissions'
 
     useEffect(() => {
         const handleHashChange = () => setHash(window.location.hash || '#public');
         window.addEventListener('hashchange', handleHashChange);
-        handleHashChange(); // Set initial hash
+        handleHashChange(); // Establecer el hash inicial
         return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
     
     const RenderedPortal = useMemo(() => {
         const portal = hash.split('/')[0] || '#public';
         
-        if (user) {
-            if (user.role === 'boss' && portal !== '#boss') {
-                window.location.hash = '#boss/dashboard';
+        // Si hay un usuario logueado y sus permisos están cargados
+        if (user && user.permissions) {
+            // Si el usuario es el "Boss"
+            if (user.permissions.isBoss) {
+                // Si no está en el portal del boss, redirigir
+                if (portal !== '#boss') {
+                    window.location.hash = '#boss/dashboard';
+                    return null; // Renderizar nada mientras se redirige
+                }
                 return <BossPortal />;
-            }
-            if ((user.role === 'admin' || user.role === 'investigador') && portal !== '#admin') {
-                window.location.hash = '#admin';
+            } 
+            // Para cualquier otro usuario autenticado (Admin, Investigador, etc.)
+            else {
+                // Si no está en el portal de admin, redirigir
+                if (portal !== '#admin') {
+                     window.location.hash = '#admin';
+                     return null; // Renderizar nada mientras se redirige
+                }
                 return <AdminPortal />;
             }
         }
 
+        // Si no hay usuario, manejar rutas públicas y de login
         switch (portal) {
             case '#admin':
-                return user ? <AdminPortal /> : <LoginScreen />;
             case '#boss':
-                return user && user.role === 'boss' ? <BossPortal /> : <LoginScreen />;
+                return <LoginScreen />;
             case '#public':
             default:
                 return <PublicPortal />;
