@@ -16,7 +16,25 @@ const RoleManagementPage = () => {
 
     const companyRoles = roles[user.companyId] || [];
 
-    // ... (lógica de handleSaveRole y handleDeleteRole sin cambios)
+    const handleSaveRole = (roleData) => {
+        const newCompanyRoles = [...companyRoles];
+        if (editingRole) {
+            const index = newCompanyRoles.findIndex(r => r.id === editingRole.id);
+            newCompanyRoles[index] = { ...editingRole, ...roleData };
+        } else {
+            newCompanyRoles.push({ ...roleData, id: `rol_${uuidv4()}` });
+        }
+        setRoles(prev => ({ ...prev, [user.companyId]: newCompanyRoles }));
+        setIsModalOpen(false);
+        setEditingRole(null);
+    };
+
+    const handleDeleteRole = () => {
+        if (!roleToDelete) return;
+        const newCompanyRoles = companyRoles.filter(r => r.id !== roleToDelete.id);
+        setRoles(prev => ({ ...prev, [user.companyId]: newCompanyRoles }));
+        setRoleToDelete(null);
+    };
 
     return (
         <Card>
@@ -51,7 +69,24 @@ const RoleManagementPage = () => {
                     </div>
                 ))}
             </div>
-            {/* ... (código de los modales sin cambios) */}
+            {isModalOpen && (
+                <RoleEditModal 
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSaveRole}
+                    role={editingRole}
+                />
+            )}
+            {roleToDelete && (
+                <ConfirmationModal
+                    isOpen={!!roleToDelete}
+                    onClose={() => setRoleToDelete(null)}
+                    onConfirm={handleDeleteRole}
+                    title={`Eliminar Rol: ${roleToDelete.name}`}
+                >
+                    <p>¿Está seguro de que desea eliminar este rol? Los usuarios asignados a este rol perderán sus permisos. Esta acción no se puede deshacer.</p>
+                </ConfirmationModal>
+            )}
         </Card>
     );
 };
