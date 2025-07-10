@@ -24,7 +24,63 @@ const SanctionsTab = ({ complaint }) => {
 
     const companyUsers = useMemo(() => allUsers.filter(u => u.companyId === complaint.companyId), [allUsers, complaint.companyId]);
     
-    // ... (toda la lógica de handleSave, confirmDelete, etc., permanece igual)
+    const handleSaveSanction = (itemData) => {
+        let updatedSanctions;
+        let action;
+        if (itemData.id) {
+             updatedSanctions = complaint.sanctions.map(s => s.id === itemData.id ? { ...s, ...itemData } : s);
+             action = `Sanción editada: "${itemData.type}"`;
+        } else {
+             const newItem = { id: uuidv4(), ...itemData };
+             updatedSanctions = [...(complaint.sanctions || []), newItem];
+             action = `Nueva sanción registrada: "${newItem.type}"`;
+        }
+        
+        const newAuditLogEntry = { id: uuidv4(), action, userId: user.uid, timestamp: new Date().toISOString() };
+        updateComplaint(complaint.id, { sanctions: updatedSanctions, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
+        addToast(itemData.id ? "Sanción actualizada" : "Sanción añadida", "success");
+        setIsSanctionModalOpen(false);
+        setSanctionToModify(null);
+    };
+
+    const confirmDeleteSanction = () => {
+        if (!sanctionToDelete) return;
+        const sanctionType = sanctionToDelete.type;
+        const updatedSanctions = complaint.sanctions.filter(s => s.id !== sanctionToDelete.id);
+        const newAuditLogEntry = { id: uuidv4(), action: `Sanción eliminada: "${sanctionType}"`, userId: user.uid, timestamp: new Date().toISOString() };
+        updateComplaint(complaint.id, { sanctions: updatedSanctions, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
+        addToast("Sanción eliminada", "success");
+        setSanctionToDelete(null);
+    };
+    
+    const handleSaveOtherMeasure = (itemData) => {
+        let updatedMeasures;
+        let action;
+        if(itemData.id) {
+            updatedMeasures = (complaint.otherMeasures || []).map(m => m.id === itemData.id ? { ...m, ...itemData } : m);
+            action = `Otra medida editada: "${itemData.description}"`;
+        } else {
+            const newItem = { id: uuidv4(), ...itemData };
+            updatedMeasures = [...(complaint.otherMeasures || []), newItem];
+            action = `Nueva otra medida registrada: "${newItem.description}"`;
+        }
+        
+        const newAuditLogEntry = { id: uuidv4(), action, userId: user.uid, timestamp: new Date().toISOString() };
+        updateComplaint(complaint.id, { otherMeasures: updatedMeasures, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
+        addToast(itemData.id ? "Medida actualizada" : "Medida añadida", "success");
+        setIsOtherMeasureModalOpen(false);
+        setOtherMeasureToModify(null);
+    };
+
+    const confirmDeleteOtherMeasure = () => {
+        if (!otherMeasureToDelete) return;
+        const measureDesc = otherMeasureToDelete.description;
+        const updatedMeasures = (complaint.otherMeasures || []).filter(m => m.id !== otherMeasureToDelete.id);
+        const newAuditLogEntry = { id: uuidv4(), action: `Otra medida eliminada: "${measureDesc}"`, userId: user.uid, timestamp: new Date().toISOString() };
+        updateComplaint(complaint.id, { otherMeasures: updatedMeasures, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
+        addToast("Medida eliminada", "success");
+        setOtherMeasureToDelete(null);
+    };
 
     const sanctionTypes = ["Amonestación verbal", "Amonestación escrita", "Multa", "Desvinculación"];
 
@@ -94,10 +150,60 @@ const SanctionsTab = ({ complaint }) => {
                     ))}
                 </div>
             </div>
-            {/* ... (Modales sin cambios en su renderizado) */}
+            
+            <AddItemModal 
+                isOpen={isSanctionModalOpen}
+                onClose={() => {setIsSanctionModalOpen(false); setSanctionToModify(null);}}
+                onSubmit={handleSaveSanction}
+                title={sanctionToModify ? "Editar Sanción" : "Registrar Nueva Sanción"}
+                initialState={sanctionToModify || { type: 'Amonestación verbal', description: '', applicationDate: '', responsibleUserId: companyUsers[0]?.uid || '' }}
+                isEditing={!!sanctionToModify}
+            >
+                {(formData, handleChange) => (
+                    <>
+                         <Select label="Tipo de Sanción" value={formData.type} onChange={e => handleChange('type', e.target.value)} required>
+                            {sanctionTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                        </Select>
+                        <TextArea label="Descripción / Fundamento" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
+                        <Input label="Fecha de Aplicación" type="date" value={formData.applicationDate} onChange={e => handleChange('applicationDate', e.target.value)} required />
+                        <Select label="Responsable del Seguimiento" value={formData.responsibleUserId} onChange={e => handleChange('responsibleUserId', e.target.value)} required>
+                            {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
+                        </Select>
+                    </>
+                )}
+            </AddItemModal>
+            
+            <AddItemModal
+                isOpen={isOtherMeasureModalOpen}
+                onClose={() => {setIsOtherMeasureModalOpen(false); setOtherMeasureToModify(null);}}
+                onSubmit={handleSaveOtherMeasure}
+                title={otherMeasureToModify ? "Editar Otra Medida" : "Registrar Otra Medida"}
+                initialState={otherMeasureToModify || { description: '', date: '', responsibleUserId: companyUsers[0]?.uid || '' }}
+                isEditing={!!otherMeasureToModify}
+            >
+                {(formData, handleChange) => (
+                     <>
+                        <TextArea label="Descripción de la Medida" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
+                        <Input label="Fecha de Aplicación" type="date" value={formData.date} onChange={e => handleChange('date', e.target.value)} required />
+                        <Select label="Responsable" value={formData.responsibleUserId} onChange={e => handleChange('responsibleUserId', e.target.value)} required>
+                            {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
+                        </Select>
+                    </>
+                )}
+            </AddItemModal>
+
+            {sanctionToDelete && (
+                 <ConfirmationModal isOpen={!!sanctionToDelete} onClose={() => setSanctionToDelete(null)} onConfirm={confirmDeleteSanction} title="Confirmar Eliminación">
+                    <p>¿Está seguro de que desea eliminar esta sanción? Esta acción no se puede deshacer.</p>
+                </ConfirmationModal>
+            )}
+            {otherMeasureToDelete && (
+                 <ConfirmationModal isOpen={!!otherMeasureToDelete} onClose={() => setOtherMeasureToDelete(null)} onConfirm={confirmDeleteOtherMeasure} title="Confirmar Eliminación">
+                    <p>¿Está seguro de que desea eliminar esta medida? Esta acción no se puede deshacer.</p>
+                </ConfirmationModal>
+            )}
         </Card>
     );
 };
 
 export default SanctionsTab;
-
