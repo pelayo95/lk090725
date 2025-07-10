@@ -71,5 +71,5 @@ export const allPermissions = {
   config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
 
   // Módulo: Soporte
-  soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte", // Nuevo permiso
+  soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte",
 };
