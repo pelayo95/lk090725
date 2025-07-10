@@ -1,5 +1,5 @@
 // src/contexts/DataContext.jsx
-import React, { useContext, createContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotification } from './NotificationContext';
 import { initialData } from '../data/mockData';
@@ -26,39 +26,43 @@ export const DataProvider = ({ children }) => {
     }, []);
     
     const addComplaint = useCallback((complaintData, companyId) => {
-        const password = Math.floor(100000 + Math.random() * 900000).toString();
-        const newComplaint = {
-            ...complaintData,
-            id: `CASO-${String(complaints.length + 1).padStart(3, '0')}`,
-            companyId,
-            password,
-            createdAt: new Date().toISOString(),
-            closedAt: null,
-            status: "Ingresada",
-            severity: "Sin Asignar",
-            investigatorIds: [],
-            receptionType: null,
-            internalAction: null,
-            dtComplaintDate: null,
-            dtReceptionDate: null,
-            managements: [
-                { id: uuidv4(), text: "Definir si la investigación será interna o derivada a la Inspección del Trabajo", completed: false, dueDate: null, assignedTo: null }
-            ],
-            safeguardMeasures: [],
-            internalComments: [],
-            auditLog: [{ id: uuidv4(), action: "Creación de Denuncia", userId: "public", timestamp: new Date().toISOString() }],
-            timelineProgress: {},
-            chatMessages: [],
-            caseFiles: [],
-            sanctions: [],
-            otherMeasures: [],
-        };
-        setComplaints(prev => [...prev, newComplaint]);
-        return newComplaint;
-    }, [complaints, setComplaints]);
+        setComplaints(prevComplaints => {
+            const password = Math.floor(100000 + Math.random() * 900000).toString();
+            const newComplaint = {
+                ...complaintData,
+                id: `CASO-${String(prevComplaints.length + 1).padStart(3, '0')}`,
+                companyId,
+                password,
+                createdAt: new Date().toISOString(),
+                closedAt: null,
+                status: "Ingresada",
+                severity: "Sin Asignar",
+                investigatorIds: [],
+                receptionType: null,
+                internalAction: null,
+                dtComplaintDate: null,
+                dtReceptionDate: null,
+                managements: [
+                    { id: uuidv4(), text: "Definir si la investigación será interna o derivada a la Inspección del Trabajo", completed: false, dueDate: null, assignedTo: null }
+                ],
+                safeguardMeasures: [],
+                internalComments: [],
+                auditLog: [{ id: uuidv4(), action: "Creación de Denuncia", userId: "public", timestamp: new Date().toISOString() }],
+                timelineProgress: {},
+                chatMessages: [],
+                caseFiles: [],
+                sanctions: [],
+                otherMeasures: [],
+            };
+            // Devolvemos el nuevo array de quejas
+            return [...prevComplaints, newComplaint];
+        });
+        // Nota: No podemos devolver `newComplaint` directamente aquí. La lógica del componente que llama deberá adaptarse.
+        // Sin embargo, para la estructura actual, esta es la forma más segura de actualizar el estado.
+    }, [setComplaints]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
-        setComplaints(prev => prev.map(c => {
+        setComplaints(prevComplaints => prevComplaints.map(c => {
             if (c.id === complaintId) {
                 const finalUpdates = {...updates};
                 
@@ -90,7 +94,7 @@ export const DataProvider = ({ children }) => {
     }, [setComplaints, addToast]);
     
     const updateCompany = useCallback((companyId, updates) => {
-        setCompanies(prev => prev.map(c => c.id === companyId ? { ...c, ...updates } : c));
+        setCompanies(prevCompanies => prevCompanies.map(c => c.id === companyId ? { ...c, ...updates } : c));
         addToast("Empresa actualizada", "success");
     }, [setCompanies, addToast]);
 
