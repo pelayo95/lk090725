@@ -24,7 +24,6 @@ const Dashboard = () => {
     const userPlan = useMemo(() => plans.find(p => p.id === userCompany?.planId), [plans, userCompany]);
     const features = userPlan?.features || {};
 
-    // Filtrar casos basados en permisos
     const visibleComplaints = useMemo(() => {
         const companyComplaints = complaints.filter(c => c.companyId === user.companyId);
         if (user.permissions.casos_listado_alcance === 'todos') {
@@ -39,7 +38,7 @@ const Dashboard = () => {
     const alerts = useAlerts(visibleComplaints, user);
     
     const { filteredComplaints, kpis, statusData, severityData } = useDashboardAnalytics({
-        companyComplaints: visibleComplaints, // Usar casos filtrados para los KPIs
+        companyComplaints: visibleComplaints,
         searchQuery, 
         startDate, 
         endDate
