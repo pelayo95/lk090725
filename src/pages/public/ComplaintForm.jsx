@@ -10,7 +10,7 @@ import WitnessesField from '../../components/form-fields/WitnessesField';
 import DocumentsField from '../../components/form-fields/DocumentsField';
 import AccusedPersonsField from '../../components/form-fields/AccusedPersonsField';
 import ReviewStep from './ReviewStep';
-import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
 
 const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
@@ -21,12 +21,15 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     const config = useMemo(() => getCompanyConfig(companyId), [companyId, getCompanyConfig]);
     const reviewStep = {id: 'review', title: 'Revisar y Enviar', description: 'Revise la información antes de enviar.'};
     const formSteps = useMemo(() => [...config.formSteps, reviewStep], [config.formSteps]);
-        
+    
     const [currentStep, setCurrentStep] = useState(0);
-    const [formData, setFormData] = useState({ accusedPersons: [{id: uuidv4(), name: '', position: '', relacion: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }] });
+    const [formData, setFormData] = useState({ 
+        accusedPersons: [{id: uuidv4(), name: '', position: '', relacion: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }],
+        evidence: { files: [] }
+    });
     const [editingFromReview, setEditingFromReview] = useState(false);
-    const [declarationAccepted, setDeclarationAccepted] = useState(false); // Nuevo estado para la declaración
-        
+    const [declarationAccepted, setDeclarationAccepted] = useState(false);
+    
     const today = new Date().toISOString().split("T")[0];
 
     const handleInputChange = (dataKey, value) => {
@@ -61,7 +64,7 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     };
 
     const prevStep = () => {
-        setEditingFromReview(false); // Always reset when going back
+        setEditingFromReview(false);
         setCurrentStep(prev => Math.max(prev - 1, 0));
     };
 
@@ -74,7 +77,7 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
     
     const step = formSteps[currentStep];
 
-   return (
+    return (
         <Card>
             <div className="mb-6">
                 <h2 className="text-xl font-semibold text-slate-700">{step.title}</h2>
@@ -116,7 +119,6 @@ const ComplaintForm = ({ companyId, onBack, onSuccess }) => {
                                 case 'rut':
                                     return <RutInput {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} />;
                                 case 'date':
-                                    // Se añade el atributo 'max' para la validación
                                     return <Input type="date" {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} max={today} />;
                                 default:
                                     return <Input type={field.type} {...commonProps} value={value || ''} onChange={e => handleInputChange(field.dataKey, e.target.value)} />;
