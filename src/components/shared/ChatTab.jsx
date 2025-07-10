@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { Card, Input, Button, Modal } from '../common';
+import { Card, TextArea, Button, Modal } from '../common'; // Importar TextArea en lugar de Input
 import { Send, MessageSquarePlus } from 'lucide-react';
 
 const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, currentUserColor, otherUserColor, complaintId }) => {
@@ -18,7 +18,7 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     useEffect(scrollToBottom, [messages]);
     
     const handleAddComment = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!newComment.trim()) return;
         onSendMessage(newComment);
         setNewComment("");
@@ -30,10 +30,17 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     };
 
     const handleSelectTemplate = (template) => {
-        // Reemplaza placeholders como [CODIGO_CASO] con el valor real
         const processedContent = template.content.replace(/\[CODIGO_CASO\]/g, complaintId || '');
         setNewComment(processedContent);
         setIsTemplateModalOpen(false);
+    };
+
+    const handleKeyDown = (e) => {
+        // Enviar con Enter, nueva línea con Shift+Enter
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAddComment();
+        }
     };
 
     const canSend = title.includes("Denunciante") ? user.permissions.comunicacion_denunciante_puede_enviar : user.permissions.comentarios_internos_puede_enviar;
@@ -58,16 +65,26 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                 <div ref={messagesEndRef} />
             </div>
             {canSend && (
-                <form onSubmit={handleAddComment} className="flex items-center gap-2 border-t pt-4">
-                    <Input id="new-message" placeholder={placeholder} value={newComment} onChange={e => setNewComment(e.target.value)} className="flex-1"/>
-                    {companyTemplates.length > 0 && (
-                        <Button type="button" variant="secondary" onClick={() => setIsTemplateModalOpen(true)} title="Usar Plantilla">
-                            <MessageSquarePlus className="w-5 h-5"/>
+                <form onSubmit={handleAddComment} className="flex items-start gap-2 border-t pt-4">
+                    <TextArea 
+                        id="new-message" 
+                        placeholder={placeholder} 
+                        value={newComment} 
+                        onChange={e => setNewComment(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="flex-1 resize-none"
+                        rows="3" // Altura inicial de 3 líneas
+                    />
+                    <div className="flex flex-col gap-2">
+                        {companyTemplates.length > 0 && (
+                            <Button type="button" variant="secondary" onClick={() => setIsTemplateModalOpen(true)} title="Usar Plantilla">
+                                <MessageSquarePlus className="w-5 h-5"/>
+                            </Button>
+                        )}
+                        <Button type="submit" variant="primary" className="p-2.5">
+                            <Send className="w-5 h-5"/>
                         </Button>
-                    )}
-                    <Button type="submit" variant="primary" className="p-2.5">
-                        <Send className="w-5 h-5"/>
-                    </Button>
+                    </div>
                 </form>
             )}
             <Modal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} title="Seleccionar Plantilla">
