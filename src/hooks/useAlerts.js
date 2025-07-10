@@ -1,53 +1,82 @@
 // src/hooks/useAlerts.js
 import { useMemo } from 'react';
+import { useData } from '../contexts/DataContext';
 
 export const useAlerts = (complaints, user) => {
+    const { notificationRules } = useData();
+    const companyRules = notificationRules[user.companyId] || [];
+
     const alerts = useMemo(() => {
-        if(!user) return [];
+        if (!user || !companyRules || companyRules.length === 0) return [];
+        
         const now = new Date();
-        const threeDaysFromNow = new Date(now.getTime() + (3 * 24 * 60 * 60 * 1000));
+        const generatedAlerts = [];
 
-        const lastVisited = user.lastVisited || {};
+        companyRules.forEach(rule => {
+            // Evaluador para: "Caso Nuevo Sin Asignar"
+            if (rule.trigger === 'new_case_unassigned') {
+                complaints.forEach(c => {
+                    const meetsBaseCondition = c.status === 'Ingresada' && c.investigatorIds.length === 0;
+                    if (!meetsBaseCondition) return;
 
-        const allAlerts = [];
+                    const delayMs = (rule.delayHours || 0) * 60 * 60 * 1000;
+                    const caseAge = now.getTime() - new Date(c.createdAt).getTime();
 
-        complaints.forEach(c => {
-            const lastVisitTimestamp = new Date(lastVisited[c.id] || 0);
-            const isUserInvestigator = c.investigatorIds.includes(user.uid);
+                    if (caseAge < delayMs) return;
 
-            // 1. New case alert (for admins until assigned)
-            if (user.role === 'admin' && c.status === "Ingresada" && c.investigatorIds.length === 0) {
-                allAlerts.push({ id: `new-${c.id}`, type: 'new_case', text: `Nuevo caso sin asignar: ${c.id}`, caseId: c.id, date: c.createdAt });
-            }
-
-            // 2. New assignment alert
-            const assignmentLog = c.auditLog.find(log => log.action.includes('Caso asignado a:') && new Date(log.timestamp) > lastVisitTimestamp);
-            if(assignmentLog && c.investigatorIds.includes(user.uid)) {
-                allAlerts.push({ id: `assign-${c.id}`, type: 'assignment', text: `Has sido asignado al caso ${c.id}`, caseId: c.id, date: assignmentLog.timestamp });
-            }
-            
-            if(isUserInvestigator) {
-                 // 3. Upcoming deadlines
-                (c.managements || []).forEach(m => {
-                    if (m.dueDate && !m.completed) {
-                        const dueDate = new Date(m.dueDate + "T23:59:59");
-                        if (dueDate <= threeDaysFromNow && dueDate > now) {
-                             allAlerts.push({ id: `due-${m.id}`, type: 'deadline', text: `Plazo por vencer para gestión en caso ${c.id}`, caseId: c.id, date: m.dueDate });
+                    let conditionsMet = true;
+                    if (rule.conditions) {
+                        if (rule.conditions.severity && c.severity !== rule.conditions.severity) {
+                            conditionsMet = false;
                         }
                     }
-                });
 
-                // 4. New activity
-                const latestMessage = (c.chatMessages || []).slice(-1)[0];
-                if(latestMessage && new Date(latestMessage.timestamp) > lastVisitTimestamp && latestMessage.senderId !== user.uid) {
-                    allAlerts.push({ id: `activity-msg-${c.id}`, type: 'activity', text: `Nuevo mensaje en el caso ${c.id}`, caseId: c.id, date: latestMessage.timestamp });
-                }
+                    if (conditionsMet) {
+                        generatedAlerts.push({
+                            id: `rule-${rule.id}-${c.id}`,
+                            type: 'rule_triggered',
+                            text: rule.message.replace(/\[CODIGO_CASO\]/g, c.id),
+                            caseId: c.id,
+                            date: c.createdAt
+                        });
+                    }
+                });
+            }
+
+            // Evaluador para: "Gestión por Vencer"
+            if (rule.trigger === 'management_due_date_approaching') {
+                complaints.forEach(c => {
+                    (c.managements || []).forEach(m => {
+                        if (m.completed || !m.dueDate) return;
+
+                        const dueDate = new Date(m.dueDate + "T23:59:59");
+                        const daysBeforeMs = (rule.daysBefore || 0) * 24 * 60 * 60 * 1000;
+                        const timeDiff = dueDate.getTime() - now.getTime();
+                        
+                        if (timeDiff > 0 && timeDiff <= daysBeforeMs) {
+                            const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                            generatedAlerts.push({
+                                id: `rule-${rule.id}-${m.id}`,
+                                type: 'rule_triggered',
+                                text: rule.message
+                                    .replace(/\[CODIGO_CASO\]/g, c.id)
+                                    .replace(/\[TEXTO_GESTION\]/g, m.text)
+                                    .replace(/\[DIAS_RESTANTES\]/g, daysRemaining),
+                                caseId: c.id,
+                                date: m.dueDate
+                            });
+                        }
+                    });
+                });
             }
         });
         
-        return allAlerts.sort((a,b) => new Date(b.date) - new Date(a.date));
+        // Aquí se podría añadir lógica para filtrar alertas según `rule.recipients`
+        // Por ahora, se muestran todas las alertas generadas al usuario actual.
+        
+        return generatedAlerts.sort((a,b) => new Date(b.date) - new Date(a.date));
 
-    }, [complaints, user]);
+    }, [complaints, user, companyRules]);
 
     return alerts;
 };
