@@ -1,5 +1,5 @@
 // src/contexts/DataContext.jsx
-import React, { useContext, createContext, useState, useEffect } from 'react';
+import React, { useContext, createContext, useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotification } from './NotificationContext';
 import { initialData } from '../data/mockData';
@@ -25,7 +25,7 @@ export const DataProvider = ({ children }) => {
         setIsLoading(false);
     }, []);
     
-    const addComplaint = (complaintData, companyId) => {
+    const addComplaint = useCallback((complaintData, companyId) => {
         const password = Math.floor(100000 + Math.random() * 900000).toString();
         const newComplaint = {
             ...complaintData,
@@ -55,9 +55,9 @@ export const DataProvider = ({ children }) => {
         };
         setComplaints(prev => [...prev, newComplaint]);
         return newComplaint;
-    };
+    }, [complaints, setComplaints]);
     
-    const updateComplaint = (complaintId, updates, user) => {
+    const updateComplaint = useCallback((complaintId, updates, user) => {
         setComplaints(prev => prev.map(c => {
             if (c.id === complaintId) {
                 const finalUpdates = {...updates};
@@ -87,14 +87,14 @@ export const DataProvider = ({ children }) => {
             return c;
         }));
         addToast("Caso actualizado correctamente", "success");
-    };
+    }, [setComplaints, addToast]);
     
-    const updateCompany = (companyId, updates) => {
+    const updateCompany = useCallback((companyId, updates) => {
         setCompanies(prev => prev.map(c => c.id === companyId ? { ...c, ...updates } : c));
         addToast("Empresa actualizada", "success");
-    };
+    }, [setCompanies, addToast]);
 
-    const value = { 
+    const value = useMemo(() => ({ 
         companies, setCompanies, 
         complaints, addComplaint, updateComplaint, 
         holidays, setHolidays, 
@@ -103,7 +103,11 @@ export const DataProvider = ({ children }) => {
         roles, setRoles,
         communicationTemplates, setCommunicationTemplates,
         notificationRules, setNotificationRules
-    };
+    }), [
+        companies, setCompanies, complaints, addComplaint, updateComplaint, 
+        holidays, setHolidays, updateCompany, plans, setPlans, roles, setRoles, 
+        communicationTemplates, setCommunicationTemplates, notificationRules, setNotificationRules
+    ]);
 
     if (isLoading) {
         return <div className="flex items-center justify-center h-screen bg-slate-100 text-slate-600">Cargando datos de la aplicación...</div>;
