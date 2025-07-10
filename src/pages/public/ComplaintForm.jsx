@@ -5,7 +5,7 @@ import { useData } from '../../contexts/DataContext';
 import { getNestedValue, setNestedValue } from '../../utils/objectUtils';
 import { Card, Button, Input, Select, TextArea } from '../../components/common';
 import { RadioGroup } from '../../components/form-fields/RadioGroup';
-import RutInput from '../../components/form-fields/RutInput';
+import RutInput from '../../components/form-fields/RutInput.jsx';
 import WitnessesField from '../../components/form-fields/WitnessesField';
 import DocumentsField from '../../components/form-fields/DocumentsField';
 import AccusedPersonsField from '../../components/form-fields/AccusedPersonsField';
