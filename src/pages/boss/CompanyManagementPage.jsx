@@ -10,9 +10,22 @@ import { defaultConfig } from '../../config/defaultConfig';
 import { uuidv4 } from '../../utils/uuid';
 import CreateCompanyModal from './CreateCompanyModal';
 import CompanyEditPanel from './CompanyEditPanel';
+import { allPermissions } from '../../data/permissions'; // Importar la lista de permisos
+
+// Helper para generar todos los permisos para el nuevo rol de admin
+const generateAllPermissionsEnabled = () => {
+  return Object.keys(allPermissions).reduce((acc, key) => {
+    if (key.includes('_alcance')) {
+      acc[key] = key.includes('agenda') ? 'empresa' : 'todos';
+    } else {
+      acc[key] = true;
+    }
+    return acc;
+  }, {});
+};
 
 const CompanyManagementPage = () => {
-    const { companies, plans, setCompanies } = useData();
+    const { companies, plans, setCompanies, setRoles } = useData(); // Añadir setRoles
     const { setAllUsers } = useAuth();
     const { addToast } = useNotification();
     const { updateCompanyConfig } = useConfig();
@@ -35,11 +48,22 @@ const CompanyManagementPage = () => {
             adminEmail: newCompanyData.adminEmail,
         };
         
+        // 1. Generar un ID de rol único para la nueva empresa
+        const defaultAdminRoleId = `rol_admin_${companyId}`;
+
+        // 2. Crear el nuevo rol de Administrador con todos los permisos
+        const newAdminRole = {
+            id: defaultAdminRoleId,
+            name: "Administrador General",
+            isDefaultAdmin: true,
+            permissions: generateAllPermissionsEnabled(),
+        };
+
         const newAdminUser = {
             uid: uuidv4(),
             email: newCompanyData.adminEmail,
             password: newCompanyData.password,
-            roleId: 'rol_admin_empresa_a', // Asignar rol por defecto
+            roleId: defaultAdminRoleId, // 3. Asignar el ID de rol CORRECTO
             companyId: companyId,
             name: newCompanyData.adminName,
             rut: newCompanyData.adminRut,
@@ -47,8 +71,13 @@ const CompanyManagementPage = () => {
             phone: newCompanyData.adminPhone
         };
         
+        // 4. Actualizar todos los estados
         setCompanies(prev => [...prev, newCompany]);
         setAllUsers(prev => [...prev, newAdminUser]);
+        setRoles(prev => ({
+            ...prev,
+            [companyId]: [newAdminRole]
+        }));
         updateCompanyConfig(companyId, defaultConfig); 
         addToast("Empresa y Admin creados con éxito", "success");
         setCreateModalOpen(false);
