@@ -11,6 +11,7 @@ const legalDefinitions = {
  * Define la configuración por defecto para una nueva empresa.
  */
 export const defaultConfig = {
+        complaintDeclarationText: "Declaro bajo juramento que los hechos descritos en esta denuncia son verídicos y completos según mi leal saber y entender. Comprendo que la entrega de información falsa puede acarrear consecuencias legales y/o disciplinarias.",
     formSteps: [
         { id: "s1", title: "Tipo de Conducta", description: "Seleccione el tipo de conducta que desea denunciar.", fields: [
             { 
@@ -48,21 +49,21 @@ export const defaultConfig = {
     ],
     timelineSettings: {
         interna: [
-            { id: "ti1", name: "Recepción de denuncia", duration: 0, dayType: 'corridos', countFrom: 'case-start' },
-            { id: "ti2", name: "Gestiones iniciales", duration: 5, dayType: 'habiles-administrativos', countFrom: 'previous-stage-end', subSteps: [
+           { id: "ti1", name: "Recepción de denuncia", duration: 0, dayType: 'corridos', countFrom: 'case-start' },
+            { id: "ti2", name: "Gestiones iniciales", duration: 3, dayType: 'habiles-administrativos', countFrom: 'previous-stage-end', subSteps: [ // Plazo actualizado
                 { id: "sub1", name: "Designar investigadores", duration: 1, dayType: 'habiles-administrativos' },
                 { id: "sub2", name: "Notificar recepción de denuncia", duration: 1, dayType: 'habiles-administrativos' },
                 { id: "sub3", name: "Informar al denunciado sobre la denuncia", duration: 1, dayType: 'habiles-administrativos' },
                 { id: "sub4", name: "Determinar medidas de resguardo", duration: 1, dayType: 'habiles-administrativos' },
                 { id: "sub5", name: "Notificar medidas a partes/DT/organismo", duration: 1, dayType: 'habiles-administrativos' },
             ]},
-            { id: "ti3", name: "Investigación", duration: 30, dayType: 'habiles-administrativos', countFrom: 'previous-stage-end', subSteps: [
+            { id: "ti3", name: "Investigación", duration: 30, dayType: 'habiles-administrativos', countFrom: 'case-start', subSteps: [ // countFrom y plazo actualizados
                 { id: "sub6", name: "Entrevistar a denunciante", duration: 5, dayType: 'habiles-administrativos' },
                 { id: "sub7", name: "Entrevistar a denunciado", duration: 5, dayType: 'habiles-administrativos' },
                 { id: "sub8", name: "Entrevistar a testigos", duration: 10, dayType: 'habiles-administrativos' },
                 { id: "sub9", name: "Revisar prueba aportada", duration: 5, dayType: 'habiles-administrativos' },
                 { id: "sub10", name: "Revisar documentación laboral", duration: 5, dayType: 'habiles-administrativos' },
-                { id: "sub15", name: "Notificar término de investigación", duration: 1, dayType: 'habiles-administrativos' } // Nueva sub-etapa
+                { id: "sub15", name: "Notificar término de investigación", duration: 1, dayType: 'habiles-administrativos' }
             ] },
             { id: "ti4", name: "Redacción y envío de informe", duration: 2, dayType: 'habiles-administrativos', countFrom: 'previous-stage-end' },
             { id: "ti5", name: "Revisión por Inspección del Trabajo", duration: 30, dayType: 'habiles-administrativos', countFrom: 'previous-stage-end' },
@@ -82,4 +83,5 @@ export const defaultConfig = {
         "Prohibición de contacto entre las partes.",
         "Rotación de turnos o puestos de trabajo."
     ]
+    
 };
