@@ -10,10 +10,28 @@ const AdminLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState('dashboard');
 
-    // ... (lógica de handleNavigation y useEffect sin cambios)
+    const handleNavigation = (view) => {
+        setActiveView(view);
+        window.location.hash = `#admin/${view}`;
+    }
+
+    useEffect(() => {
+        const hash = window.location.hash.split('/')[1] || 'dashboard';
+        setActiveView(hash);
+    }, []);
 
     const navItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5"/>, permission: 'dashboard_ver_kpis' },
+        { 
+            id: 'dashboard', 
+            label: 'Dashboard', 
+            icon: <LayoutDashboard className="w-5 h-5"/>, 
+            // El acceso se concede si tiene permiso para ver CUALQUIER parte del dashboard
+            permission: [
+                'dashboard_ver_kpis', 
+                'casos_ver_listado', 
+                'dashboard_ver_agenda'
+            ] 
+        },
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5"/>, permission: 'config_usuarios_puede_ver_lista' },
         { 
             id: 'settings', 
@@ -32,7 +50,10 @@ const AdminLayout = ({ children }) => {
     return (
         <div className="flex h-screen bg-slate-100">
             <aside className="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
-                {/* ... (código del header y footer del sidebar sin cambios) */}
+                <div className="h-16 flex items-center px-4 border-b border-slate-200">
+                    <Briefcase className="w-8 h-8 text-indigo-600"/>
+                    <span className="ml-2 font-bold text-lg text-slate-800">Plataforma</span>
+                </div>
                 <nav className="flex-1 px-2 py-4 space-y-1">
                     {navItems.map(item => {
                         // Comprobar si el usuario tiene el permiso necesario
@@ -55,7 +76,19 @@ const AdminLayout = ({ children }) => {
                         )
                     })}
                 </nav>
-                {/* ... */}
+                <div className="p-4 border-t border-slate-200">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">{user?.name[0]}</div>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
+                            <p className="text-xs text-slate-500">{user?.email}</p>
+                        </div>
+                    </div>
+                    <Button onClick={logout} variant="secondary" className="w-full mt-4">
+                        <LogOut className="w-4 h-4"/>
+                        Cerrar Sesión
+                    </Button>
+                </div>
             </aside>
             <main className="flex-1 overflow-y-auto">
                 <div className="p-8">
