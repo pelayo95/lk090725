@@ -10,7 +10,7 @@ import { defaultConfig } from '../../config/defaultConfig';
 import { uuidv4 } from '../../utils/uuid';
 import CreateCompanyModal from './CreateCompanyModal';
 import CompanyEditPanel from './CompanyEditPanel';
-import { allPermissions } from '../../data/permissions'; // Importar la lista de permisos
+import { allPermissions } from '../../data/permissions';
 
 // Helper para generar todos los permisos para el nuevo rol de admin
 const generateAllPermissionsEnabled = () => {
@@ -25,7 +25,7 @@ const generateAllPermissionsEnabled = () => {
 };
 
 const CompanyManagementPage = () => {
-    const { companies, plans, setCompanies, setRoles } = useData(); // Añadir setRoles
+    const { companies, plans, setCompanies, setRoles } = useData();
     const { setAllUsers } = useAuth();
     const { addToast } = useNotification();
     const { updateCompanyConfig } = useConfig();
@@ -63,7 +63,7 @@ const CompanyManagementPage = () => {
             uid: uuidv4(),
             email: newCompanyData.adminEmail,
             password: newCompanyData.password,
-            roleId: defaultAdminRoleId, // 3. Asignar el ID de rol CORRECTO
+            roleId: defaultAdminRoleId, // <<< CORRECCIÓN: Usar el ID de rol recién generado
             companyId: companyId,
             name: newCompanyData.adminName,
             rut: newCompanyData.adminRut,
