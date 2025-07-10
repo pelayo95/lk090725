@@ -5,28 +5,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Card, Select } from '../../components/common';
 import AssignInvestigators from './case-details/AssignInvestigators';
 import InvestigationFlowManager from './case-details/InvestigationFlowManager';
-// Estos componentes se crearán en el siguiente paso
-// import DetailsTab from './case-details/DetailsTab';
-// import TimelineTab from './case-details/TimelineTab';
-// import MeasuresTab from './case-details/MeasuresTab';
-// import ManagementsTab from './case-details/ManagementsTab';
-// import FilesTab from './case-details/FilesTab';
-// import SanctionsTab from './case-details/SanctionsTab';
-// import ChatTab from './case-details/ChatTab';
-// import AuditLogTab from './case-details/AuditLogTab';
+import DetailsTab from './case-details/DetailsTab';
+import TimelineTab from './case-details/TimelineTab';
+import MeasuresTab from './case-details/MeasuresTab';
+import ManagementsTab from './case-details/ManagementsTab';
+import FilesTab from './case-details/FilesTab';
+import SanctionsTab from './case-details/SanctionsTab';
+import ChatTab from '../../components/shared/ChatTab';
+import AuditLogTab from './case-details/AuditLogTab';
 import { ChevronLeft, ClipboardList, Clock, Shield, ListChecks, Paperclip, Activity, MessageSquare, History } from 'lucide-react';
-
-// Placeholder para los componentes de las pestañas que aún no se han creado
-const PlaceholderTab = ({ title }) => <Card><h3 className="text-lg font-semibold">{title}</h3><p>Este componente estará disponible pronto.</p></Card>;
-const DetailsTab = () => <PlaceholderTab title="Detalles" />;
-const TimelineTab = () => <PlaceholderTab title="Línea de Tiempo" />;
-const MeasuresTab = () => <PlaceholderTab title="Medidas de Resguardo" />;
-const ManagementsTab = () => <PlaceholderTab title="Gestiones" />;
-const FilesTab = () => <PlaceholderTab title="Archivos" />;
-const SanctionsTab = () => <PlaceholderTab title="Sanciones" />;
-const ChatTab = () => <PlaceholderTab title="Comunicaciones" />;
-const AuditLogTab = () => <PlaceholderTab title="Auditoría" />;
-
+import { uuidv4 } from '../../utils/uuid';
 
 const CaseDetailPage = ({ caseId }) => {
     const { complaints, updateComplaint, companies, plans } = useData();
@@ -58,16 +46,28 @@ const CaseDetailPage = ({ caseId }) => {
         'Sin Asignar': 'bg-slate-100 text-slate-800 border-slate-300'
     };
 
+    const handleSendPublicMessage = (text) => {
+        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje al denunciante.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { chatMessages: [...(complaint.chatMessages || []), newMessage], auditLog: newAuditLog }, user);
+    };
+    
+    const handleSendInternalComment = (text) => {
+        const newComment = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Añadió un comentario interno.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { internalComments: [...(complaint.internalComments || []), newComment], auditLog: newAuditLog }, user);
+    };
+
     const allTabs = [
-        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, feature: 'edicionDenuncias', component: DetailsTab },
-        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'lineaTiempoDinamica', component: TimelineTab },
-        { id: 'measures', label: 'Medidas de Resguardo', icon: <Shield className="w-5 h-5"/>, feature: 'gestionMedidas', component: MeasuresTab },
-        { id: 'managements', label: 'Gestiones', icon: <ListChecks className="w-5 h-5"/>, feature: 'planGestion', component: ManagementsTab },
-        { id: 'files', label: 'Archivos', icon: <Paperclip className="w-5 h-5"/>, feature: 'gestionArchivos', component: FilesTab },
-        { id: 'sanctions', label: 'Sanciones', icon: <Activity className="w-5 h-5"/>, feature: 'gestionSanciones', component: SanctionsTab },
-        { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, feature: 'comunicacionConDenunciante', component: ChatTab },
-        { id: 'internal_comments', label: 'Comentarios Internos', icon: <MessageSquare className="w-5 h-5"/>, feature: 'comentariosInternos', component: ChatTab },
-        { id: 'audit', label: 'Auditoría', icon: <History className="w-5 h-5"/>, feature: 'auditoriaCompleta', component: AuditLogTab }
+        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, feature: 'edicionDenuncias', component: () => <DetailsTab complaint={complaint} features={features} /> },
+        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'lineaTiempoDinamica', component: () => <TimelineTab complaint={complaint} /> },
+        { id: 'measures', label: 'Medidas de Resguardo', icon: <Shield className="w-5 h-5"/>, feature: 'gestionMedidas', component: () => <MeasuresTab complaint={complaint} /> },
+        { id: 'managements', label: 'Gestiones', icon: <ListChecks className="w-5 h-5"/>, feature: 'planGestion', component: () => <ManagementsTab complaint={complaint} /> },
+        { id: 'files', label: 'Archivos', icon: <Paperclip className="w-5 h-5"/>, feature: 'gestionArchivos', component: () => <FilesTab complaint={complaint} /> },
+        { id: 'sanctions', label: 'Sanciones', icon: <Activity className="w-5 h-5"/>, feature: 'gestionSanciones', component: () => <SanctionsTab complaint={complaint} /> },
+        { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, feature: 'comunicacionConDenunciante', component: () => <ChatTab title="Comunicaciones con Denunciante" messages={complaint.chatMessages || []} onSendMessage={handleSendPublicMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el denunciante..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" /> },
+        { id: 'internal_comments', label: 'Comentarios Internos', icon: <MessageSquare className="w-5 h-5"/>, feature: 'comentariosInternos', component: () => <ChatTab title="Comentarios Internos" messages={complaint.internalComments || []} onSendMessage={handleSendInternalComment} currentUserId={user.uid} placeholder="Escribe un comentario interno..." currentUserColor="bg-amber-100" otherUserColor="bg-slate-200" /> },
+        { id: 'audit', label: 'Auditoría', icon: <History className="w-5 h-5"/>, feature: 'auditoriaCompleta', component: () => <AuditLogTab auditLog={complaint.auditLog} /> }
     ];
 
     const visibleTabs = allTabs.filter(tab => tab.id === 'details' || (features && features[tab.feature]));
@@ -114,7 +114,7 @@ const CaseDetailPage = ({ caseId }) => {
             </div>
 
             <div>
-                <ActiveComponent complaint={complaint} features={features} />
+                <ActiveComponent />
             </div>
         </div>
     );
