@@ -9,8 +9,9 @@ import TimelineSettings from './settings/TimelineSettings';
 import MeasuresSettings from './settings/MeasuresSettings';
 import RoleManagementPage from './settings/RoleManagementPage';
 import CommunicationTemplatesSettings from './settings/CommunicationTemplatesSettings';
-import NotificationSettings from './settings/NotificationSettings'; // Nuevo
-import { FileText, Clock, Shield, Users, MessageSquare, Bell } from 'lucide-react';
+import NotificationSettings from './settings/NotificationSettings';
+import DeclarationSettings from './settings/DeclarationSettings';
+import { FileText, Clock, Shield, Users, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
 
 const SettingsPage = () => {
     const { user } = useAuth();
@@ -19,12 +20,13 @@ const SettingsPage = () => {
     const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
     
     const tabs = [
-        { id: 'roles', label: 'Roles y Permisos', icon: <Users className="w-5 h-5"/>, feature: 'config_puede_gestionar_roles', component: RoleManagementPage },
+        { id: 'roles', label: 'Roles', icon: <Users className="w-5 h-5"/>, feature: 'config_puede_gestionar_roles', component: RoleManagementPage },
         { id: 'templates', label: 'Plantillas', icon: <MessageSquare className="w-5 h-5"/>, feature: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings },
-        { id: 'notifications', label: 'Notificaciones', icon: <Bell className="w-5 h-5"/>, feature: 'config_puede_gestionar_notificaciones', component: NotificationSettings }, // Nueva pestaña
+        { id: 'notifications', label: 'Notificaciones', icon: <Bell className="w-5 h-5"/>, feature: 'config_puede_gestionar_notificaciones', component: NotificationSettings },
         { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'config_puede_gestionar_formularios', component: FormSettings },
+        { id: 'declaration', label: 'Declaración', icon: <AlertTriangle className="w-5 h-5"/>, feature: 'config_puede_gestionar_declaracion', component: DeclarationSettings },
         { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'config_puede_gestionar_timelines', component: TimelineSettings },
-        { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5" />, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
+        { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5"/>, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
     ];
 
     const visibleTabs = tabs.filter(tab => user.permissions[tab.feature]);
