@@ -28,7 +28,6 @@ export const DataProvider = ({ children }) => {
     
     const addComplaint = useCallback((complaintData, companyId) => {
         const password = Math.floor(100000 + Math.random() * 900000).toString();
-        // Se usa un ID único para evitar dependencias de estado y poder retornar el objeto.
         const newComplaintId = `CASO-${uuidv4().slice(0, 6).toUpperCase()}`;
         
         const newComplaint = {
@@ -59,7 +58,6 @@ export const DataProvider = ({ children }) => {
         };
         
         setComplaints(prev => [...prev, newComplaint]);
-        // Se retorna el objeto para que el componente que llama pueda usarlo.
         return newComplaint;
     }, [setComplaints]);
     
@@ -101,26 +99,25 @@ export const DataProvider = ({ children }) => {
     }, [setCompanies, addToast]);
     
     const addSupportTicket = useCallback((ticketData, user) => {
-        const newTicket = {
-            ...ticketData,
-            id: `TICKET-${String(supportTickets.length + 1).padStart(3, '0')}`,
-            companyId: user.companyId,
-            status: 'Abierto',
-            createdAt: new Date().toISOString(),
-            createdBy: user.uid,
-        };
-        setSupportTickets(prev => [...prev, newTicket]);
+        setSupportTickets(prevTickets => {
+            const newTicket = {
+                ...ticketData,
+                id: `TICKET-${String(prevTickets.length + 1).padStart(3, '0')}`,
+                companyId: user.companyId,
+                status: 'Abierto',
+                createdAt: new Date().toISOString(),
+                createdBy: user.uid,
+            };
+            return [...prevTickets, newTicket];
+        });
         addToast("Ticket de soporte creado con éxito.", "success");
-        return newTicket;
-    }, [supportTickets, setSupportTickets, addToast]);
+    }, [setSupportTickets, addToast]);
 
     const updateSupportTicket = useCallback((ticketId, updates) => {
         setSupportTickets(prev => prev.map(t => t.id === ticketId ? { ...t, ...updates } : t));
         addToast("Ticket actualizado.", "success");
     }, [setSupportTickets, addToast]);
 
-    // El valor del contexto se memoiza para evitar re-renders innecesarios.
-    // Las funciones memoizadas con useCallback no necesitan ser dependencias aquí.
     const value = useMemo(() => ({ 
         companies, setCompanies, 
         complaints, addComplaint, updateComplaint, 
@@ -132,8 +129,8 @@ export const DataProvider = ({ children }) => {
         notificationRules, setNotificationRules,
         supportTickets, addSupportTicket, updateSupportTicket
     }), [
-        companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules,
-        setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules,
+        companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules, supportTickets,
+        setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules, setSupportTickets,
         addComplaint, updateComplaint, updateCompany, addSupportTicket, updateSupportTicket
     ]);
 
