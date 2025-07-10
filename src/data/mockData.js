@@ -2,6 +2,18 @@
 import { defaultFeaturesState, allFeatureKeys } from '../config/features';
 import { defaultConfig } from '../config/defaultConfig';
 import { uuidv4 } from '../utils/uuid';
+import { allPermissions } from './permissions';
+
+// Genera un objeto de permisos con todos los valores en true o el más permisivo
+const allPermissionsEnabled = Object.keys(allPermissions).reduce((acc, key) => {
+  if (key.includes('_alcance')) {
+    acc[key] = key.includes('agenda') ? 'empresa' : 'todos';
+  } else {
+    acc[key] = true;
+  }
+  return acc;
+}, {});
+
 
 /**
  * Simula la base de datos de la aplicación.
@@ -23,9 +35,10 @@ export const initialData = {
   companies: [
     { id: "empresa-a", name: "Empresa A", legalName: "Empresa A S.A.", rut: "76.123.456-7", address: "Av. Siempre Viva 123", abbreviation: "EMPA", commercialContact: {name: 'Juan Perez', rut: '12.345.678-9', position: 'Gerente Comercial', phone: '+56912345678', email: 'juan.perez@emp-a.com'}, admin: "admin-a@ejemplo.com", status: "activo", planId: 'plan-profesional' },
   ],
+  // Los usuarios ahora tienen roleId en lugar de role
   users: [
-    { uid: "boss1", email: "boss@ejemplo.com", role: "boss", companyId: null, name: "Super Admin", password: "password", lastVisited: {} },
-    { uid: "adminA1", email: "admin-a@ejemplo.com", role: "admin", companyId: "empresa-a", name: "Admin A", password: "password", rut: '1.111.111-1', position: 'Gerente RRHH', phone: '+56911111111', lastVisited: {} },
+    { uid: "boss1", email: "boss@ejemplo.com", roleId: "boss_role", companyId: null, name: "Super Admin", password: "password", lastVisited: {} },
+    { uid: "adminA1", email: "admin-a@ejemplo.com", roleId: "rol_admin_empresa_a", companyId: "empresa-a", name: "Admin A", password: "password", rut: '1.111.111-1', position: 'Gerente RRHH', phone: '+56911111111', lastVisited: {} },
   ],
   complaints: [
      {
@@ -38,5 +51,33 @@ export const initialData = {
   ],
   configurations: {
     "empresa-a": defaultConfig,
+  },
+  // Nueva colección de roles, organizada por ID de empresa
+  roles: {
+    "empresa-a": [
+      {
+        id: "rol_admin_empresa_a",
+        name: "Administrador General",
+        isDefaultAdmin: true,
+        permissions: allPermissionsEnabled,
+      },
+      {
+        id: "rol_investigador_empresa_a",
+        name: "Investigador",
+        isDefaultAdmin: false,
+        permissions: {
+          ...Object.keys(allPermissions).reduce((acc, key) => ({...acc, [key]: false}), {}), // Empieza con todo en false
+          dashboard_ver_kpis: true,
+          dashboard_kpis_alcance: "propios",
+          dashboard_ver_graficos: true,
+          dashboard_graficos_alcance: "propios",
+          dashboard_ver_agenda: true,
+          dashboard_agenda_alcance: "propia",
+          casos_ver_listado: true,
+          casos_listado_alcance: "asignados",
+          casos_ver_detalles: true,
+        }
+      }
+    ]
   }
 };
