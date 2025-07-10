@@ -5,7 +5,6 @@ import { uuidv4 } from '../utils/uuid';
 import { allPermissions } from './permissions';
 
 // Helper para generar un objeto con todos los permisos activados al máximo nivel.
-// Esta función asegura que roles como "Administrador" siempre tengan acceso a todo lo nuevo.
 const generateAllPermissionsEnabled = () => {
   return Object.keys(allPermissions).reduce((acc, key) => {
     if (key.includes('_alcance')) {
@@ -106,10 +105,10 @@ export const initialData = {
   complaints: [
      {
        id: "CASO-001", companyId: "empresa-a", password: "123", status: "Cerrada", severity: "Leve",
-       createdAt: "2025-04-10T09:00:00Z", closedAt: "2025-05-20T10:00:00Z", investigatorIds: ["adminA1", "investigadorA1"],
+       createdAt: "2025-07-10T09:00:00Z", closedAt: "2025-07-10T10:00:00Z", investigatorIds: ["adminA1", "investigadorA1"],
        receptionType: 'interna', internalAction: 'investigar', originalData: { case: { type: "Violencia en el Trabajo" }, complainant: { name: "Carlos Soto" }, accusedPersons: [{id: uuidv4(), name: 'Supervisor X', position: 'Supervisor', dependency: 'Gerencia', employeeType: 'Trabajador de mi misma empresa', employerName: ''}] },
        editedData: {}, managements: [], safeguardMeasures: [], internalComments: [], auditLog: [], timelineProgress: {}, caseFiles: [], sanctions: [], otherMeasures: [],
-       chatMessages: [ { id: uuidv4(), text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-04-10T10:00:00Z' } ]
+       chatMessages: [ { id: uuidv4(), text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-07-10T10:00:00Z' } ]
      },
   ],
   configurations: {
@@ -152,7 +151,7 @@ export const initialData = {
         permissions: defaultAuditorPermissions,
       }
     ]
-  },
+  }, // <-- ESTA COMA FALTABA
   supportTickets: [
     {
       id: "TICKET-001",
@@ -171,4 +170,5 @@ export const initialData = {
         }
       ]
     }
+  ]
 };
