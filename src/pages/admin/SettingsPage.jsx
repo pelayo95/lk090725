@@ -8,8 +8,9 @@ import FormSettings from './settings/FormSettings';
 import TimelineSettings from './settings/TimelineSettings';
 import MeasuresSettings from './settings/MeasuresSettings';
 import RoleManagementPage from './settings/RoleManagementPage';
-import CommunicationTemplatesSettings from './settings/CommunicationTemplatesSettings'; // Nuevo componente
-import { FileText, Clock, Shield, Users, MessageSquare } from 'lucide-react';
+import CommunicationTemplatesSettings from './settings/CommunicationTemplatesSettings';
+import NotificationSettings from './settings/NotificationSettings'; // Nuevo
+import { FileText, Clock, Shield, Users, MessageSquare, Bell } from 'lucide-react';
 
 const SettingsPage = () => {
     const { user } = useAuth();
@@ -19,7 +20,8 @@ const SettingsPage = () => {
     
     const tabs = [
         { id: 'roles', label: 'Roles y Permisos', icon: <Users className="w-5 h-5"/>, feature: 'config_puede_gestionar_roles', component: RoleManagementPage },
-        { id: 'templates', label: 'Plantillas', icon: <MessageSquare className="w-5 h-5"/>, feature: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings }, // Nueva pestaña
+        { id: 'templates', label: 'Plantillas', icon: <MessageSquare className="w-5 h-5"/>, feature: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings },
+        { id: 'notifications', label: 'Notificaciones', icon: <Bell className="w-5 h-5"/>, feature: 'config_puede_gestionar_notificaciones', component: NotificationSettings }, // Nueva pestaña
         { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'config_puede_gestionar_formularios', component: FormSettings },
         { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'config_puede_gestionar_timelines', component: TimelineSettings },
         { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5" />, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
