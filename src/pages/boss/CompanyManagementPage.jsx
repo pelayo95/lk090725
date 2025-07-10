@@ -24,7 +24,7 @@ const CompanyManagementPage = () => {
         
         const newCompany = {
             id: companyId,
-            status: 'oculto',
+            status: 'activo',
             name: newCompanyData.name,
             legalName: newCompanyData.legalName,
             rut: newCompanyData.rut,
@@ -39,7 +39,7 @@ const CompanyManagementPage = () => {
             uid: uuidv4(),
             email: newCompanyData.adminEmail,
             password: newCompanyData.password,
-            role: 'admin',
+            roleId: 'rol_admin_empresa_a', // Asignar rol por defecto
             companyId: companyId,
             name: newCompanyData.adminName,
             rut: newCompanyData.adminRut,
