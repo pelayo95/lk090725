@@ -18,7 +18,7 @@ const AccusedPersonsField = ({ label, description, value, onChange, required }) 
     };
 
     const addAccused = () => {
-        onChange([...accusedPersons, { id: uuidv4(), name: '', position: '', dependency: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }]);
+        onChange([...accusedPersons, { id: uuidv4(), name: '', position: '', relacion: '', employeeType: 'Trabajador de mi misma empresa', employerName: '' }]);
     };
 
     const removeAccused = (index) => {
@@ -35,6 +35,7 @@ const AccusedPersonsField = ({ label, description, value, onChange, required }) 
                         <div className="space-y-4">
                             <Input label="Nombre Completo del Denunciado/a" value={person.name || ''} onChange={(e) => handleAccusedChange(index, 'name', e.target.value)} required={required && index === 0}/>
                             <Input label="Cargo / Puesto de Trabajo" value={person.position || ''} onChange={(e) => handleAccusedChange(index, 'position', e.target.value)} />
+                            <Input label="Relación funcional o jerárquica" value={person.relacion || ''} onChange={(e) => handleAccusedChange(index, 'relacion', e.target.value)} />
                             <RadioGroup
                                 label="Tipo de trabajador"
                                 id={`employeeType-${person.id}`}
