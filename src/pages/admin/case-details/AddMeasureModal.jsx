@@ -5,14 +5,14 @@ import { ChevronLeft, Edit } from 'lucide-react';
 
 const AddMeasureModal = ({ isOpen, onClose, onSubmit, users, defaultMeasures, editingItem }) => {
     const [view, setView] = useState(editingItem ? 'custom' : 'select');
-    const [itemData, setItemData] = useState(editingItem || { text: '', assignedTo: users[0]?.uid, status: 'Discusión', endDate: '' });
+    const [itemData, setItemData] = useState(editingItem || { text: '', assignedTo: users[0]?.uid, status: 'Discusión', startDate: '', endDate: '', description: '' });
 
     useEffect(() => {
-        if(editingItem) {
+        if (editingItem) {
             setItemData(editingItem);
             setView('custom');
         } else if (isOpen) {
-             setItemData({ text: '', assignedTo: users[0]?.uid, status: 'Discusión', endDate: '' });
+             setItemData({ text: '', assignedTo: users[0]?.uid, status: 'Discusión', startDate: '', endDate: '', description: '' });
              setView('select');
         }
     }, [isOpen, editingItem, users]);
@@ -45,13 +45,17 @@ const AddMeasureModal = ({ isOpen, onClose, onSubmit, users, defaultMeasures, ed
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <TextArea label="Descripción de la Medida" id="measure-text" value={itemData.text} onChange={e => handleChange('text', e.target.value)} required />
+                    <TextArea label="Detalles Adicionales (Opcional)" id="measure-desc" value={itemData.description} onChange={e => handleChange('description', e.target.value)} rows={2} />
                     <Select label="Asignar A" id="measure-assign" value={itemData.assignedTo} onChange={e => handleChange('assignedTo', e.target.value)} required>
                         {users.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
                     </Select>
                     <Select label="Estado" id="measure-status" value={itemData.status} onChange={e => handleChange('status', e.target.value)} required>
                         {['Discusión', 'Aprobación', 'Implementación', 'Implementada', 'Seguimiento', 'Revisión'].map(s => <option key={s} value={s}>{s}</option>)}
                     </Select>
-                    <Input label="Fecha de Término (Opcional)" id="measure-enddate" type="date" value={itemData.endDate} onChange={e => handleChange('endDate', e.target.value)} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Fecha de Inicio (Opcional)" id="measure-startdate" type="date" value={itemData.startDate} onChange={e => handleChange('startDate', e.target.value)} />
+                        <Input label="Fecha de Término (Opcional)" id="measure-enddate" type="date" value={itemData.endDate} onChange={e => handleChange('endDate', e.target.value)} />
+                    </div>
                     <div className="flex justify-between items-center pt-4">
                          {!editingItem ? <Button type="button" onClick={() => setView('select')} variant="secondary">
                             <ChevronLeft className="w-4 h-4"/> Volver
