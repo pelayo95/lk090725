@@ -1,8 +1,4 @@
 // src/data/permissions.js
-
-/**
- * Define la lista maestra de todos los permisos atómicos disponibles en la aplicación.
- */
 export const allPermissions = {
   // Módulo: Dashboard
   dashboard_ver_kpis: "Ver componente de KPIs",
@@ -63,16 +59,11 @@ export const allPermissions = {
   config_usuarios_puede_ver_lista: "Ver la lista de usuarios de la empresa",
   config_usuarios_puede_crear: "Crear nuevos usuarios",
   config_usuarios_puede_asignar_rol: "Cambiar el rol de un usuario",
-  config_usuarios_puede_eliminar: "Eliminar usuarios (próximamente)",
+  config_usuarios_puede_eliminar: "Eliminar usuarios",
   config_puede_gestionar_formularios: "Acceder al constructor de formularios",
   config_puede_gestionar_timelines: "Acceder al constructor de líneas de tiempo",
   config_puede_gestionar_medidas_defecto: "Gestionar la lista de medidas predefinidas",
   config_puede_gestionar_plantillas: "Gestionar plantillas de comunicación",
   config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
-  config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
-  soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte",
   config_puede_gestionar_declaracion: "Editar la declaración de veracidad del formulario",
-
-  // Módulo: Soporte
-  soporte_puede_crear_ver_tickets: "Crear y ver tickets de soporte",
 };
