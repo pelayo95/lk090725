@@ -25,11 +25,11 @@ const ManagementsTab = ({ complaint }) => {
 
         if(itemData.id) {
              updatedManagements = complaint.managements.map(m => m.id === itemData.id ? { ...m, ...itemData } : m);
-             action = `Gestión editada: "${itemData.text}"`;
+             action = `Gestión editada: "${itemData.name}"`;
         } else {
              const newItem = { id: uuidv4(), ...itemData, completed: false };
-             updatedManagements = [...complaint.managements, newItem];
-             action = `Nueva gestión creada: "${newItem.text}"`;
+             updatedManagements = [...(complaint.managements || []), newItem];
+             action = `Nueva gestión creada: "${newItem.name}"`;
         }
         
         const newAuditLogEntry = { id: uuidv4(), action, userId: user.uid, timestamp: new Date().toISOString() };
@@ -52,7 +52,7 @@ const ManagementsTab = ({ complaint }) => {
     const handleToggleComplete = (managementId) => {
         const updatedManagements = complaint.managements.map(m => m.id === managementId ? {...m, completed: !m.completed } : m);
         const newStatus = updatedManagements.find(m => m.id === managementId).completed;
-        const newAuditLogEntry = { id: uuidv4(), action: `Gestión "${updatedManagements.find(m => m.id === managementId).text}" marcada como ${newStatus ? 'completada' : 'pendiente'}.`, userId: user.uid, timestamp: new Date().toISOString() };
+        const newAuditLogEntry = { id: uuidv4(), action: `Gestión "${updatedManagements.find(m => m.id === managementId).name}" marcada como ${newStatus ? 'completada' : 'pendiente'}.`, userId: user.uid, timestamp: new Date().toISOString() };
         updateComplaint(complaint.id, { managements: updatedManagements, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
     };
     
@@ -64,7 +64,7 @@ const ManagementsTab = ({ complaint }) => {
     const confirmDelete = () => {
         if (!itemToModify) return;
         
-        const managementText = itemToModify.text;
+        const managementText = itemToModify.name;
         const updatedManagements = complaint.managements.filter(m => m.id !== itemToModify.id);
         const newAuditLogEntry = { id: uuidv4(), action: `Gestión eliminada: "${managementText}"`, userId: user.uid, timestamp: new Date().toISOString() };
         updateComplaint(complaint.id, { managements: updatedManagements, auditLog: [...complaint.auditLog, newAuditLogEntry] }, user);
@@ -96,7 +96,8 @@ const ManagementsTab = ({ complaint }) => {
                                 <div className={`h-5 w-5 rounded mt-1 flex-shrink-0 ${m.completed ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                             )}
                             <div className="flex-1">
-                                <p className={`text-slate-800 ${m.completed ? 'line-through text-slate-500' : ''}`}>{m.text}</p>
+                                <p className={`font-semibold text-slate-800 ${m.completed ? 'line-through text-slate-500' : ''}`}>{m.name}</p>
+                                <p className={`text-sm text-slate-600 ${m.completed ? 'line-through text-slate-500' : ''}`}>{m.text}</p>
                                 <div className="text-xs text-slate-500 flex items-center gap-4 mt-1">
                                     <span className="flex items-center gap-1"><User className="w-3 h-3"/>{getUserNameById(m.assignedTo, allUsers)}</span>
                                     {m.dueDate && <span className="flex items-center gap-1"><Calendar className="w-3 h-3"/>Vence: {m.dueDate}</span>}
@@ -122,11 +123,12 @@ const ManagementsTab = ({ complaint }) => {
                 onClose={() => setIsModalOpen(false)} 
                 onSubmit={handleSave}
                 title={itemToModify ? "Editar Gestión" : "Añadir Nueva Gestión"}
-                initialState={itemToModify || { text: '', assignedTo: companyUsers[0]?.uid || '', dueDate: '' }}
+                initialState={itemToModify || { name: '', text: '', assignedTo: companyUsers[0]?.uid || '', dueDate: '' }}
                 isEditing={!!itemToModify}
             >
                 {(formData, handleChange) => (
                     <>
+                        <Input label="Nombre de la Gestión" id="mng-name" value={formData.name || ''} onChange={e => handleChange('name', e.target.value)} required />
                         <TextArea label="Descripción de la Tarea" id="mng-text" value={formData.text} onChange={e => handleChange('text', e.target.value)} required />
                         <Select label="Asignar A" id="mng-assign" value={formData.assignedTo} onChange={e => handleChange('assignedTo', e.target.value)} required>
                             {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
