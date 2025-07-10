@@ -26,39 +26,40 @@ export const DataProvider = ({ children }) => {
     }, []);
     
     const addComplaint = useCallback((complaintData, companyId) => {
-        setComplaints(prevComplaints => {
-            const password = Math.floor(100000 + Math.random() * 900000).toString();
-            const newComplaint = {
-                ...complaintData,
-                id: `CASO-${String(prevComplaints.length + 1).padStart(3, '0')}`,
-                companyId,
-                password,
-                createdAt: new Date().toISOString(),
-                closedAt: null,
-                status: "Ingresada",
-                severity: "Sin Asignar",
-                investigatorIds: [],
-                receptionType: null,
-                internalAction: null,
-                dtComplaintDate: null,
-                dtReceptionDate: null,
-                managements: [
-                    { id: uuidv4(), text: "Definir si la investigación será interna o derivada a la Inspección del Trabajo", completed: false, dueDate: null, assignedTo: null }
-                ],
-                safeguardMeasures: [],
-                internalComments: [],
-                auditLog: [{ id: uuidv4(), action: "Creación de Denuncia", userId: "public", timestamp: new Date().toISOString() }],
-                timelineProgress: {},
-                chatMessages: [],
-                caseFiles: [],
-                sanctions: [],
-                otherMeasures: [],
-            };
-            // Devolvemos el nuevo array de quejas
-            return [...prevComplaints, newComplaint];
-        });
-        // Nota: No podemos devolver `newComplaint` directamente aquí. La lógica del componente que llama deberá adaptarse.
-        // Sin embargo, para la estructura actual, esta es la forma más segura de actualizar el estado.
+        const password = Math.floor(100000 + Math.random() * 900000).toString();
+        // Se usa un ID único para evitar dependencias de estado y poder retornar el objeto.
+        const newComplaintId = `CASO-${uuidv4().slice(0, 6).toUpperCase()}`;
+        
+        const newComplaint = {
+            ...complaintData,
+            id: newComplaintId,
+            companyId,
+            password,
+            createdAt: new Date().toISOString(),
+            closedAt: null,
+            status: "Ingresada",
+            severity: "Sin Asignar",
+            investigatorIds: [],
+            receptionType: null,
+            internalAction: null,
+            dtComplaintDate: null,
+            dtReceptionDate: null,
+            managements: [
+                { id: uuidv4(), text: "Definir si la investigación será interna o derivada a la Inspección del Trabajo", completed: false, dueDate: null, assignedTo: null }
+            ],
+            safeguardMeasures: [],
+            internalComments: [],
+            auditLog: [{ id: uuidv4(), action: "Creación de Denuncia", userId: "public", timestamp: new Date().toISOString() }],
+            timelineProgress: {},
+            chatMessages: [],
+            caseFiles: [],
+            sanctions: [],
+            otherMeasures: [],
+        };
+        
+        setComplaints(prev => [...prev, newComplaint]);
+        // Se retorna el objeto para que el componente que llama pueda usarlo.
+        return newComplaint;
     }, [setComplaints]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
@@ -98,6 +99,8 @@ export const DataProvider = ({ children }) => {
         addToast("Empresa actualizada", "success");
     }, [setCompanies, addToast]);
 
+    // El valor del contexto se memoiza para evitar re-renders innecesarios.
+    // Las funciones memoizadas con useCallback no necesitan ser dependencias aquí.
     const value = useMemo(() => ({ 
         companies, setCompanies, 
         complaints, addComplaint, updateComplaint, 
@@ -108,9 +111,9 @@ export const DataProvider = ({ children }) => {
         communicationTemplates, setCommunicationTemplates,
         notificationRules, setNotificationRules
     }), [
-        companies, setCompanies, complaints, addComplaint, updateComplaint, 
-        holidays, setHolidays, updateCompany, plans, setPlans, roles, setRoles, 
-        communicationTemplates, setCommunicationTemplates, notificationRules, setNotificationRules
+        companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules,
+        setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules,
+        addComplaint, updateComplaint, updateCompany
     ]);
 
     if (isLoading) {
