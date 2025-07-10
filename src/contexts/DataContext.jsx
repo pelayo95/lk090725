@@ -20,6 +20,7 @@ export const DataProvider = ({ children }) => {
     const [roles, setRoles] = useLocalStorage('roles', initialData.roles || {});
     const [communicationTemplates, setCommunicationTemplates] = useLocalStorage('communicationTemplates', initialData.communicationTemplates || {});
     const [notificationRules, setNotificationRules] = useLocalStorage('notificationRules', initialData.notificationRules || {});
+    const [supportTickets, setSupportTickets] = useLocalStorage('supportTickets', initialData.supportTickets || []);
 
     useEffect(() => {
         setIsLoading(false);
@@ -98,6 +99,25 @@ export const DataProvider = ({ children }) => {
         setCompanies(prevCompanies => prevCompanies.map(c => c.id === companyId ? { ...c, ...updates } : c));
         addToast("Empresa actualizada", "success");
     }, [setCompanies, addToast]);
+    
+    const addSupportTicket = useCallback((ticketData, user) => {
+        const newTicket = {
+            ...ticketData,
+            id: `TICKET-${String(supportTickets.length + 1).padStart(3, '0')}`,
+            companyId: user.companyId,
+            status: 'Abierto',
+            createdAt: new Date().toISOString(),
+            createdBy: user.uid,
+        };
+        setSupportTickets(prev => [...prev, newTicket]);
+        addToast("Ticket de soporte creado con éxito.", "success");
+        return newTicket;
+    }, [supportTickets, setSupportTickets, addToast]);
+
+    const updateSupportTicket = useCallback((ticketId, updates) => {
+        setSupportTickets(prev => prev.map(t => t.id === ticketId ? { ...t, ...updates } : t));
+        addToast("Ticket actualizado.", "success");
+    }, [setSupportTickets, addToast]);
 
     // El valor del contexto se memoiza para evitar re-renders innecesarios.
     // Las funciones memoizadas con useCallback no necesitan ser dependencias aquí.
@@ -109,11 +129,12 @@ export const DataProvider = ({ children }) => {
         plans, setPlans,
         roles, setRoles,
         communicationTemplates, setCommunicationTemplates,
-        notificationRules, setNotificationRules
+        notificationRules, setNotificationRules,
+        supportTickets, addSupportTicket, updateSupportTicket
     }), [
         companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules,
         setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules,
-        addComplaint, updateComplaint, updateCompany
+        addComplaint, updateComplaint, updateCompany, addSupportTicket, updateSupportTicket
     ]);
 
     if (isLoading) {
