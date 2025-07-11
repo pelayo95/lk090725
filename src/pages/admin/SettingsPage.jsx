@@ -12,6 +12,7 @@ import CommunicationTemplatesSettings from './settings/CommunicationTemplatesSet
 import NotificationSettings from './settings/NotificationSettings';
 import DeclarationSettings from './settings/DeclarationSettings';
 import { FileText, Clock, Shield, Users, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
+import { userHasPermission } from '../../utils/userUtils';
 
 const SettingsPage = () => {
     const { user } = useAuth();
@@ -29,7 +30,7 @@ const SettingsPage = () => {
         { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5"/>, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
     ];
 
-    const visibleTabs = tabs.filter(tab => user.permissions[tab.feature]);
+    const visibleTabs = tabs.filter(tab => userHasPermission(user, tab.feature));
     const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || '');
     
     const handleSave = () => {
