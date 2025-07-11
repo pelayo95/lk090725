@@ -10,7 +10,21 @@ import { uuidv4 } from '../../utils/uuid';
 
 const StatusDetailPage = ({ complaint, onBack, holidays }) => {
     const { complaints: allComplaints, updateComplaint, plans, companies } = useData();
+    
+    // Se mantiene la lógica de buscar la versión más actualizada del caso desde el contexto
     const currentComplaint = allComplaints.find(c => c.id === complaint.id);
+
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Si el caso aún no se encuentra en el estado, mostramos un mensaje de carga.
+    // Esto previene el error al intentar acceder a propiedades de un objeto nulo.
+    if (!currentComplaint) {
+        return (
+            <Card>
+                <p className="text-center text-slate-600">Cargando información del caso...</p>
+            </Card>
+        );
+    }
+    // --- FIN DE LA CORRECCIÓN ---
 
     const { getCompanyConfig } = useConfig();
     const config = getCompanyConfig(currentComplaint.companyId);
@@ -135,7 +149,6 @@ const StatusDetailPage = ({ complaint, onBack, holidays }) => {
                                         const value = getNestedValue(currentComplaint.originalData, field.dataKey);
                                         if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
-                                        // Manejo especial para 'accusedPersons' para mostrar todos los detalles
                                         if (field.type === 'accusedPersons' && Array.isArray(value)) {
                                             return (
                                                 <div key={field.id} className="grid grid-cols-3 gap-2">
