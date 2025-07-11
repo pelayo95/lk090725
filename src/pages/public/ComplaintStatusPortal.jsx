@@ -259,16 +259,16 @@ const WitnessesSection = ({ complaint, updateComplaint }) => {
 // --- Componente Principal del Portal de Estado ---
 const ComplaintStatusPortal = ({ complaint, onBack }) => {
     const [activeTab, setActiveTab] = useState('timeline');
-    const { updateComplaint, complaints, holidays, companies } = useData();
+    const { updateComplaint, holidays, companies } = useData();
     const { getCompanyConfig } = useConfig();
     
-    // Obtiene la versión más reciente del caso desde el contexto.
-    const currentComplaint = complaints.find(c => c.id === complaint.id);
-
-    // GUARDA DE SEGURIDAD: Previene el error si el caso no se encuentra.
-    if (!currentComplaint) {
+    // GUARDA DE SEGURIDAD: Previene el error si el caso es nulo al inicio.
+    if (!complaint) {
         return <Card><p>Cargando información del caso...</p></Card>;
     }
+    
+    // AHORA se usa el 'complaint' de props directamente. Es la fuente de verdad.
+    const currentComplaint = complaint;
     
     const config = getCompanyConfig(currentComplaint.companyId);
     const company = companies.find(c => c.id === currentComplaint.companyId);
