@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
-import { Card, TextArea, Button, Modal } from '../common'; // Importar TextArea en lugar de Input
+import { Card, TextArea, Button, Modal } from '../common';
 import { Send, MessageSquarePlus } from 'lucide-react';
+import { userHasPermission } from '../../utils/userUtils'; // Importar
 
 const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, currentUserColor, otherUserColor, complaintId }) => {
     const { user, allUsers } = useAuth();
@@ -36,14 +37,15 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     };
 
     const handleKeyDown = (e) => {
-        // Enviar con Enter, nueva línea con Shift+Enter
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleAddComment();
         }
     };
 
-    const canSend = title.includes("Denunciante") ? user.permissions.comunicacion_denunciante_puede_enviar : user.permissions.comentarios_internos_puede_enviar;
+    const canSend = title.includes("Denunciante") 
+        ? userHasPermission(user, 'comunicacion_denunciante_puede_enviar') 
+        : userHasPermission(user, 'comentarios_internos_puede_enviar');
 
     return (
         <Card>
@@ -73,7 +75,7 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                         onChange={e => setNewComment(e.target.value)}
                         onKeyDown={handleKeyDown}
                         className="flex-1 resize-none"
-                        rows="3" // Altura inicial de 3 líneas
+                        rows="3"
                     />
                     <div className="flex flex-col gap-2">
                         {companyTemplates.length > 0 && (
