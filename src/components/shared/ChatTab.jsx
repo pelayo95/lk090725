@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Card, TextArea, Button, Modal } from '../common';
 import { Send, MessageSquarePlus } from 'lucide-react';
-import { userHasPermission } from '../../utils/userUtils'; // Importar
 
 const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, currentUserColor, otherUserColor, complaintId }) => {
     const { user, allUsers } = useAuth();
@@ -13,7 +12,14 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const companyTemplates = communicationTemplates[user.companyId] || [];
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Se obtienen las plantillas de forma segura, solo si existe un usuario logueado.
+    const companyTemplates = user ? (communicationTemplates[user.companyId] || []) : [];
+
+    // Se determina si el chat debe ser interactivo (permitir enviar mensajes).
+    // Esto es verdad si se proporciona la función `onSendMessage`.
+    const isInteractive = typeof onSendMessage === 'function';
+    // --- FIN DE LA CORRECCIÓN ---
 
     const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     useEffect(scrollToBottom, [messages]);
@@ -43,10 +49,6 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
         }
     };
 
-    const canSend = title.includes("Denunciante") 
-        ? userHasPermission(user, 'comunicacion_denunciante_puede_enviar') 
-        : userHasPermission(user, 'comentarios_internos_puede_enviar');
-
     return (
         <Card>
             <h3 className="text-lg font-semibold text-slate-800 mb-4">{title}</h3>
@@ -66,7 +68,9 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                 })}
                 <div ref={messagesEndRef} />
             </div>
-            {canSend && (
+            
+            {/* Se renderiza el formulario de envío si el chat es interactivo */}
+            {isInteractive && (
                 <form onSubmit={handleAddComment} className="flex items-start gap-2 border-t pt-4">
                     <TextArea 
                         id="new-message" 
@@ -78,7 +82,8 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                         rows="3"
                     />
                     <div className="flex flex-col gap-2">
-                        {companyTemplates.length > 0 && (
+                        {/* El botón de plantillas solo aparece si es un admin */}
+                        {user && companyTemplates.length > 0 && (
                             <Button type="button" variant="secondary" onClick={() => setIsTemplateModalOpen(true)} title="Usar Plantilla">
                                 <MessageSquarePlus className="w-5 h-5"/>
                             </Button>
@@ -89,16 +94,20 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                     </div>
                 </form>
             )}
-            <Modal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} title="Seleccionar Plantilla">
-                <div className="space-y-2">
-                    {companyTemplates.map(template => (
-                        <button key={template.id} onClick={() => handleSelectTemplate(template)} className="w-full text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-md">
-                            <p className="font-semibold">{template.name}</p>
-                            <p className="text-xs text-slate-500 truncate">{template.content}</p>
-                        </button>
-                    ))}
-                </div>
-            </Modal>
+
+            {/* El modal de plantillas solo se necesita si es un admin */}
+            {user && (
+                 <Modal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} title="Seleccionar Plantilla">
+                    <div className="space-y-2">
+                        {companyTemplates.map(template => (
+                            <button key={template.id} onClick={() => handleSelectTemplate(template)} className="w-full text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-md">
+                                <p className="font-semibold">{template.name}</p>
+                                <p className="text-xs text-slate-500 truncate">{template.content}</p>
+                            </button>
+                        ))}
+                    </div>
+                </Modal>
+            )}
         </Card>
     );
 };
