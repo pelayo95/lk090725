@@ -117,23 +117,13 @@ export const initialData = {
            dependency: 'Gerencia', 
            employeeType: 'Trabajador de mi misma empresa', 
            employerName: '',
-           accessCode: 1,
-           password: 1 
+           accessCode: null,
+           password: null 
          }] 
        },
        editedData: {}, 
        managements: [], 
-       safeguardMeasures: [
-         {
-           id: uuidv4(),
-           text: "Prohibición de contacto entre las partes.",
-           status: "Implementada",
-           assignedTo: "adminA1",
-           startDate: "2025-07-11",
-           endDate: "2025-08-11",
-           description: "Se ha instruido a ambas partes a no tener contacto por ningún medio durante el proceso de investigación."
-         }
-       ], 
+       safeguardMeasures: [], 
        internalComments: [], 
        auditLog: [], 
        timelineProgress: {}, 
@@ -141,7 +131,9 @@ export const initialData = {
        sanctions: [], 
        otherMeasures: [],
        chatMessages: [ { id: uuidv4(), text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-07-10T10:00:00Z' } ],
-       accusedChatMessages: []
+       accusedChatMessages: [],
+       // --- NUEVO ARRAY AÑADIDO ---
+       accusedWitnesses: [],
      },
   ],
   configurations: {
