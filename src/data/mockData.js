@@ -117,8 +117,8 @@ export const initialData = {
            dependency: 'Gerencia', 
            employeeType: 'Trabajador de mi misma empresa', 
            employerName: '',
-           accessCode: null,
-           password: null 
+           accessCode: 1,
+           password: 1 
          }] 
        },
        editedData: {}, 
