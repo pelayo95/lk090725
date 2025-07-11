@@ -1,24 +1,38 @@
 // src/pages/public/PublicPortal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, ChevronRight, CheckCircle, Copy } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, ConfirmationModal } from '../../components/common';
 import ComplaintForm from './ComplaintForm'; 
 import StatusCheckPage from './StatusCheckPage';
-import ComplaintStatusPortal from './ComplaintStatusPortal'; // Importar el nuevo portal
+import ComplaintStatusPortal from './ComplaintStatusPortal';
 
 const PublicPortal = () => {
+    const { companies, complaints } = useData(); // Obtener la lista de denuncias aquí
     const [view, setView] = useState('selectCompany');
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [caseInfo, setCaseInfo] = useState(null);
     const [loggedInCase, setLoggedInCase] = useState(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { addToast } = useNotification();
-
-    const { companies } = useData();
     
     const activeCompanies = companies.filter(c => c.status === 'activo');
+
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Este efecto mantiene el `loggedInCase` sincronizado con la fuente de datos global.
+    // Si se envía un mensaje o se sube un archivo, `complaints` cambia y este efecto
+    // actualizará `loggedInCase`, provocando que la nueva información se pase al portal de estado.
+    useEffect(() => {
+        if (loggedInCase) {
+            const updatedCase = complaints.find(c => c.id === loggedInCase.id);
+            if (updatedCase) {
+                setLoggedInCase(updatedCase);
+            }
+        }
+    }, [complaints]); // Se ejecuta cada vez que la lista de denuncias cambia.
+    // --- FIN DE LA CORRECCIÓN ---
+
 
     const handleCompanySelect = (company) => {
         setSelectedCompany(company);
@@ -97,7 +111,6 @@ const PublicPortal = () => {
             case 'statusCheck':
                 return <StatusCheckPage onLoginSuccess={handleStatusLoginSuccess} onBack={() => setView('selectCompany')} />;
             case 'statusDetail':
-                // Reemplazar StatusDetailPage con el nuevo ComplaintStatusPortal
                 return <ComplaintStatusPortal complaint={loggedInCase} onBack={() => { setView('selectCompany'); setLoggedInCase(null); }} />;
             case 'selectCompany':
             default:
@@ -124,7 +137,7 @@ const PublicPortal = () => {
 
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-3xl mx-auto"> {/* Aumentado el ancho para la nueva página */}
+            <div className="w-full max-w-3xl mx-auto">
                 <div className="text-center mb-8">
                     <Shield className="inline-block w-16 h-16 text-indigo-600"/>
                     <h1 className="text-3xl font-bold text-slate-800">Canal de Denuncias</h1>
