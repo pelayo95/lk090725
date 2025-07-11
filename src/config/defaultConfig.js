@@ -9,6 +9,10 @@ const legalDefinitions = {
 
 export const defaultConfig = {
     complaintDeclarationText: "Declaro bajo juramento que los hechos descritos en esta denuncia son verídicos y completos según mi leal saber y entender. Comprendo que la entrega de información falsa puede acarrear consecuencias legales y/o disciplinarias.",
+    accusedPortalSettings: {
+        canViewFacts: true,
+        canViewEvidence: false,
+    },
     formSteps: [
         { id: "s1", title: "Tipo de Conducta", description: "Seleccione el tipo de conducta que desea denunciar.", fields: [
             { 
