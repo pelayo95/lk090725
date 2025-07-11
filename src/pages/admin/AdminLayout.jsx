@@ -1,6 +1,7 @@
 // src/pages/admin/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { userHasPermission } from '../../utils/userUtils'; // Importar la nueva utilidad
 import { 
     Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy
 } from 'lucide-react';
@@ -53,11 +54,8 @@ const AdminLayout = ({ children }) => {
                 </div>
                 <nav className="flex-1 px-2 py-4 space-y-1">
                     {navItems.map(item => {
-                        const hasPermission = Array.isArray(item.permission)
-                            ? item.permission.some(p => user.permissions[p])
-                            : user.permissions[item.permission];
-
-                        if (!hasPermission) return null;
+                        // Lógica de permisos simplificada
+                        if (!userHasPermission(user, item.permission)) return null;
                         
                         return (
                             <a
