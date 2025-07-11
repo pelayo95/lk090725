@@ -5,7 +5,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Card, Button, Select, Input, TextArea, ConfirmationModal } from '../../../components/common';
 import { AddItemModal } from '../../../components/common/AddItemModal';
-import { getUserNameById } from '../../../utils/userUtils';
+import { getUserNameById, userHasPermission } from '../../../utils/userUtils';
 import { uuidv4 } from '../../../utils/uuid';
 import { Plus, Edit, Trash, User, Calendar } from 'lucide-react';
 
@@ -88,7 +88,7 @@ const SanctionsTab = ({ complaint }) => {
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Sanciones</h3>
-                {user.permissions.sanciones_puede_crear_editar && (
+                {userHasPermission(user, 'sanciones_puede_crear_editar') && (
                     <Button onClick={() => { setSanctionToModify(null); setIsSanctionModalOpen(true); }} variant="primary">
                         <Plus className="w-4 h-4"/> Registrar Sanción
                     </Button>
@@ -103,10 +103,10 @@ const SanctionsTab = ({ complaint }) => {
                                 <p className="text-sm text-slate-600 mt-1">{s.description}</p>
                             </div>
                             <div className="flex gap-1">
-                                {user.permissions.sanciones_puede_crear_editar && (
+                                {userHasPermission(user, 'sanciones_puede_crear_editar') && (
                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => { setSanctionToModify(s); setIsSanctionModalOpen(true); }}><Edit className="w-4 h-4 text-slate-500"/></Button>
                                 )}
-                                {user.permissions.sanciones_puede_eliminar && (
+                                {userHasPermission(user, 'sanciones_puede_eliminar') && (
                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => setSanctionToDelete(s)}><Trash className="w-4 h-4 text-red-500"/></Button>
                                 )}
                             </div>
@@ -122,7 +122,7 @@ const SanctionsTab = ({ complaint }) => {
             <div className="mt-8 pt-6 border-t">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-slate-800">Otras Medidas</h3>
-                    {user.permissions.sanciones_puede_crear_editar && (
+                    {userHasPermission(user, 'sanciones_puede_crear_editar') && (
                         <Button onClick={() => { setOtherMeasureToModify(null); setIsOtherMeasureModalOpen(true); }} variant="secondary">
                             <Plus className="w-4 h-4"/> Añadir Otra Medida
                         </Button>
@@ -131,79 +131,4 @@ const SanctionsTab = ({ complaint }) => {
                  <div className="space-y-3">
                     {(complaint.otherMeasures || []).map(m => (
                         <div key={m.id} className="p-4 rounded-lg bg-white border border-slate-200">
-                           <div className="flex justify-between items-start">
-                                <p className="text-sm text-slate-600 mt-1">{m.description}</p>
-                                <div className="flex gap-1">
-                                    {user.permissions.sanciones_puede_crear_editar && (
-                                        <Button variant="ghost" className="p-1 h-auto" onClick={() => { setOtherMeasureToModify(m); setIsOtherMeasureModalOpen(true); }}><Edit className="w-4 h-4 text-slate-500"/></Button>
-                                    )}
-                                    {user.permissions.sanciones_puede_eliminar && (
-                                        <Button variant="ghost" className="p-1 h-auto" onClick={() => setOtherMeasureToDelete(m)}><Trash className="w-4 h-4 text-red-500"/></Button>
-                                    )}
-                                </div>
-                           </div>
-                            <div className="text-xs text-slate-500 flex items-center gap-4 mt-2 border-t pt-2">
-                                <span className="flex items-center gap-1"><Calendar className="w-3 h-3"/>Fecha: {new Date(m.date + 'T00:00:00').toLocaleDateString()}</span>
-                                <span className="flex items-center gap-1"><User className="w-3 h-3"/>Responsable: {getUserNameById(m.responsibleUserId, allUsers)}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            
-            <AddItemModal 
-                isOpen={isSanctionModalOpen}
-                onClose={() => {setIsSanctionModalOpen(false); setSanctionToModify(null);}}
-                onSubmit={handleSaveSanction}
-                title={sanctionToModify ? "Editar Sanción" : "Registrar Nueva Sanción"}
-                initialState={sanctionToModify || { type: 'Amonestación verbal', description: '', applicationDate: '', responsibleUserId: companyUsers[0]?.uid || '' }}
-                isEditing={!!sanctionToModify}
-            >
-                {(formData, handleChange) => (
-                    <>
-                         <Select label="Tipo de Sanción" value={formData.type} onChange={e => handleChange('type', e.target.value)} required>
-                            {sanctionTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                        </Select>
-                        <TextArea label="Descripción / Fundamento" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
-                        <Input label="Fecha de Aplicación" type="date" value={formData.applicationDate} onChange={e => handleChange('applicationDate', e.target.value)} required />
-                        <Select label="Responsable del Seguimiento" value={formData.responsibleUserId} onChange={e => handleChange('responsibleUserId', e.target.value)} required>
-                            {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
-                        </Select>
-                    </>
-                )}
-            </AddItemModal>
-            
-            <AddItemModal
-                isOpen={isOtherMeasureModalOpen}
-                onClose={() => {setIsOtherMeasureModalOpen(false); setOtherMeasureToModify(null);}}
-                onSubmit={handleSaveOtherMeasure}
-                title={otherMeasureToModify ? "Editar Otra Medida" : "Registrar Otra Medida"}
-                initialState={otherMeasureToModify || { description: '', date: '', responsibleUserId: companyUsers[0]?.uid || '' }}
-                isEditing={!!otherMeasureToModify}
-            >
-                {(formData, handleChange) => (
-                     <>
-                        <TextArea label="Descripción de la Medida" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
-                        <Input label="Fecha de Aplicación" type="date" value={formData.date} onChange={e => handleChange('date', e.target.value)} required />
-                        <Select label="Responsable" value={formData.responsibleUserId} onChange={e => handleChange('responsibleUserId', e.target.value)} required>
-                            {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name}</option>)}
-                        </Select>
-                    </>
-                )}
-            </AddItemModal>
-
-            {sanctionToDelete && (
-                 <ConfirmationModal isOpen={!!sanctionToDelete} onClose={() => setSanctionToDelete(null)} onConfirm={confirmDeleteSanction} title="Confirmar Eliminación">
-                    <p>¿Está seguro de que desea eliminar esta sanción? Esta acción no se puede deshacer.</p>
-                </ConfirmationModal>
-            )}
-            {otherMeasureToDelete && (
-                 <ConfirmationModal isOpen={!!otherMeasureToDelete} onClose={() => setOtherMeasureToDelete(null)} onConfirm={confirmDeleteOtherMeasure} title="Confirmar Eliminación">
-                    <p>¿Está seguro de que desea eliminar esta medida? Esta acción no se puede deshacer.</p>
-                </ConfirmationModal>
-            )}
-        </Card>
-    );
-};
-
-export default SanctionsTab;
+                           <div className="flex justify-between items-
