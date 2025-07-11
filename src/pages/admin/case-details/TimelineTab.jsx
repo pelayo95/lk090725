@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { Card, Tooltip } from '../../../components/common';
 import { calculateEndDate } from '../../../services/dateUtils';
 import { uuidv4 } from '../../../utils/uuid';
-import { CheckCircle, ListChecks } from 'lucide-react';
+import { CheckCircle, ListChecks, ArrowUpRight } from 'lucide-react'; // Ícono añadido
 
 const TimelineTab = ({ complaint, onNavigate }) => {
     const { getCompanyConfig } = useConfig();
@@ -79,7 +79,6 @@ const TimelineTab = ({ complaint, onNavigate }) => {
         updateComplaint(complaint.id, { timelineProgress: newProgress, auditLog: newAuditLog }, user);
     };
     
-    // Función actualizada para manejar todos los clics interactivos
     const handleSubStepClick = (subStep) => {
         const communicationSteps = ['sub2', 'sub3', 'sub5', 'sub15'];
         const managementSteps = ['sub6', 'sub7', 'sub8', 'sub9', 'sub10'];
@@ -88,9 +87,6 @@ const TimelineTab = ({ complaint, onNavigate }) => {
             onNavigate('communications');
         } else if (managementSteps.includes(subStep.id)) {
             onNavigate('managements');
-        } else if (subStep.id === 'sub1') {
-            console.log("Navegando a la sección de investigadores...");
-            // Aquí se podría implementar un scroll a la sección de asignación
         } else if (subStep.id === 'sub4') {
             onNavigate('measures');
         }
@@ -128,19 +124,19 @@ const TimelineTab = ({ complaint, onNavigate }) => {
                                             const subKey = `${event.id}_${i}`;
                                             const isSubCompleted = complaint.timelineProgress?.[subKey];
                                             const isSubDisabled = !user.permissions.timeline_puede_marcar_etapas || isDisabled;
-                                            // Se actualiza la lista de IDs interactivos
-                                            const isInteractive = ['sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6', 'sub7', 'sub8', 'sub9', 'sub10', 'sub15'].includes(sub.id);
+                                            const isInteractive = ['sub2', 'sub3', 'sub4', 'sub5', 'sub6', 'sub7', 'sub8', 'sub9', 'sub10', 'sub15'].includes(sub.id);
 
                                             return (
                                                 <li key={sub.id || i} className="flex items-center gap-2">
                                                     <input type="checkbox" checked={isSubCompleted || false} disabled={isSubDisabled} onChange={() => handleToggle(event.id, i)}
                                                         className={`h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${isSubDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}/>
-                                                    <span 
-                                                        className={`text-xs ${isSubCompleted ? 'line-through text-slate-400' : 'text-slate-600'} ${isInteractive ? 'cursor-pointer hover:underline text-blue-600' : ''}`}
+                                                    <div 
+                                                        className={`flex items-center gap-1 text-xs ${isInteractive ? 'cursor-pointer hover:underline text-blue-600' : ''} ${isSubCompleted ? 'line-through text-slate-400' : 'text-slate-600'}`}
                                                         onClick={isInteractive ? () => handleSubStepClick(sub) : undefined}
                                                     >
-                                                        {sub.name}
-                                                    </span>
+                                                        <span>{sub.name}</span>
+                                                        {isInteractive && <ArrowUpRight className="w-3 h-3"/>}
+                                                    </div>
                                                 </li>
                                             );
                                         })}
