@@ -1,7 +1,8 @@
-// src/pages/admin/settings/UserEditModal.jsx
+// src/pages/admin/UserEditModal.jsx
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Input, Select } from '../../../components/common';
-import { useAuth } from '../../../contexts/AuthContext';
+// La siguiente línea es la que se ha corregido
+import { Modal, Button, Input, Select } from '../../components/common'; 
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserEditModal = ({ isOpen, onClose, onSave, user, roles }) => {
     const { user: currentUser } = useAuth(); // El usuario logueado para chequear permisos
