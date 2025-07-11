@@ -6,7 +6,7 @@ import { useConfig } from '../../../contexts/ConfigContext';
 import { Card, Button, Select, Modal, TextArea } from '../../../components/common';
 import { Plus, Edit, User, Calendar, FileText, Copy } from 'lucide-react';
 import { uuidv4 } from '../../../utils/uuid';
-import { getUserNameById } from '../../../utils/userUtils';
+import { getUserNameById, userHasPermission } from '../../../utils/userUtils';
 import AddMeasureModal from './AddMeasureModal';
 import { useNotification } from '../../../contexts/NotificationContext';
 
@@ -128,7 +128,7 @@ const MeasuresTab = ({ complaint }) => {
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Medidas de Resguardo</h3>
-                {user.permissions.medidas_puede_crear && (
+                {userHasPermission(user, 'medidas_puede_crear') && (
                     <Button onClick={handleAddClick} variant="primary">
                         <Plus className="w-4 h-4"/> Añadir Medida
                     </Button>
@@ -141,12 +141,12 @@ const MeasuresTab = ({ complaint }) => {
                              <div className="flex justify-between items-start">
                                 <p className="text-slate-800 flex-1">{m.text}</p>
                                 <div className="flex items-center">
-                                    {user.permissions.medidas_puede_crear && (
+                                    {userHasPermission(user, 'medidas_puede_crear') && (
                                         <Button variant="ghost" className="p-1 h-auto" title="Solicitar Documentación" onClick={() => { setMeasureForDocRequest(m); setIsDocRequestModalOpen(true); }}>
                                             <FileText className="w-4 h-4 text-blue-600"/>
                                         </Button>
                                     )}
-                                    {user.permissions.medidas_puede_editar && (
+                                    {userHasPermission(user, 'medidas_puede_editar') && (
                                         <Button variant="ghost" className="p-1 h-auto" onClick={() => handleEditClick(m)}><Edit className="w-4 h-4 text-slate-500"/></Button>
                                     )}
                                 </div>
@@ -158,7 +158,7 @@ const MeasuresTab = ({ complaint }) => {
                                         onChange={e => handleStatusChange(m.id, e.target.value)} 
                                         id={`measure-status-${m.id}`} 
                                         className="text-xs p-1"
-                                        disabled={!user.permissions.medidas_puede_cambiar_estado}
+                                        disabled={!userHasPermission(user, 'medidas_puede_cambiar_estado')}
                                     >
                                         {['Discusión', 'Aprobación', 'Implementación', 'Implementada', 'Seguimiento', 'Revisión'].map(s => <option key={s} value={s}>{s}</option>)}
                                     </Select>
