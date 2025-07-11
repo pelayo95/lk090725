@@ -11,11 +11,11 @@ import { uuidv4 } from '../../utils/uuid';
 const StatusDetailPage = ({ complaint, onBack, holidays }) => {
     const { complaints: allComplaints, updateComplaint, plans, companies } = useData();
     
-    // Se mantiene la lógica de buscar la versión más actualizada del caso desde el contexto
+    // Se busca la versión más actualizada del caso desde el contexto global
     const currentComplaint = allComplaints.find(c => c.id === complaint.id);
 
     // --- INICIO DE LA CORRECCIÓN ---
-    // Si el caso aún no se encuentra en el estado, mostramos un mensaje de carga.
+    // Si el caso aún no se encuentra o no está disponible, mostramos un estado de carga.
     // Esto previene el error al intentar acceder a propiedades de un objeto nulo.
     if (!currentComplaint) {
         return (
@@ -154,7 +154,7 @@ const StatusDetailPage = ({ complaint, onBack, holidays }) => {
                                                 <div key={field.id} className="grid grid-cols-3 gap-2">
                                                     <dt className="text-slate-500">{field.label}:</dt>
                                                     <dd className="col-span-2 text-slate-700 font-medium space-y-2">
-                                                        {value.map((person, i) => (
+                                                        {value.map((person) => (
                                                             <div key={person.id} className="text-xs p-2 border rounded-md bg-slate-50">
                                                                 <p><span className="font-semibold">Nombre:</span> {person.name || 'N/A'}</p>
                                                                 <p><span className="font-semibold">Cargo:</span> {person.position || 'N/A'}</p>
