@@ -6,7 +6,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, ConfirmationModal } from '../../components/common';
 import ComplaintForm from './ComplaintForm'; 
 import StatusCheckPage from './StatusCheckPage';
-import StatusDetailPage from './StatusDetailPage';
+import ComplaintStatusPortal from './ComplaintStatusPortal'; // Importar el nuevo portal
 
 const PublicPortal = () => {
     const [view, setView] = useState('selectCompany');
@@ -16,7 +16,7 @@ const PublicPortal = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { addToast } = useNotification();
 
-    const { companies, holidays } = useData();
+    const { companies } = useData();
     
     const activeCompanies = companies.filter(c => c.status === 'activo');
 
@@ -46,7 +46,6 @@ const PublicPortal = () => {
     };
 
     const copyToClipboard = (text) => {
-        // Usa un textarea temporal para copiar al portapapeles
         const textArea = document.createElement("textarea");
         textArea.value = text;
         document.body.appendChild(textArea);
@@ -98,7 +97,8 @@ const PublicPortal = () => {
             case 'statusCheck':
                 return <StatusCheckPage onLoginSuccess={handleStatusLoginSuccess} onBack={() => setView('selectCompany')} />;
             case 'statusDetail':
-                return <StatusDetailPage complaint={loggedInCase} onBack={() => { setView('selectCompany'); setLoggedInCase(null); }} holidays={holidays} />;
+                // Reemplazar StatusDetailPage con el nuevo ComplaintStatusPortal
+                return <ComplaintStatusPortal complaint={loggedInCase} onBack={() => { setView('selectCompany'); setLoggedInCase(null); }} />;
             case 'selectCompany':
             default:
                 return (
@@ -124,7 +124,7 @@ const PublicPortal = () => {
 
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-2xl mx-auto">
+            <div className="w-full max-w-3xl mx-auto"> {/* Aumentado el ancho para la nueva página */}
                 <div className="text-center mb-8">
                     <Shield className="inline-block w-16 h-16 text-indigo-600"/>
                     <h1 className="text-3xl font-bold text-slate-800">Canal de Denuncias</h1>
@@ -140,7 +140,7 @@ const PublicPortal = () => {
                         onConfirm={handleConfirmCompany}
                         title={`Confirmar Empresa: ${selectedCompany?.name}`}
                     >
-                        <p>Está a punto de ingresar una denuncia para la empresa **{selectedCompany?.name}**. Por favor, asegúrese de que esta es la empresa correcta. Una denuncia ingresada a una empresa incorrecta no podrá ser tramitada.</p>
+                        <p>Está a punto de ingresar una denuncia para la empresa **{selectedCompany?.name}**. Por favor, asegúrese de que esta es la empresa correcta.</p>
                         <p className="mt-2">Recuerde que este es un canal interno de denuncias y, si lo desea, puede ingresar su denuncia directamente en la Dirección del Trabajo.</p>
                     </ConfirmationModal>
                 )}
