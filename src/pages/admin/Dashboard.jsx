@@ -5,12 +5,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardAnalytics } from '../../hooks/useDashboardAnalytics';
 import { useAlerts } from '../../hooks/useAlerts';
 import { getUserNameById } from '../../utils/userUtils';
-import { Card, Input } from '../../components/common';
+import { Card, Input, Button } from '../../components/common';
 import AlertsPanel from '../../components/admin/AlertsPanel';
 import KPIStat from '../../components/admin/KPIStat';
 import WeeklyAgenda from '../../components/admin/WeeklyAgenda';
 import BarChart from '../../components/charts/BarChart';
-import { FolderOpen, AlertCircle, Search, CheckCircle, Clock } from 'lucide-react';
+import { FolderOpen, AlertCircle, Search, CheckCircle, Clock, ArrowUpDown, X } from 'lucide-react';
 
 const Dashboard = () => {
     const { complaints, companies, plans } = useData();
@@ -19,6 +19,7 @@ const Dashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'descending' });
 
     const userCompany = useMemo(() => companies.find(c => c.id === user.companyId), [companies, user]);
     const userPlan = useMemo(() => plans.find(p => p.id === userCompany?.planId), [plans, userCompany]);
@@ -43,6 +44,36 @@ const Dashboard = () => {
         startDate, 
         endDate
     });
+
+    const sortedComplaints = useMemo(() => {
+        let sortableItems = [...filteredComplaints];
+        if (sortConfig !== null) {
+            sortableItems.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [filteredComplaints, sortConfig]);
+
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const clearFilters = () => {
+        setSearchQuery('');
+        setStartDate('');
+        setEndDate('');
+    };
     
     const handleAlertClick = (caseId) => {
         updateUser(user.uid, { 
@@ -68,6 +99,11 @@ const Dashboard = () => {
         'En Investigación': 'bg-amber-100 text-amber-800',
         'Cerrada': 'bg-emerald-100 text-emerald-800'
     };
+    
+    const getSortIndicator = (key) => {
+        if (sortConfig.key !== key) return <ArrowUpDown className="w-3 h-3 ml-1 text-slate-400" />;
+        return sortConfig.direction === 'ascending' ? '▲' : '▼';
+    };
 
     return (
         <div className="space-y-6">
@@ -77,8 +113,8 @@ const Dashboard = () => {
             
             {features.filtrosAvanzados && (
               <Card>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="md:col-span-2">
                           <Input 
                               label="Buscar caso..." id="search" placeholder="ID, denunciante, palabra clave..."
                               value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
@@ -87,8 +123,11 @@ const Dashboard = () => {
                       <div>
                           <Input label="Fecha Inicio" id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
                       </div>
-                      <div>
+                      <div className="flex items-end gap-2">
                           <Input label="Fecha Fin" id="end-date" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                          <Button onClick={clearFilters} variant="secondary" className="h-10">
+                            <X className="w-4 h-4" />
+                          </Button>
                       </div>
                   </div>
               </Card>
@@ -116,15 +155,21 @@ const Dashboard = () => {
                     <table className="w-full text-sm text-left text-slate-500">
                         <thead className="text-xs text-slate-700 uppercase bg-slate-50">
                             <tr>
-                                <th scope="col" className="px-6 py-3">ID Caso</th>
-                                <th scope="col" className="px-6 py-3">Fecha Ingreso</th>
-                                <th scope="col" className="px-6 py-3">Estado</th>
+                                <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('id')}>
+                                    <div className="flex items-center">ID Caso {getSortIndicator('id')}</div>
+                                </th>
+                                <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('createdAt')}>
+                                    <div className="flex items-center">Fecha Ingreso {getSortIndicator('createdAt')}</div>
+                                </th>
+                                <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => requestSort('status')}>
+                                    <div className="flex items-center">Estado {getSortIndicator('status')}</div>
+                                </th>
                                 <th scope="col" className="px-6 py-3">Investigador(es)</th>
                                 <th scope="col" className="px-6 py-3">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredComplaints.map(c => (
+                            {sortedComplaints.map(c => (
                                 <tr key={c.id} className="bg-white border-b hover:bg-slate-50">
                                     <th scope="row" className="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">{c.id}</th>
                                     <td className="px-6 py-4">{new Date(c.createdAt).toLocaleDateString()}</td>
