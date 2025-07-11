@@ -66,4 +66,6 @@ export const allPermissions = {
   config_puede_gestionar_plantillas: "Gestionar plantillas de comunicación",
   config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
   config_puede_gestionar_declaracion: "Editar la declaración de veracidad del formulario",
+  config_puede_gestionar_portal_denunciado: "Configurar portal del denunciado",
+
 };
