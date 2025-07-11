@@ -176,4 +176,24 @@ const FilesTab = ({ complaint }) => {
                             <Select label="Categoría" value={formData.category} onChange={e => handleChange('category', e.target.value)} required>
                                 {orderedCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                             </Select>
-                            <TextArea label="Descripción" value={formData.description} onChange={
+                            <TextArea label="Descripción" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
+                        </>
+                    );
+                }}
+            </AddItemModal>
+            
+            {fileToDelete && (
+                <ConfirmationModal
+                    isOpen={!!fileToDelete}
+                    onClose={() => setFileToDelete(null)}
+                    onConfirm={confirmDeleteFile}
+                    title="Confirmar Eliminación"
+                >
+                    <p>¿Está seguro de que desea eliminar el archivo <span className="font-bold">{fileToDelete.fileName}</span>? Esta acción no se puede deshacer.</p>
+                </ConfirmationModal>
+            )}
+        </Card>
+    );
+};
+
+export default FilesTab;
