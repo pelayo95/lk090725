@@ -61,6 +61,8 @@ export const permissionToFeatureMap = {
     config_puede_gestionar_plantillas: 'comunicacionConDenunciante',
     config_puede_gestionar_notificaciones: 'kpisYMetricas',
     config_puede_gestionar_declaracion: 'constructorFormularios',
+    config_puede_gestionar_portal_denunciado: "Configurar portal del denunciado",
+
     
     soporte_puede_crear_ver_tickets: null, // No depende del plan
 };
