@@ -5,7 +5,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Card, Button, Select, TextArea, ConfirmationModal, Input } from '../../../components/common';
 import { AddItemModal } from '../../../components/common/AddItemModal';
-import { getUserNameById } from '../../../utils/userUtils';
+import { getUserNameById, userHasPermission } from '../../../utils/userUtils';
 import { uuidv4 } from '../../../utils/uuid';
 import { Plus, Edit, Trash, Paperclip } from 'lucide-react';
 
@@ -107,7 +107,7 @@ const FilesTab = ({ complaint }) => {
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Gestión de Archivos</h3>
-                {user.permissions.archivos_puede_subir && (
+                {userHasPermission(user, 'archivos_puede_subir') && (
                     <Button onClick={handleAddClick} variant="primary">
                         <Plus className="w-4 h-4"/> Añadir Archivo
                     </Button>
@@ -137,10 +137,10 @@ const FilesTab = ({ complaint }) => {
                                                 </p>
                                             </div>
                                              <div className="flex gap-1">
-                                                {user.permissions.archivos_puede_editar_clasificar && (
+                                                {userHasPermission(user, 'archivos_puede_editar_clasificar') && (
                                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => handleEditClick(file)}><Edit className="w-4 h-4 text-slate-500"/></Button>
                                                 )}
-                                                {user.permissions.archivos_puede_eliminar && (
+                                                {userHasPermission(user, 'archivos_puede_eliminar') && (
                                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => setFileToDelete(file)}><Trash className="w-4 h-4 text-red-500"/></Button>
                                                 )}
                                             </div>
@@ -176,24 +176,4 @@ const FilesTab = ({ complaint }) => {
                             <Select label="Categoría" value={formData.category} onChange={e => handleChange('category', e.target.value)} required>
                                 {orderedCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                             </Select>
-                            <TextArea label="Descripción" value={formData.description} onChange={e => handleChange('description', e.target.value)} required />
-                        </>
-                    );
-                }}
-            </AddItemModal>
-            
-            {fileToDelete && (
-                <ConfirmationModal
-                    isOpen={!!fileToDelete}
-                    onClose={() => setFileToDelete(null)}
-                    onConfirm={confirmDeleteFile}
-                    title="Confirmar Eliminación"
-                >
-                    <p>¿Está seguro de que desea eliminar el archivo <span className="font-bold">{fileToDelete.fileName}</span>? Esta acción no se puede deshacer.</p>
-                </ConfirmationModal>
-            )}
-        </Card>
-    );
-};
-
-export default FilesTab;
+                            <TextArea label="Descripción" value={formData.description} onChange={
