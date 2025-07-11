@@ -4,17 +4,18 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useData } from '../../../contexts/DataContext';
 import { Card, Button, Input, Select, TextArea, ConfirmationModal } from '../../../components/common';
 import { AddItemModal } from '../../../components/common/AddItemModal';
-import { Plus, Edit, Trash, Bell } from 'lucide-react';
+import { Plus, Edit, Trash } from 'lucide-react';
 import { uuidv4 } from '../../../utils/uuid';
 
 const NotificationSettings = () => {
-    const { user } = useAuth();
+    const { user, allUsers } = useAuth();
     const { notificationRules, setNotificationRules } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRule, setEditingRule] = useState(null);
     const [ruleToDelete, setRuleToDelete] = useState(null);
 
     const companyRules = notificationRules[user.companyId] || [];
+    const companyUsers = allUsers.filter(u => u.companyId === user.companyId);
 
     const handleSaveRule = (ruleData) => {
         const newCompanyRules = [...companyRules];
@@ -39,6 +40,13 @@ const NotificationSettings = () => {
     const triggerOptions = [
         { value: 'new_case_unassigned', label: 'Caso Nuevo Sin Asignar' },
         { value: 'management_due_date_approaching', label: 'Gestión por Vencer' },
+        { value: 'case_status_changed', label: 'Estado del Caso Cambia' },
+        { value: 'new_public_message', label: 'Nuevo Mensaje de Denunciante/Denunciado' },
+    ];
+
+    const recipientOptions = [
+        { value: 'all_admins', label: 'Todos los Administradores' },
+        { value: 'assigned_investigators', label: 'Investigadores Asignados al Caso' },
     ];
 
     return (
@@ -76,17 +84,55 @@ const NotificationSettings = () => {
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleSaveRule}
                 title={editingRule ? "Editar Regla" : "Crear Regla de Notificación"}
-                initialState={editingRule || { name: '', trigger: triggerOptions[0].value, message: '' }}
+                initialState={editingRule || { name: '', trigger: triggerOptions[0].value, message: '', recipients: ['all_admins'], conditions: {}, timing: {} }}
                 isEditing={!!editingRule}
             >
                 {(formData, handleChange) => (
                     <>
                         <Input label="Nombre de la Regla" value={formData.name} onChange={e => handleChange('name', e.target.value)} required />
-                        <Select label="Activador (Trigger)" value={formData.trigger} onChange={e => handleChange('trigger', e.target.value)}>
+                        <Select label="Activador (Cuando...)" value={formData.trigger} onChange={e => handleChange('trigger', e.target.value)}>
                             {triggerOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </Select>
+                        
+                        <div className="p-3 border rounded-md bg-slate-50 space-y-3">
+                            <h4 className="text-sm font-semibold text-slate-600">Condiciones (Opcional)</h4>
+                            {formData.trigger === 'new_case_unassigned' && (
+                                <Select label="Si la gravedad es:" value={formData.conditions?.severity || 'any'} onChange={e => handleChange('conditions', {...formData.conditions, severity: e.target.value})}>
+                                    <option value="any">Cualquiera</option>
+                                    <option value="Leve">Leve</option>
+                                    <option value="Moderado">Moderado</option>
+                                    <option value="Grave">Grave</option>
+                                </Select>
+                            )}
+                             {formData.trigger === 'case_status_changed' && (
+                                <Select label="Si el nuevo estado es:" value={formData.conditions?.newStatus || 'any'} onChange={e => handleChange('conditions', {...formData.conditions, newStatus: e.target.value})}>
+                                    <option value="any">Cualquiera</option>
+                                    <option value="Ingresada">Ingresada</option>
+                                    <option value="En Investigación">En Investigación</option>
+                                    <option value="Cerrada">Cerrada</option>
+                                </Select>
+                            )}
+                            <p className="text-xs text-slate-400">La regla solo se activará si se cumplen estas condiciones.</p>
+                        </div>
+
+                         <div className="p-3 border rounded-md bg-slate-50 space-y-3">
+                             <h4 className="text-sm font-semibold text-slate-600">Tiempos (Opcional)</h4>
+                             {formData.trigger === 'new_case_unassigned' && (
+                                 <Input type="number" label="Notificar después de (horas):" value={formData.timing?.delayHours || ''} onChange={e => handleChange('timing', {...formData.timing, delayHours: parseInt(e.target.value) || 0})} />
+                             )}
+                             {formData.trigger === 'management_due_date_approaching' && (
+                                 <Input type="number" label="Notificar (días) antes del vencimiento:" value={formData.timing?.daysBefore || ''} onChange={e => handleChange('timing', {...formData.timing, daysBefore: parseInt(e.target.value) || 0})} />
+                             )}
+                             <p className="text-xs text-slate-400">Define cuándo se debe enviar la notificación.</p>
+                        </div>
+
+                        <Select label="Destinatarios (Notificar a...)" value={formData.recipients} onChange={e => handleChange('recipients', Array.from(e.target.selectedOptions, option => option.value))} multiple>
+                            {recipientOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                             {companyUsers.map(u => <option key={u.uid} value={u.uid}>{u.name} (Usuario Específico)</option>)}
+                        </Select>
+
                         <TextArea label="Mensaje de la Notificación" value={formData.message} onChange={e => handleChange('message', e.target.value)} required rows={4} />
-                        <p className="text-xs text-slate-500">Puede usar placeholders como [CODIGO_CASO], [TEXTO_GESTION], [DIAS_RESTANTES].</p>
+                        <p className="text-xs text-slate-500">Placeholders: [CODIGO_CASO], [TEXTO_GESTION], [DIAS_RESTANTES].</p>
                     </>
                 )}
             </AddItemModal>
