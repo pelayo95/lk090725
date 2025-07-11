@@ -5,7 +5,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { Card, Button, Select, Input, TextArea, ConfirmationModal } from '../../../components/common';
 import { AddItemModal } from '../../../components/common/AddItemModal';
-import { getUserNameById } from '../../../utils/userUtils';
+import { getUserNameById, userHasPermission } from '../../../utils/userUtils';
 import { uuidv4 } from '../../../utils/uuid';
 import { Plus, Edit, Trash, User, Calendar } from 'lucide-react';
 
@@ -77,7 +77,7 @@ const ManagementsTab = ({ complaint }) => {
         <Card>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Plan de Gestión</h3>
-                {user.permissions.gestiones_puede_crear && (
+                {userHasPermission(user, 'gestiones_puede_crear') && (
                     <Button onClick={handleAddClick} variant="primary">
                         <Plus className="w-4 h-4"/> Añadir Gestión
                     </Button>
@@ -88,7 +88,7 @@ const ManagementsTab = ({ complaint }) => {
                 {complaint.managements.length > 0 ? (
                     complaint.managements.map(m => (
                         <div key={m.id} className={`p-3 rounded-lg flex items-start gap-4 transition-colors ${m.completed ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'} border`}>
-                            {user.permissions.gestiones_puede_marcar_completa ? (
+                            {userHasPermission(user, 'gestiones_puede_marcar_completa') ? (
                                 <input type="checkbox" checked={m.completed} onChange={() => handleToggleComplete(m.id)}
                                     className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-1 flex-shrink-0"
                                 />
@@ -104,10 +104,10 @@ const ManagementsTab = ({ complaint }) => {
                                 </div>
                             </div>
                             <div className="flex gap-1">
-                                {user.permissions.gestiones_puede_editar_asignar && (
+                                {userHasPermission(user, 'gestiones_puede_editar_asignar') && (
                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => handleEditClick(m)}><Edit className="w-4 h-4 text-slate-500"/></Button>
                                 )}
-                                {user.permissions.gestiones_puede_eliminar && (
+                                {userHasPermission(user, 'gestiones_puede_eliminar') && (
                                     <Button variant="ghost" className="p-1 h-auto" onClick={() => handleDeleteClick(m)}><Trash className="w-4 h-4 text-red-500"/></Button>
                                 )}
                             </div>
