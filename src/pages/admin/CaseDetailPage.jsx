@@ -13,7 +13,7 @@ import FilesTab from './case-details/FilesTab';
 import SanctionsTab from './case-details/SanctionsTab';
 import ChatTab from '../../components/shared/ChatTab';
 import AuditLogTab from './case-details/AuditLogTab';
-import { ChevronLeft, ClipboardList, Clock, Shield, ListChecks, Paperclip, Activity, MessageSquare, History } from 'lucide-react';
+import { ChevronLeft, ClipboardList, Clock, Shield, ListChecks, Paperclip, Activity, MessageSquare, History, UserCheck } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
 import { userHasPermission } from '../../utils/userUtils';
 
@@ -34,7 +34,7 @@ const CaseDetailPage = ({ caseId }) => {
     const userPlan = useMemo(() => plans.find(p => p.id === userCompany?.planId), [plans, userCompany]);
     const features = userPlan?.features || {};
     
-    if (!complaint) return <Card><h1 className="text-2xl font-bold text-slate-800 mb-6">Caso no encontrado</h1><a href="#admin/dashboard" className="text-indigo-600 hover:underline text-sm flex items-center gap-1"><ChevronLeft className="w-4 h-4"/> Volver al Dashboard</a></Card>
+    if (!complaint) return <Card><h1 className="text-2xl font-bold text-slate-800 mb-6">Caso no encontrado</h1><a href="#admin/dashboard" className="text-indigo-600 hover:underline text-sm flex items-center gap-1"><ChevronLeft className="w-4 h-4"/> Volver al Dashboard</a></Card>;
 
     const companyInvestigators = useMemo(() => {
         return allUsers.filter(u => u.companyId === complaint.companyId && (u.roleId.includes('admin') || u.roleId.includes('investigador')));
@@ -53,6 +53,12 @@ const CaseDetailPage = ({ caseId }) => {
         updateComplaint(complaint.id, { chatMessages: [...(complaint.chatMessages || []), newMessage], auditLog: newAuditLog }, user);
     };
     
+    const handleSendAccusedMessage = (text) => {
+        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje a un denunciado.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { accusedChatMessages: [...(complaint.accusedChatMessages || []), newMessage], auditLog: newAuditLog }, user);
+    };
+
     const handleSendInternalComment = (text) => {
         const newComment = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Añadió un comentario interno.`, userId: user.uid, timestamp: new Date().toISOString() }];
@@ -60,13 +66,14 @@ const CaseDetailPage = ({ caseId }) => {
     };
 
     const allTabs = [
-        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, permission: 'casos_ver_detalles', component: () => <DetailsTab complaint={complaint} onNavigate={setActiveTab} /> },
+        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, permission: 'casos_ver_detalles', component: () => <DetailsTab complaint={complaint} /> },
         { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, permission: 'timeline_puede_ver', component: () => <TimelineTab complaint={complaint} onNavigate={setActiveTab} /> },
         { id: 'measures', label: 'Medidas de Resguardo', icon: <Shield className="w-5 h-5"/>, permission: 'medidas_puede_ver', component: () => <MeasuresTab complaint={complaint} /> },
         { id: 'managements', label: 'Gestiones', icon: <ListChecks className="w-5 h-5"/>, permission: 'gestiones_puede_ver', component: () => <ManagementsTab complaint={complaint} /> },
         { id: 'files', label: 'Archivos', icon: <Paperclip className="w-5 h-5"/>, permission: 'archivos_puede_ver_descargar', component: () => <FilesTab complaint={complaint} /> },
         { id: 'sanctions', label: 'Sanciones', icon: <Activity className="w-5 h-5"/>, permission: 'sanciones_puede_ver', component: () => <SanctionsTab complaint={complaint} /> },
-        { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comunicacion_denunciante_puede_ver', component: () => <ChatTab title="Comunicaciones con Denunciante" messages={complaint.chatMessages || []} onSendMessage={handleSendPublicMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el denunciante..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" complaintId={complaint.id} /> },
+        { id: 'communications', label: 'Com. Denunciante', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comunicacion_denunciante_puede_ver', component: () => <ChatTab title="Comunicaciones con Denunciante" messages={complaint.chatMessages || []} onSendMessage={handleSendPublicMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el denunciante..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" complaintId={complaint.id} /> },
+        { id: 'accused_communications', label: 'Com. Denunciado', icon: <UserCheck className="w-5 h-5"/>, permission: 'comunicacion_denunciante_puede_ver', component: () => <ChatTab title="Comunicaciones con Denunciado(s)" messages={complaint.accusedChatMessages || []} onSendMessage={handleSendAccusedMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el/los denunciado(s)..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" complaintId={complaint.id} /> },
         { id: 'internal_comments', label: 'Comentarios Internos', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comentarios_internos_puede_ver', component: () => <ChatTab title="Comentarios Internos" messages={complaint.internalComments || []} onSendMessage={handleSendInternalComment} currentUserId={user.uid} placeholder="Escribe un comentario interno..." currentUserColor="bg-amber-100" otherUserColor="bg-slate-200" /> },
         { id: 'audit', label: 'Auditoría', icon: <History className="w-5 h-5"/>, permission: 'auditoria_puede_ver', component: () => <AuditLogTab auditLog={complaint.auditLog} /> }
     ];
