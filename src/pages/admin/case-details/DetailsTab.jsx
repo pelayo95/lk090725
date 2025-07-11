@@ -8,6 +8,7 @@ import { getNestedValue } from '../../../utils/objectUtils';
 import { uuidv4 } from '../../../utils/uuid';
 import { Edit, RotateCcw, Info } from 'lucide-react';
 import EditFieldModal from './EditFieldModal';
+import { userHasPermission } from '../../../utils/userUtils';
 
 const DetailsTab = ({ complaint }) => {
     const { getCompanyConfig } = useConfig();
@@ -46,7 +47,7 @@ const DetailsTab = ({ complaint }) => {
         const hasBeenEdited = editedValue !== undefined;
         let currentValue = hasBeenEdited ? editedValue : originalValue;
 
-        if (field.dataKey.startsWith('complainant.') && !user.permissions.casos_ver_datos_denunciante) {
+        if (field.dataKey.startsWith('complainant.') && !userHasPermission(user, 'casos_ver_datos_denunciante')) {
             return <span className="italic text-slate-500">Confidencial</span>;
         }
         
@@ -99,12 +100,12 @@ const DetailsTab = ({ complaint }) => {
                                                             <Info className="w-4 h-4 text-sky-500 cursor-help"/>
                                                         </Tooltip>
                                                     )}
-                                                    {user.permissions.casos_puede_editar_denuncia && field.editableOnManage && (
+                                                    {userHasPermission(user, 'casos_puede_editar_denuncia') && field.editableOnManage && (
                                                         <Button variant="ghost" className="text-xs p-1 h-auto" onClick={() => openEditModal({ ...field, currentValue: getNestedValue(complaint.editedData, field.dataKey) ?? getNestedValue(complaint.originalData, field.dataKey) })}>
                                                             <Edit className="w-3 h-3"/>
                                                         </Button>
                                                     )}
-                                                    {user.permissions.casos_puede_editar_denuncia && getNestedValue(complaint.editedData, field.dataKey) !== undefined && (
+                                                    {userHasPermission(user, 'casos_puede_editar_denuncia') && getNestedValue(complaint.editedData, field.dataKey) !== undefined && (
                                                          <Button variant="ghost" className="text-xs p-1 h-auto" onClick={() => handleRevert(field.dataKey, field.label)}>
                                                             <RotateCcw className="w-3 h-3 text-amber-600"/>
                                                         </Button>
