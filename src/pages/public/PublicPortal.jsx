@@ -7,22 +7,22 @@ import { Card, Button, ConfirmationModal } from '../../components/common';
 import ComplaintForm from './ComplaintForm'; 
 import StatusCheckPage from './StatusCheckPage';
 import ComplaintStatusPortal from './ComplaintStatusPortal';
+import AccusedLoginPage from './AccusedLoginPage';
+import AccusedPortal from './AccusedPortal';
 
 const PublicPortal = () => {
-    const { companies, complaints } = useData(); // Obtener la lista de denuncias aquí
+    const { companies, complaints } = useData();
     const [view, setView] = useState('selectCompany');
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [caseInfo, setCaseInfo] = useState(null);
     const [loggedInCase, setLoggedInCase] = useState(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { addToast } = useNotification();
+    const [loggedInAccused, setLoggedInAccused] = useState(null);
     
     const activeCompanies = companies.filter(c => c.status === 'activo');
 
-    // --- INICIO DE LA CORRECCIÓN ---
-    // Este efecto mantiene el `loggedInCase` sincronizado con la fuente de datos global.
-    // Si se envía un mensaje o se sube un archivo, `complaints` cambia y este efecto
-    // actualizará `loggedInCase`, provocando que la nueva información se pase al portal de estado.
+    // Efecto para mantener el estado del caso sincronizado con el contexto global.
     useEffect(() => {
         if (loggedInCase) {
             const updatedCase = complaints.find(c => c.id === loggedInCase.id);
@@ -30,9 +30,7 @@ const PublicPortal = () => {
                 setLoggedInCase(updatedCase);
             }
         }
-    }, [complaints]); // Se ejecuta cada vez que la lista de denuncias cambia.
-    // --- FIN DE LA CORRECCIÓN ---
-
+    }, [complaints, loggedInCase?.id]);
 
     const handleCompanySelect = (company) => {
         setSelectedCompany(company);
@@ -59,16 +57,22 @@ const PublicPortal = () => {
         setView('statusDetail');
     };
 
+    const handleAccusedLoginSuccess = (complaint, accusedPerson) => {
+        setLoggedInCase(complaint);
+        setLoggedInAccused(accusedPerson);
+        setView('accusedPortal');
+    };
+
     const copyToClipboard = (text) => {
         const textArea = document.createElement("textarea");
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.select();
-        try {
-            document.execCommand('copy');
-            addToast(`'${text}' copiado al portapapeles`, 'success');
-        } catch (err) {
-            addToast('Error al copiar', 'error');
+        try { 
+            document.execCommand('copy'); 
+            addToast(`'${text}' copiado al portapapeles`, 'success'); 
+        } catch (err) { 
+            addToast('Error al copiar', 'error'); 
         }
         document.body.removeChild(textArea);
     };
@@ -83,7 +87,6 @@ const PublicPortal = () => {
                         <CheckCircle className="inline-block w-16 h-16 text-emerald-500"/>
                         <h2 className="text-2xl font-bold text-slate-800 mt-4">Denuncia Enviada Exitosamente</h2>
                         <p className="text-slate-600 mt-2 mb-6">Guarde sus credenciales en un lugar seguro. Las necesitará para hacer seguimiento de su caso.</p>
-                        
                         <div className="mt-4 space-y-4 text-left bg-slate-100 p-6 rounded-lg inline-block w-full max-w-md">
                             <div>
                                 <label className="text-sm font-medium text-slate-600">Código del Caso</label>
@@ -104,7 +107,6 @@ const PublicPortal = () => {
                                 </div>
                             </div>
                         </div>
-
                         <Button onClick={() => setView('selectCompany')} className="mt-8">Volver al Inicio</Button>
                     </Card>
                 );
@@ -112,6 +114,10 @@ const PublicPortal = () => {
                 return <StatusCheckPage onLoginSuccess={handleStatusLoginSuccess} onBack={() => setView('selectCompany')} />;
             case 'statusDetail':
                 return <ComplaintStatusPortal complaint={loggedInCase} onBack={() => { setView('selectCompany'); setLoggedInCase(null); }} />;
+            case 'accusedLogin':
+                return <AccusedLoginPage onLoginSuccess={handleAccusedLoginSuccess} onBack={() => setView('selectCompany')} />;
+            case 'accusedPortal':
+                return <AccusedPortal complaint={loggedInCase} accusedPerson={loggedInAccused} onBack={() => { setView('selectCompany'); setLoggedInCase(null); setLoggedInAccused(null); }} />;
             case 'selectCompany':
             default:
                 return (
@@ -126,9 +132,10 @@ const PublicPortal = () => {
                                 </button>
                             ))}
                         </div>
-                         <div className="mt-6 text-center flex justify-center gap-6">
+                         <div className="mt-6 text-center flex justify-center gap-4 flex-wrap">
                             <a href="#admin" className="text-sm text-indigo-600 hover:underline">Acceso Administradores</a>
-                            <a href="#public/status" onClick={(e) => { e.preventDefault(); setView('statusCheck')}} className="text-sm text-indigo-600 hover:underline">Seguimiento de caso</a>
+                            <a href="#public/status" onClick={(e) => { e.preventDefault(); setView('statusCheck')}} className="text-sm text-indigo-600 hover:underline">Seguimiento de Denuncia</a>
+                            <a href="#public/accused" onClick={(e) => { e.preventDefault(); setView('accusedLogin')}} className="text-sm text-indigo-600 hover:underline">Portal del Denunciado</a>
                         </div>
                     </Card>
                 );
@@ -143,11 +150,9 @@ const PublicPortal = () => {
                     <h1 className="text-3xl font-bold text-slate-800">Canal de Denuncias</h1>
                     <p className="text-slate-600 mt-2">Un espacio seguro y confidencial para informar situaciones.</p>
                 </div>
-
                 {renderContent()}
-                
                 {isConfirmModalOpen && (
-                     <ConfirmationModal
+                    <ConfirmationModal
                         isOpen={isConfirmModalOpen}
                         onClose={handleCancelCompany}
                         onConfirm={handleConfirmCompany}
