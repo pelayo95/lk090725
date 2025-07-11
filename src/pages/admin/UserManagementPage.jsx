@@ -5,13 +5,16 @@ import { useData } from '../../contexts/DataContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, Input, Select, ConfirmationModal } from '../../components/common';
 import { AddItemModal } from '../../components/common/AddItemModal';
-import { Plus, Trash } from 'lucide-react';
-import { uuidv4 } from '../../utils/uuid'; // Ruta corregida
+import { Plus, Trash, Edit } from 'lucide-react';
+import { uuidv4 } from '../../utils/uuid';
+import UserEditModal from './settings/UserEditModal'; // Importar el nuevo modal
 
 const UserManagementPage = () => {
-    const { user, allUsers, setAllUsers } = useAuth();
+    const { user, allUsers, setAllUsers, updateUser } = useAuth();
     const { roles } = useData();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
     const [userToDelete, setUserToDelete] = useState(null);
     const { addToast } = useNotification();
     
@@ -27,7 +30,18 @@ const UserManagementPage = () => {
         };
         setAllUsers(prev => [...prev, newUser]);
         addToast("Usuario creado con éxito", "success");
-        setIsModalOpen(false);
+        setIsCreateModalOpen(false);
+    };
+
+    const handleEditClick = (userToEdit) => {
+        setEditingUser(userToEdit);
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateUser = (userId, updatedData) => {
+        updateUser(userId, updatedData);
+        addToast("Usuario actualizado con éxito", "success");
+        setIsEditModalOpen(false);
     };
 
     const handleDeleteUser = () => {
@@ -47,7 +61,7 @@ const UserManagementPage = () => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-slate-800">Gestión de Usuarios</h1>
                 {user.permissions.config_usuarios_puede_crear && (
-                    <Button onClick={() => setIsModalOpen(true)} variant="primary">
+                    <Button onClick={() => setIsCreateModalOpen(true)} variant="primary">
                         <Plus className="w-4 h-4"/> Crear Usuario
                     </Button>
                 )}
@@ -68,7 +82,12 @@ const UserManagementPage = () => {
                                 <td className="px-6 py-4 font-medium text-slate-900">{u.name}</td>
                                 <td className="px-6 py-4">{u.email}</td>
                                 <td className="px-6 py-4 capitalize">{getRoleName(u.roleId)}</td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-6 py-4 text-right flex justify-end gap-1">
+                                    {user.permissions.config_usuarios_puede_asignar_rol && (
+                                        <Button variant="ghost" className="text-slate-600" onClick={() => handleEditClick(u)}>
+                                            <Edit className="w-4 h-4" />
+                                        </Button>
+                                    )}
                                     {user.permissions.config_usuarios_puede_eliminar && u.uid !== user.uid && (
                                         <Button variant="ghost" className="text-red-500" onClick={() => setUserToDelete(u)}>
                                             <Trash className="w-4 h-4" />
@@ -81,8 +100,8 @@ const UserManagementPage = () => {
                  </table>
             </Card>
             <AddItemModal
-                 isOpen={isModalOpen}
-                 onClose={() => setIsModalOpen(false)}
+                 isOpen={isCreateModalOpen}
+                 onClose={() => setIsCreateModalOpen(false)}
                  onSubmit={handleCreateUser}
                  title="Crear Nuevo Usuario"
                  initialState={{ name: '', email: '', roleId: companyRoles[0]?.id || '', password: 'password' }}
@@ -102,6 +121,17 @@ const UserManagementPage = () => {
                     </>
                 )}
             </AddItemModal>
+            
+            {isEditModalOpen && (
+                <UserEditModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSave={handleUpdateUser}
+                    user={editingUser}
+                    roles={companyRoles}
+                />
+            )}
+
             {userToDelete && (
                 <ConfirmationModal
                     isOpen={!!userToDelete}
