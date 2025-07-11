@@ -15,6 +15,7 @@ import ChatTab from '../../components/shared/ChatTab';
 import AuditLogTab from './case-details/AuditLogTab';
 import { ChevronLeft, ClipboardList, Clock, Shield, ListChecks, Paperclip, Activity, MessageSquare, History } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
+import { userHasPermission } from '../../utils/userUtils';
 
 const CaseDetailPage = ({ caseId }) => {
     const { complaints, updateComplaint, companies, plans } = useData();
@@ -59,18 +60,18 @@ const CaseDetailPage = ({ caseId }) => {
     };
 
     const allTabs = [
-        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, permission: 'casos_ver_detalles', component: () => <DetailsTab complaint={complaint} /> },
-        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, permission: 'timeline_puede_ver', component: () => <TimelineTab complaint={complaint} /> },
+        { id: 'details', label: 'Detalles', icon: <ClipboardList className="w-5 h-5"/>, permission: 'casos_ver_detalles', component: () => <DetailsTab complaint={complaint} onNavigate={setActiveTab} /> },
+        { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, permission: 'timeline_puede_ver', component: () => <TimelineTab complaint={complaint} onNavigate={setActiveTab} /> },
         { id: 'measures', label: 'Medidas de Resguardo', icon: <Shield className="w-5 h-5"/>, permission: 'medidas_puede_ver', component: () => <MeasuresTab complaint={complaint} /> },
         { id: 'managements', label: 'Gestiones', icon: <ListChecks className="w-5 h-5"/>, permission: 'gestiones_puede_ver', component: () => <ManagementsTab complaint={complaint} /> },
         { id: 'files', label: 'Archivos', icon: <Paperclip className="w-5 h-5"/>, permission: 'archivos_puede_ver_descargar', component: () => <FilesTab complaint={complaint} /> },
         { id: 'sanctions', label: 'Sanciones', icon: <Activity className="w-5 h-5"/>, permission: 'sanciones_puede_ver', component: () => <SanctionsTab complaint={complaint} /> },
-        { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comunicacion_denunciante_puede_ver', component: () => <ChatTab title="Comunicaciones con Denunciante" messages={complaint.chatMessages || []} onSendMessage={handleSendPublicMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el denunciante..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" /> },
+        { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comunicacion_denunciante_puede_ver', component: () => <ChatTab title="Comunicaciones con Denunciante" messages={complaint.chatMessages || []} onSendMessage={handleSendPublicMessage} currentUserId={user.uid} placeholder="Escribe un mensaje para el denunciante..." currentUserColor="bg-indigo-100" otherUserColor="bg-slate-200" complaintId={complaint.id} /> },
         { id: 'internal_comments', label: 'Comentarios Internos', icon: <MessageSquare className="w-5 h-5"/>, permission: 'comentarios_internos_puede_ver', component: () => <ChatTab title="Comentarios Internos" messages={complaint.internalComments || []} onSendMessage={handleSendInternalComment} currentUserId={user.uid} placeholder="Escribe un comentario interno..." currentUserColor="bg-amber-100" otherUserColor="bg-slate-200" /> },
         { id: 'audit', label: 'Auditoría', icon: <History className="w-5 h-5"/>, permission: 'auditoria_puede_ver', component: () => <AuditLogTab auditLog={complaint.auditLog} /> }
     ];
 
-    const visibleTabs = allTabs.filter(tab => user.permissions[tab.permission]);
+    const visibleTabs = allTabs.filter(tab => userHasPermission(user, tab.permission));
     const ActiveComponent = visibleTabs.find(tab => tab.id === activeTab)?.component || (() => null);
 
     const handleSeverityChange = (e) => updateComplaint(caseId, { severity: e.target.value }, user);
@@ -92,12 +93,12 @@ const CaseDetailPage = ({ caseId }) => {
                     </Select>
                 </div>
             </div>
-            {user.permissions.casos_puede_asignar_investigadores && (
+            {userHasPermission(user, 'casos_puede_asignar_investigadores') && (
                 <Card className="p-4">
                     <AssignInvestigators complaint={complaint} investigators={companyInvestigators}/>
                 </Card>
             )}
-            {user.permissions.casos_puede_definir_flujo && (
+            {userHasPermission(user, 'casos_puede_definir_flujo') && (
               <Card className="p-4 bg-slate-50">
                   <InvestigationFlowManager complaint={complaint} onUpdate={handleInvestigationFlowChange} />
               </Card>
