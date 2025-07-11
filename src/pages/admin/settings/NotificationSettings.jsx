@@ -132,7 +132,12 @@ const NotificationSettings = () => {
                         </Select>
 
                         <TextArea label="Mensaje de la Notificación" value={formData.message} onChange={e => handleChange('message', e.target.value)} required rows={4} />
-                        <p className="text-xs text-slate-500">Placeholders: [CODIGO_CASO], [TEXTO_GESTION], [DIAS_RESTANTES].</p>
+                        {/* --- TEXTO DE AYUDA ACTUALIZADO --- */}
+                        <p className="text-xs text-slate-500">
+                            <b>Placeholders generales:</b> [CODIGO_CASO], [ESTADO_CASO], [GRAVEDAD_CASO], [TIPO_CONDUCTA], [NOMBRES_INVESTIGADORES].
+                            <br/>
+                            <b>Para gestiones:</b> [NOMBRE_GESTION], [FECHA_VENCIMIENTO_GESTION], [DIAS_RESTANTES].
+                        </p>
                     </>
                 )}
             </AddItemModal>
