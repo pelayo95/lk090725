@@ -7,7 +7,7 @@ import { Card, Button, Input, Select, ConfirmationModal } from '../../components
 import { AddItemModal } from '../../components/common/AddItemModal';
 import { Plus, Trash, Edit } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
-import UserEditModal from './settings/UserEditModal'; // Importar el nuevo modal
+import UserEditModal from './UserEditModal'; // Importar el nuevo modal
 
 const UserManagementPage = () => {
     const { user, allUsers, setAllUsers, updateUser } = useAuth();
