@@ -2,20 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
-    Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy, Menu, X
+    Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy, Menu
 } from 'lucide-react';
 import { userHasPermission } from '../../utils/userUtils';
 
 const AdminLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const [activeView, setActiveView] = useState('dashboard');
-    // --- INICIO DE LA MODIFICACIÓN: Estado para controlar el menú móvil ---
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleNavigation = (view) => {
         setActiveView(view);
         window.location.hash = `#admin/${view}`;
-        setIsSidebarOpen(false); // Cierra el menú al navegar
+        setIsSidebarOpen(false); 
     }
 
     useEffect(() => {
@@ -41,7 +40,7 @@ const AdminLayout = ({ children }) => {
                 <Briefcase className="w-8 h-8 text-indigo-600"/>
                 <span className="ml-2 font-bold text-lg text-slate-800">Plataforma</span>
             </div>
-            <nav className="flex-1 px-2 py-4 space-y-1">
+            <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
                 {navItems.map(item => {
                     if (!userHasPermission(user, item.permission)) return null;
                     return (
@@ -74,40 +73,36 @@ const AdminLayout = ({ children }) => {
     );
 
     return (
-        <div className="flex h-screen bg-slate-100">
-            {/* --- INICIO DE LA MODIFICACIÓN: Lógica del menú responsivo --- */}
-
-            {/* Menú para Escritorio (visible en pantallas grandes) */}
-            <aside className="hidden lg:flex lg:flex-col w-64 bg-white border-r border-slate-200 flex-shrink-0">
-                <SidebarContent />
-            </aside>
-
-            {/* Menú para Móvil (superpuesto, se muestra con `isSidebarOpen`) */}
-            <div className={`fixed inset-0 z-40 flex lg:hidden transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <aside className="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
+        <div className="relative min-h-screen lg:flex">
+            {/* --- MENÚ LATERAL PARA MÓVIL (SUPERPUESTO) --- */}
+            <div 
+                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            >
+                <div className="flex flex-col h-full">
                     <SidebarContent />
-                </aside>
-                {/* Fondo oscuro para cerrar el menú */}
-                <div className="flex-1 bg-black/50" onClick={() => setIsSidebarOpen(false)}></div>
+                </div>
+            </div>
+            {isSidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
+
+            {/* --- MENÚ LATERAL PARA ESCRITORIO (FIJO) --- */}
+            <div className="hidden lg:flex lg:flex-col w-64 flex-shrink-0 bg-white border-r">
+                <SidebarContent />
             </div>
 
+            {/* --- CONTENIDO PRINCIPAL Y BARRA SUPERIOR MÓVIL --- */}
             <div className="flex-1 flex flex-col">
-                {/* Barra superior solo para móvil con el botón de hamburguesa */}
-                <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4">
+                 <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
                     <button onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-700"/>
                     </button>
                     <div className="flex-1 text-center font-bold text-lg text-slate-800">Plataforma</div>
                 </header>
-
-                {/* Contenido Principal */}
-                <main className="flex-1 overflow-y-auto">
-                    <div className="p-4 sm:p-8">
-                        {React.cloneElement(children, { activeView, setActiveView })}
+                <main className="flex-1">
+                    <div className="p-4 sm:p-6 lg:p-8">
+                        {children}
                     </div>
                 </main>
             </div>
-             {/* --- FIN DE LA MODIFICACIÓN --- */}
         </div>
     );
 };
