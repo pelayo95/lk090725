@@ -7,7 +7,7 @@ import { Card, Button, ConfirmationModal } from '../../components/common';
 import ComplaintForm from './ComplaintForm'; 
 import ComplaintStatusPortal from './ComplaintStatusPortal';
 import AccusedPortal from './AccusedPortal';
-import UnifiedLoginPage from './UnifiedLoginPage'; // Importar la nueva página de login
+import UnifiedLoginPage from './UnifiedLoginPage';
 
 const PublicPortal = () => {
     const { companies, complaints } = useData();
