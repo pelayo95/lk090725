@@ -15,7 +15,7 @@ const AdminLayout = ({ children }) => {
         setActiveView(view);
         window.location.hash = `#admin/${view}`;
         setIsSidebarOpen(false); 
-    }
+    };
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -73,25 +73,24 @@ const AdminLayout = ({ children }) => {
     );
 
     return (
-        <div className="relative min-h-screen lg:flex">
-            {/* --- MENÚ LATERAL PARA MÓVIL (SUPERPUESTO) --- */}
-            <div 
-                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        <div className="min-h-screen bg-slate-100">
+            {/* --- INICIO DE LA MODIFICACIÓN --- */}
+
+            {/* Menú lateral, su visibilidad y posición cambian según el tamaño de la pantalla */}
+            <aside 
+                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     <SidebarContent />
                 </div>
-            </div>
+            </aside>
+            
+            {/* Fondo oscuro para cerrar el menú en móvil */}
             {isSidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
 
-            {/* --- MENÚ LATERAL PARA ESCRITORIO (FIJO) --- */}
-            <div className="hidden lg:flex lg:flex-col w-64 flex-shrink-0 bg-white border-r">
-                <SidebarContent />
-            </div>
-
-            {/* --- CONTENIDO PRINCIPAL Y BARRA SUPERIOR MÓVIL --- */}
-            <div className="flex-1 flex flex-col">
-                 <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
+            {/* Contenido Principal: se le aplica un margen a la izquierda SOLO en pantallas grandes */}
+            <div className="lg:ml-64">
+                <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
                     <button onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-700"/>
                     </button>
@@ -103,6 +102,8 @@ const AdminLayout = ({ children }) => {
                     </div>
                 </main>
             </div>
+
+            {/* --- FIN DE LA MODIFICACIÓN --- */}
         </div>
     );
 };
