@@ -2,13 +2,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card, Select, Button, Modal } from '../../components/common'; // Button y Modal añadidos
+import { Card, Select, Button, Modal } from '../../components/common';
 import AssignInvestigators from './case-details/AssignInvestigators';
 import InvestigationFlowManager from './case-details/InvestigationFlowManager';
 import MeasuresTab from './case-details/MeasuresTab';
 import SanctionsTab from './case-details/SanctionsTab';
 import AuditLogTab from './case-details/AuditLogTab';
-import { ChevronLeft, Clock, Shield, Activity, MessageSquare, History, Folder, ListChecks } from 'lucide-react'; // Nuevos íconos
+import { ChevronLeft, Folder, ListChecks, Shield, Activity, MessageSquare, History } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
 import { userHasPermission } from '../../utils/userUtils';
 
@@ -18,10 +18,10 @@ import TimelineManagementsTab from './case-details/TimelineManagementsTab';
 import CommunicationsTab from './case-details/CommunicationsTab';
 
 const CaseDetailPage = ({ caseId }) => {
-    const { complaints, updateComplaint, companies, plans } = useData();
+    const { complaints, updateComplaint } = useData();
     const { user, allUsers, updateUser } = useAuth();
-    const [activeTab, setActiveTab] = useState('expediente'); // Pestaña por defecto
-    const [isAuditModalOpen, setIsAuditModalOpen] = useState(false); // Estado para el modal de auditoría
+    const [activeTab, setActiveTab] = useState('expediente');
+    const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
     const complaint = complaints.find(c => c.id === caseId);
 
     useEffect(() => {
@@ -35,7 +35,7 @@ const CaseDetailPage = ({ caseId }) => {
 
     const companyInvestigators = useMemo(() => {
         return allUsers.filter(u => u.companyId === complaint.companyId && (u.roleId.includes('admin') || u.roleId.includes('investigador')));
-    }, [allUsers, complaint]);
+    }, [allUsers, complaint.companyId]);
 
     const severityColors = {
         'Leve': 'bg-emerald-100 text-emerald-800 border-emerald-300',
@@ -44,9 +44,23 @@ const CaseDetailPage = ({ caseId }) => {
         'Sin Asignar': 'bg-slate-100 text-slate-800 border-slate-300'
     };
 
-    const handleSendPublicMessage = (text) => { /* ... */ };
-    const handleSendAccusedMessage = (text) => { /* ... */ };
-    const handleSendInternalComment = (text) => { /* ... */ };
+    const handleSendPublicMessage = (text) => {
+        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje al denunciante.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { chatMessages: [...(complaint.chatMessages || []), newMessage], auditLog: newAuditLog }, user);
+    };
+    
+    const handleSendAccusedMessage = (text) => {
+        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje a un denunciado.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { accusedChatMessages: [...(complaint.accusedChatMessages || []), newMessage], auditLog: newAuditLog }, user);
+    };
+
+    const handleSendInternalComment = (text) => {
+        const newComment = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+        const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Añadió un comentario interno.`, userId: user.uid, timestamp: new Date().toISOString() }];
+        updateComplaint(complaint.id, { internalComments: [...(complaint.internalComments || []), newComment], auditLog: newAuditLog }, user);
+    };
 
     // --- BARRA DE PESTAÑAS REESTRUCTURADA ---
     const allTabs = [
@@ -77,7 +91,6 @@ const CaseDetailPage = ({ caseId }) => {
                     <Select id="severity" value={complaint.severity} onChange={handleSeverityChange}>
                         <option>Sin Asignar</option><option>Leve</option><option>Moderado</option><option>Grave</option>
                     </Select>
-                    {/* --- BOTÓN DE AUDITORÍA --- */}
                     {userHasPermission(user, 'auditoria_puede_ver') && (
                         <Button variant="secondary" onClick={() => setIsAuditModalOpen(true)}>
                             <History className="w-4 h-4"/> Ver Auditoría
@@ -111,7 +124,6 @@ const CaseDetailPage = ({ caseId }) => {
                 <ActiveComponent />
             </div>
 
-            {/* --- MODAL PARA LA AUDITORÍA --- */}
             <Modal isOpen={isAuditModalOpen} onClose={() => setIsAuditModalOpen(false)} title={`Auditoría del Caso: ${caseId}`}>
                 <AuditLogTab auditLog={complaint.auditLog} />
             </Modal>
