@@ -37,6 +37,7 @@ const defaultInvestigatorPermissions = {
   gestiones_puede_editar_asignar: true,
   gestiones_puede_marcar_completa: true,
   gestiones_puede_eliminar: true,
+  entrevistas_puede_gestionar: true,
   archivos_puede_ver_descargar: true,
   archivos_puede_subir: true,
   archivos_puede_editar_clasificar: true,
@@ -106,47 +107,51 @@ export const initialData = {
      {
        id: "CASO-001", companyId: "empresa-a", password: "123", status: "Cerrada", severity: "Leve",
        createdAt: "2025-07-10T09:00:00Z", closedAt: "2025-07-10T10:00:00Z", investigatorIds: ["adminA1", "investigadorA1"],
-       receptionType: 'interna', internalAction: 'investigar', originalData: { case: { type: "Violencia en el Trabajo" }, complainant: { name: "Carlos Soto" }, accusedPersons: [{id: uuidv4(), name: 'Supervisor X', position: 'Supervisor', dependency: 'Gerencia', employeeType: 'Trabajador de mi misma empresa', employerName: ''}] },
+       receptionType: 'interna', internalAction: 'investigar', 
+       originalData: { 
+         case: { type: "Violencia en el Trabajo" }, 
+         complainant: { name: "Carlos Soto" }, 
+         accusedPersons: [{
+           id: uuidv4(), 
+           name: 'Supervisor X', 
+           position: 'Supervisor', 
+           dependency: 'Gerencia', 
+           employeeType: 'Trabajador de mi misma empresa', 
+           employerName: '',
+           accessCode: null,
+           password: null 
+         }] 
+       },
        editedData: {}, 
        managements: [], 
-       safeguardMeasures: [
-         {
-           id: uuidv4(),
-           text: "Prohibición de contacto entre las partes.",
-           status: "Implementada",
-           assignedTo: "adminA1",
-           startDate: "2025-07-11",
-           endDate: "2025-08-11",
-           description: "Se ha instruido a ambas partes a no tener contacto por ningún medio durante el proceso de investigación."
-         }
-       ], 
+       safeguardMeasures: [], 
        internalComments: [], 
        auditLog: [], 
        timelineProgress: {}, 
        caseFiles: [], 
        sanctions: [], 
        otherMeasures: [],
-       chatMessages: [ { id: uuidv4(), text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-07-10T10:00:00Z' } ]
+       chatMessages: [ 
+         { 
+           id: 'msg1', text: 'Esta es la descripción inicial de mi denuncia, necesito ayuda.', 
+           senderId: 'complainant', senderName: 'Denunciante', timestamp: '2025-07-10T09:05:00Z' 
+         },
+         { 
+           id: 'msg2', text: 'Hemos recibido su caso, en breve nos pondremos en contacto.', 
+           senderId: 'adminA1', senderName: 'Admin A', timestamp: '2025-07-10T10:00:00Z',
+           replyTo: { id: 'msg1', senderName: 'Denunciante', text: 'Esta es la descripción inicial de mi denuncia, necesito ayuda.' }
+         } 
+       ],
+       accusedChatMessages: [],
+       accusedWitnesses: [],
+       interviews: [],
      },
   ],
   configurations: {
     "empresa-a": defaultConfig,
   },
   communicationTemplates: {
-    "empresa-a": [
-      {
-        id: "tpl_recepcion",
-        name: "Confirmación de Recepción",
-        triggerPoint: "al-recibir-denuncia",
-        content: "Estimado/a denunciante,\n\nHemos recibido correctamente su denuncia con el código de caso [CODIGO_CASO].\n\nNuestro equipo la revisará a la brevedad y se pondrá en contacto con usted por este medio para informarle sobre los próximos pasos.\n\nAtentamente,\nEl Equipo de Gestión."
-      },
-      {
-        id: "tpl_cierre",
-        name: "Notificación de Cierre de Caso",
-        triggerPoint: "al-cerrar-caso",
-        content: "Estimado/a denunciante,\n\nLe informamos que la investigación asociada a su caso [CODIGO_CASO] ha concluido.\n\nSe han tomado las medidas correspondientes de acuerdo a nuestro reglamento interno. Agradecemos su confianza en nuestro canal de denuncias.\n\nAtentamente,\nEl Equipo de Gestión."
-      }
-    ]
+    "empresa-a": []
   },
   roles: {
     "empresa-a": [
