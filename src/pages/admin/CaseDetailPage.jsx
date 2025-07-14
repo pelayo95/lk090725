@@ -97,20 +97,18 @@ const CaseDetailPage = ({ caseId }) => {
                 </div>
             </div>
 
-            {/* --- INICIO DE LA MODIFICACIÓN --- */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {userHasPermission(user, 'casos_puede_asignar_investigadores') && (
-                    <Card className="p-4">
+                    <Card className="p-4 h-full">
                         <AssignInvestigators complaint={complaint} investigators={companyInvestigators}/>
                     </Card>
                 )}
                 {userHasPermission(user, 'casos_puede_definir_flujo') && (
-                  <Card className="p-4">
+                  <Card className="p-4 h-full">
                       <InvestigationFlowManager complaint={complaint} onUpdate={handleInvestigationFlowChange} />
                   </Card>
                 )}
             </div>
-            {/* --- FIN DE LA MODIFICACIÓN --- */}
 
             <div className="border-b border-slate-200">
                 <nav className="-mb-px flex space-x-6 overflow-x-auto">
