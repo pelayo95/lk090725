@@ -17,6 +17,14 @@ export const allFeatures = [
             { key: "canalComunicacionDenunciante", label: "Canal de Comunicación", description: "Un chat seguro y directo con los gestores del caso para solicitar información o aportar nuevos antecedentes." }
         ]
     },
+    // --- NUEVA SECCIÓN AÑADIDA ---
+    {
+        section: "Portales Adicionales",
+        module: "Acceso para Involucrados",
+        features: [
+            { key: "portalDenunciado", label: "Portal del Denunciado", description: "Activa un portal de acceso para que las personas denunciadas puedan ver el estado del caso, comunicarse y aportar antecedentes." }
+        ]
+    },
     {
         section: "Portal de administración",
         module: "Dashboard Principal",
@@ -35,6 +43,8 @@ export const allFeatures = [
             { key: "edicionDenuncias", label: "Edición de Denuncias", description: "Los campos de la denuncia pueden ser editados por los gestores. Se mantiene un registro del valor original, que se puede consultar y revertir." },
             { key: "definicionFlujo", label: "Definición de Flujo", description: "Panel para configurar el flujo de la investigación: 'Recibida internamente' o 'Notificada por DT'." },
             { key: "planGestion", label: "Plan de Gestión", description: "Creación, asignación y seguimiento de tareas específicas con fechas de vencimiento." },
+            // --- NUEVA FUNCIONALIDAD AÑADIDA ---
+            { key: "gestionEntrevistas", label: "Gestión de Entrevistas", description: "Permite agendar entrevistas, tomar notas y generar invitaciones de calendario (.ics)." },
             { key: "gestionArchivos", label: "Gestión de Archivos", description: "Permite subir y clasificar documentos asociados al caso." },
             { key: "gestionSanciones", label: "Gestión de Sanciones", description: "Permite registrar y gestionar las sanciones aplicadas en un caso." },
             { key: "lineaTiempoDinamica", label: "Línea de Tiempo Dinámica", description: "El timeline se adapta al flujo definido y permite marcar etapas como completadas." },
