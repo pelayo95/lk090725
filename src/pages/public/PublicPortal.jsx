@@ -5,10 +5,9 @@ import { useData } from '../../contexts/DataContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Card, Button, ConfirmationModal } from '../../components/common';
 import ComplaintForm from './ComplaintForm'; 
-import StatusCheckPage from './StatusCheckPage';
 import ComplaintStatusPortal from './ComplaintStatusPortal';
-import AccusedLoginPage from './AccusedLoginPage';
 import AccusedPortal from './AccusedPortal';
+import UnifiedLoginPage from './UnifiedLoginPage'; // Importar la nueva página de login
 
 const PublicPortal = () => {
     const { companies, complaints } = useData();
@@ -16,19 +15,16 @@ const PublicPortal = () => {
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [caseInfo, setCaseInfo] = useState(null);
     const [loggedInCase, setLoggedInCase] = useState(null);
+    const [loggedInAccused, setLoggedInAccused] = useState(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { addToast } = useNotification();
-    const [loggedInAccused, setLoggedInAccused] = useState(null);
     
     const activeCompanies = companies.filter(c => c.status === 'activo');
 
-    // Efecto para mantener el estado del caso sincronizado con el contexto global.
     useEffect(() => {
         if (loggedInCase) {
             const updatedCase = complaints.find(c => c.id === loggedInCase.id);
-            if (updatedCase) {
-                setLoggedInCase(updatedCase);
-            }
+            if (updatedCase) setLoggedInCase(updatedCase);
         }
     }, [complaints, loggedInCase?.id]);
 
@@ -50,17 +46,23 @@ const PublicPortal = () => {
     const handleFormSuccess = (newComplaint) => {
         setCaseInfo({ id: newComplaint.id, password: newComplaint.password });
         setView('success');
-    }
+    };
     
-    const handleStatusLoginSuccess = (complaint) => {
-        setLoggedInCase(complaint);
-        setView('statusDetail');
+    const handleUnifiedLoginSuccess = ({ type, data }) => {
+        if (type === 'complainant') {
+            setLoggedInCase(data);
+            setView('complainantPortal');
+        } else if (type === 'accused') {
+            setLoggedInCase(data.complaint);
+            setLoggedInAccused(data.accusedPerson);
+            setView('accusedPortal');
+        }
     };
 
-    const handleAccusedLoginSuccess = (complaint, accusedPerson) => {
-        setLoggedInCase(complaint);
-        setLoggedInAccused(accusedPerson);
-        setView('accusedPortal');
+    const handleLogout = () => {
+        setView('selectCompany');
+        setLoggedInCase(null);
+        setLoggedInAccused(null);
     };
 
     const copyToClipboard = (text) => {
@@ -68,56 +70,41 @@ const PublicPortal = () => {
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.select();
-        try { 
-            document.execCommand('copy'); 
-            addToast(`'${text}' copiado al portapapeles`, 'success'); 
-        } catch (err) { 
-            addToast('Error al copiar', 'error'); 
-        }
+        try { document.execCommand('copy'); addToast(`'${text}' copiado al portapapeles`, 'success'); }
+        catch (err) { addToast('Error al copiar', 'error'); }
         document.body.removeChild(textArea);
     };
 
     const renderContent = () => {
         switch (view) {
-            case 'form':
-                return <ComplaintForm companyId={selectedCompany.id} onBack={() => setView('selectCompany')} onSuccess={handleFormSuccess} />;
-            case 'success':
-                return (
-                    <Card className="text-center">
-                        <CheckCircle className="inline-block w-16 h-16 text-emerald-500"/>
-                        <h2 className="text-2xl font-bold text-slate-800 mt-4">Denuncia Enviada Exitosamente</h2>
-                        <p className="text-slate-600 mt-2 mb-6">Guarde sus credenciales en un lugar seguro. Las necesitará para hacer seguimiento de su caso.</p>
-                        <div className="mt-4 space-y-4 text-left bg-slate-100 p-6 rounded-lg inline-block w-full max-w-md">
-                            <div>
-                                <label className="text-sm font-medium text-slate-600">Código del Caso</label>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.id}</p>
-                                    <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.id)}>
-                                        <Copy className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium text-slate-600">Contraseña de Seguimiento</label>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.password}</p>
-                                    <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.password)}>
-                                        <Copy className="w-4 h-4" />
-                                    </Button>
-                                </div>
+            case 'form': return <ComplaintForm companyId={selectedCompany.id} onBack={() => setView('selectCompany')} onSuccess={handleFormSuccess} />;
+            case 'success': return (
+                <Card className="text-center">
+                    <CheckCircle className="inline-block w-16 h-16 text-emerald-500"/>
+                    <h2 className="text-2xl font-bold text-slate-800 mt-4">Denuncia Enviada Exitosamente</h2>
+                    <p className="text-slate-600 mt-2 mb-6">Guarde sus credenciales en un lugar seguro. Las necesitará para hacer seguimiento de su caso.</p>
+                    <div className="mt-4 space-y-4 text-left bg-slate-100 p-6 rounded-lg inline-block w-full max-w-md">
+                        <div>
+                            <label className="text-sm font-medium text-slate-600">Código del Caso</label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.id}</p>
+                                <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.id)}><Copy className="w-4 h-4" /></Button>
                             </div>
                         </div>
-                        <Button onClick={() => setView('selectCompany')} className="mt-8">Volver al Inicio</Button>
-                    </Card>
-                );
-            case 'statusCheck':
-                return <StatusCheckPage onLoginSuccess={handleStatusLoginSuccess} onBack={() => setView('selectCompany')} />;
-            case 'statusDetail':
-                return <ComplaintStatusPortal complaint={loggedInCase} onBack={() => { setView('selectCompany'); setLoggedInCase(null); }} />;
-            case 'accusedLogin':
-                return <AccusedLoginPage onLoginSuccess={handleAccusedLoginSuccess} onBack={() => setView('selectCompany')} />;
-            case 'accusedPortal':
-                return <AccusedPortal complaint={loggedInCase} accusedPerson={loggedInAccused} onBack={() => { setView('selectCompany'); setLoggedInCase(null); setLoggedInAccused(null); }} />;
+                        <div>
+                            <label className="text-sm font-medium text-slate-600">Contraseña de Seguimiento</label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-2xl font-mono text-indigo-700 bg-white p-2 rounded-md flex-grow">{caseInfo?.password}</p>
+                                <Button variant="secondary" onClick={() => copyToClipboard(caseInfo?.password)}><Copy className="w-4 h-4" /></Button>
+                            </div>
+                        </div>
+                    </div>
+                    <Button onClick={() => setView('selectCompany')} className="mt-8">Volver al Inicio</Button>
+                </Card>
+            );
+            case 'unifiedLogin': return <UnifiedLoginPage onLoginSuccess={handleUnifiedLoginSuccess} onBack={handleLogout} />;
+            case 'complainantPortal': return <ComplaintStatusPortal complaint={loggedInCase} onBack={handleLogout} />;
+            case 'accusedPortal': return <AccusedPortal complaint={loggedInCase} accusedPerson={loggedInAccused} onBack={handleLogout} />;
             case 'selectCompany':
             default:
                 return (
@@ -132,10 +119,9 @@ const PublicPortal = () => {
                                 </button>
                             ))}
                         </div>
-                         <div className="mt-6 text-center flex justify-center gap-4 flex-wrap">
+                         <div className="mt-6 text-center flex justify-around gap-4 flex-wrap">
                             <a href="#admin" className="text-sm text-indigo-600 hover:underline">Acceso Administradores</a>
-                            <a href="#public/status" onClick={(e) => { e.preventDefault(); setView('statusCheck')}} className="text-sm text-indigo-600 hover:underline">Seguimiento de Denuncia</a>
-                            <a href="#public/accused" onClick={(e) => { e.preventDefault(); setView('accusedLogin')}} className="text-sm text-indigo-600 hover:underline">Portal del Denunciado</a>
+                            <button onClick={() => setView('unifiedLogin')} className="text-sm text-indigo-600 hover:underline">Seguimiento de Caso</button>
                         </div>
                     </Card>
                 );
@@ -152,12 +138,7 @@ const PublicPortal = () => {
                 </div>
                 {renderContent()}
                 {isConfirmModalOpen && (
-                    <ConfirmationModal
-                        isOpen={isConfirmModalOpen}
-                        onClose={handleCancelCompany}
-                        onConfirm={handleConfirmCompany}
-                        title={`Confirmar Empresa: ${selectedCompany?.name}`}
-                    >
+                    <ConfirmationModal isOpen={isConfirmModalOpen} onClose={handleCancelCompany} onConfirm={handleConfirmCompany} title={`Confirmar Empresa: ${selectedCompany?.name}`}>
                         <p>Está a punto de ingresar una denuncia para la empresa **{selectedCompany?.name}**. Por favor, asegúrese de que esta es la empresa correcta.</p>
                         <p className="mt-2">Recuerde que este es un canal interno de denuncias y, si lo desea, puede ingresar su denuncia directamente en la Dirección del Trabajo.</p>
                     </ConfirmationModal>
