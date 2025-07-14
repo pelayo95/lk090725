@@ -24,6 +24,9 @@ export const allPermissions = {
   gestiones_puede_marcar_completa: "Marcar/desmarcar una gestión como completada",
   gestiones_puede_eliminar: "Borrar una gestión",
 
+  // --- NUEVO PERMISO AÑADIDO ---
+  entrevistas_puede_gestionar: "Agendar y gestionar entrevistas",
+
   // Módulo: Archivos
   archivos_puede_ver_descargar: "Ver y descargar archivos de un caso",
   archivos_puede_subir: "Subir nuevos archivos",
@@ -67,5 +70,4 @@ export const allPermissions = {
   config_puede_gestionar_notificaciones: "Configurar reglas de notificación",
   config_puede_gestionar_declaracion: "Editar la declaración de veracidad del formulario",
   config_puede_gestionar_portal_denunciado: "Configurar portal del denunciado",
-
 };
