@@ -6,10 +6,12 @@ import { Card, Button, Input, Select, TextArea, ConfirmationModal } from '../../
 import { AddItemModal } from '../../../components/common/AddItemModal';
 import { Plus, Edit, Trash, Calendar, Download } from 'lucide-react';
 import { uuidv4 } from '../../../utils/uuid';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 const InterviewsTab = ({ complaint }) => {
     const { updateComplaint } = useData();
     const { user, allUsers } = useAuth();
+    const { addToast } = useNotification();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingInterview, setEditingInterview] = useState(null);
     const [interviewToDelete, setInterviewToDelete] = useState(null);
@@ -39,9 +41,8 @@ const InterviewsTab = ({ complaint }) => {
         }
 
         updateComplaint(complaint.id, { interviews: newInterviews }, user);
-        setLastSavedInterview(savedInterview); // Guardar para poder generar el .ics
-        
-        // No cerramos el modal, mostramos el botón de descarga
+        addToast("Entrevista guardada exitosamente.", "success");
+        setLastSavedInterview(savedInterview);
     };
 
     const handleDeleteInterview = () => {
@@ -57,14 +58,13 @@ const InterviewsTab = ({ complaint }) => {
         };
 
         const startDate = formatDate(interview.scheduledDate);
-        // Asumimos 1 hora de duración para la entrevista
         const endDate = formatDate(new Date(new Date(interview.scheduledDate).getTime() + 60 * 60 * 1000));
 
         const event = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
             'BEGIN:VEVENT',
-            `UID:${interview.id}@yourdomain.com`,
+            `UID:${interview.id}@yourplatform.com`,
             `DTSTAMP:${formatDate(new Date())}`,
             `DTSTART:${startDate}`,
             `DTEND:${endDate}`,
@@ -125,7 +125,7 @@ const InterviewsTab = ({ complaint }) => {
                 title={editingInterview ? "Editar Entrevista" : "Agendar Nueva Entrevista"}
                 initialState={editingInterview || { intervieweeName: '', intervieweeRole: 'Testigo', scheduledDate: '', location: '', status: 'Programada', interviewers: [user.uid], summary: '' }}
                 isEditing={!!editingInterview}
-                hideSubmit={!!lastSavedInterview} // Ocultar botón de guardar si ya se guardó
+                hideSubmit={!!lastSavedInterview}
             >
                 {(formData, handleChange) => (
                     <>
@@ -154,3 +154,24 @@ const InterviewsTab = ({ complaint }) => {
                                 <Button onClick={() => generateICSFile(lastSavedInterview)}>
                                     <Download className="w-4 h-4"/> Descargar Archivo .ics
                                 </Button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </AddItemModal>
+
+            {interviewToDelete && (
+                 <ConfirmationModal
+                    isOpen={!!interviewToDelete}
+                    onClose={() => setInterviewToDelete(null)}
+                    onConfirm={handleDeleteInterview}
+                    title={`Eliminar Entrevista con: ${interviewToDelete.intervieweeName}`}
+                >
+                    <p>¿Está seguro de que desea eliminar esta entrevista? Esta acción no se puede deshacer.</p>
+                </ConfirmationModal>
+            )}
+        </Card>
+    );
+};
+
+export default InterviewsTab;
