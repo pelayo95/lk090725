@@ -8,14 +8,15 @@ import InvestigationFlowManager from './case-details/InvestigationFlowManager';
 import MeasuresTab from './case-details/MeasuresTab';
 import SanctionsTab from './case-details/SanctionsTab';
 import AuditLogTab from './case-details/AuditLogTab';
-import { ChevronLeft, Folder, ListChecks, Shield, Activity, MessageSquare, History } from 'lucide-react';
+import { ChevronLeft, Folder, ListChecks, Shield, Activity, MessageSquare, History, Video } from 'lucide-react'; // Ícono añadido
 import { uuidv4 } from '../../utils/uuid';
 import { userHasPermission } from '../../utils/userUtils';
 
-// Importar los nuevos componentes contenedores
+// Importar los componentes contenedores y la nueva pestaña
 import ExpedienteTab from './case-details/ExpedienteTab';
 import TimelineManagementsTab from './case-details/TimelineManagementsTab';
 import CommunicationsTab from './case-details/CommunicationsTab';
+import InterviewsTab from './case-details/InterviewsTab'; // Importar la nueva pestaña
 
 const CaseDetailPage = ({ caseId }) => {
     const { complaints, updateComplaint } = useData();
@@ -44,28 +45,26 @@ const CaseDetailPage = ({ caseId }) => {
         'Sin Asignar': 'bg-slate-100 text-slate-800 border-slate-300'
     };
 
-    const handleSendPublicMessage = (text) => {
-        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+    const handleSendPublicMessage = (newMessage) => {
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje al denunciante.`, userId: user.uid, timestamp: new Date().toISOString() }];
         updateComplaint(complaint.id, { chatMessages: [...(complaint.chatMessages || []), newMessage], auditLog: newAuditLog }, user);
     };
     
-    const handleSendAccusedMessage = (text) => {
-        const newMessage = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+    const handleSendAccusedMessage = (newMessage) => {
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Gestor envió un mensaje a un denunciado.`, userId: user.uid, timestamp: new Date().toISOString() }];
         updateComplaint(complaint.id, { accusedChatMessages: [...(complaint.accusedChatMessages || []), newMessage], auditLog: newAuditLog }, user);
     };
 
-    const handleSendInternalComment = (text) => {
-        const newComment = { id: uuidv4(), text, senderId: user.uid, senderName: user.name, timestamp: new Date().toISOString() };
+    const handleSendInternalComment = (newMessage) => {
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: `Añadió un comentario interno.`, userId: user.uid, timestamp: new Date().toISOString() }];
-        updateComplaint(complaint.id, { internalComments: [...(complaint.internalComments || []), newComment], auditLog: newAuditLog }, user);
+        updateComplaint(complaint.id, { internalComments: [...(complaint.internalComments || []), newMessage], auditLog: newAuditLog }, user);
     };
 
-    // --- BARRA DE PESTAÑAS REESTRUCTURADA ---
     const allTabs = [
         { id: 'expediente', label: 'Expediente', icon: <Folder className="w-5 h-5"/>, permission: ['casos_ver_detalles', 'archivos_puede_ver_descargar'], component: () => <ExpedienteTab complaint={complaint} /> },
         { id: 'timeline_managements', label: 'Línea de Tiempo y Gestiones', icon: <ListChecks className="w-5 h-5"/>, permission: ['timeline_puede_ver', 'gestiones_puede_ver'], component: () => <TimelineManagementsTab complaint={complaint} onNavigate={setActiveTab} /> },
+        // --- NUEVA PESTAÑA INTEGRADA ---
+        { id: 'interviews', label: 'Entrevistas', icon: <Video className="w-5 h-5"/>, permission: 'entrevistas_puede_gestionar', component: () => <InterviewsTab complaint={complaint} /> },
         { id: 'measures', label: 'Medidas de Resguardo', icon: <Shield className="w-5 h-5"/>, permission: 'medidas_puede_ver', component: () => <MeasuresTab complaint={complaint} /> },
         { id: 'sanctions', label: 'Sanciones', icon: <Activity className="w-5 h-5"/>, permission: 'sanciones_puede_ver', component: () => <SanctionsTab complaint={complaint} /> },
         { id: 'communications', label: 'Comunicaciones', icon: <MessageSquare className="w-5 h-5"/>, permission: ['comunicacion_denunciante_puede_ver', 'comentarios_internos_puede_ver'], component: () => <CommunicationsTab complaint={complaint} onSendPublicMessage={handleSendPublicMessage} onSendAccusedMessage={handleSendAccusedMessage} onSendInternalComment={handleSendInternalComment} /> },
@@ -120,7 +119,7 @@ const CaseDetailPage = ({ caseId }) => {
                 </nav>
             </div>
 
-            <div>
+            <div className="mt-6">
                 <ActiveComponent />
             </div>
 
