@@ -13,7 +13,7 @@ export const permissionToFeatureMap = {
     dashboard_ver_agenda: 'agendaSemanal',
     dashboard_agenda_alcance: 'agendaSemanal',
     
-    casos_ver_listado: 'kpisYMetricas', // Ver el listado es una función básica del dashboard
+    casos_ver_listado: 'kpisYMetricas',
     casos_puede_asignar_investigadores: 'asignacionInvestigadores',
     casos_ver_detalles: 'edicionDenuncias',
     casos_ver_datos_denunciante: 'edicionDenuncias',
@@ -25,6 +25,9 @@ export const permissionToFeatureMap = {
     gestiones_puede_editar_asignar: 'planGestion',
     gestiones_puede_marcar_completa: 'planGestion',
     gestiones_puede_eliminar: 'planGestion',
+
+    // --- NUEVO MAPEO AÑADIDO ---
+    entrevistas_puede_gestionar: 'gestionEntrevistas',
 
     archivos_puede_ver_descargar: 'gestionArchivos',
     archivos_puede_subir: 'gestionArchivos',
@@ -61,8 +64,9 @@ export const permissionToFeatureMap = {
     config_puede_gestionar_plantillas: 'comunicacionConDenunciante',
     config_puede_gestionar_notificaciones: 'kpisYMetricas',
     config_puede_gestionar_declaracion: 'constructorFormularios',
-    config_puede_gestionar_portal_denunciado: "Configurar portal del denunciado",
-
     
-    soporte_puede_crear_ver_tickets: null, // No depende del plan
+    // --- NUEVO MAPEO AÑADIDO ---
+    config_puede_gestionar_portal_denunciado: 'portalDenunciado',
+    
+    soporte_puede_crear_ver_tickets: null,
 };
