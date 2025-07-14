@@ -5,10 +5,12 @@ import ManagementsTab from './ManagementsTab';
 
 const TimelineManagementsTab = ({ complaint, onNavigate }) => {
     return (
-        <div className="space-y-6">
+        // --- INICIO DE LA MODIFICACIÓN ---
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <TimelineTab complaint={complaint} onNavigate={onNavigate} />
             <ManagementsTab complaint={complaint} />
         </div>
+        // --- FIN DE LA MODIFICACIÓN ---
     );
 };
 
