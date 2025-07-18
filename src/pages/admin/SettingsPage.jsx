@@ -29,7 +29,7 @@ const SettingsPage = () => {
     const { getCompanyConfig, updateCompanyConfig } = useConfig();
     const { addToast } = useNotification();
     const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
-    
+
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
     const collapseTimeoutRef = useRef(null);
 
@@ -70,14 +70,14 @@ const SettingsPage = () => {
             { id: 'notifications', label: 'Reglas de Notificación', permission: 'config_puede_gestionar_notificaciones', component: NotificationSettings, icon: <Bell className="w-5 h-5" /> },
         ]},
     ], []);
-    
+
     const visibleCategories = useMemo(() => {
         return settingCategories.map(category => ({ ...category, items: category.items.filter(item => userHasPermission(user, item.permission)) }))
             .filter(category => category.items.length > 0);
     }, [user, settingCategories]);
-    
-    const [activeSetting, setActiveSetting] = useState(() => visibleCategories[0]?.items[0]?.id || '');
-    
+
+    const [activeSetting, setActiveSetting] = useState(() => visibleCategories?.[0]?.items?.[0]?.id || '');
+
     const ActiveComponent = useMemo(() => {
         for (const category of visibleCategories) {
             const foundItem = category.items.find(item => item.id === activeSetting);
@@ -90,17 +90,17 @@ const SettingsPage = () => {
         updateCompanyConfig(user.companyId, config);
         addToast("Configuración guardada con éxito.", "success");
     };
-    
+
     return (
         <div className="space-y-6">
              <div className="flex justify-between items-center">
                  <h1 className="text-2xl font-bold text-slate-800">Configuración</h1>
                  <Button onClick={handleSave} variant="primary">Guardar Cambios</Button>
              </div>
-             
+
              <div className="md:flex md:gap-8 items-start">
-                 <aside 
-                     className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                 <aside
+                     className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                      onMouseEnter={handleMouseEnter}
                      onMouseLeave={handleMouseLeave}
                  >
@@ -116,9 +116,7 @@ const SettingsPage = () => {
                                  <div className="space-y-1">
                                      {category.items.map(item => {
                                          const isActive = activeSetting === item.id;
-                                         
-                                         // --- INICIO DE LA MODIFICACIÓN ---
-                                         // Se usa una sintaxis más limpia y correcta para las clases condicionales.
+
                                          return (
                                              <button
                                                  key={item.id}
@@ -131,8 +129,8 @@ const SettingsPage = () => {
                                                          : 'text-slate-600 hover:bg-slate-100'
                                                      }
                                                      ${isSidebarExpanded
-                                                         ? 'gap-3' // Aplica espaciado solo cuando está expandido
-                                                         : 'justify-center' // Centra el ícono cuando está colapsado
+                                                         ? 'gap-3'
+                                                         : 'justify-center'
                                                      }
                                                  `}
                                              >
@@ -144,7 +142,6 @@ const SettingsPage = () => {
                                                  </span>
                                              </button>
                                          );
-                                         // --- FIN DE LA MODIFICACIÓN ---
                                      })}
                                  </div>
                              </div>
