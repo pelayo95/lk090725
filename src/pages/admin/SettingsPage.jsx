@@ -17,13 +17,12 @@ import DocumentationSettings from './settings/DocumentationSettings';
 import AccusedPortalSettings from './settings/AccusedPortalSettings';
 import NotificationSettings from './settings/NotificationSettings';
 
-// --- INICIO DE LA MODIFICACIÓN: Importar todos los iconos necesarios ---
+// Importar los iconos para las categorías y los items
 import { 
     Users, FileText, Brush, SlidersHorizontal, 
     ShieldCheck, ClipboardList, AlertTriangle, Clock, MessageSquarePlus, Shield, 
     LayoutList, Eye, Bell 
 } from 'lucide-react';
-// --- FIN DE LA MODIFICACIÓN ---
 
 const SettingsPage = () => {
     const { user } = useAuth();
@@ -54,44 +53,24 @@ const SettingsPage = () => {
         }, 1500);
     };
 
-    // --- INICIO DE LA MODIFICACIÓN: Íconos específicos para cada item ---
     const settingCategories = useMemo(() => [
-        { 
-            name: 'Gestión de Acceso', 
-            icon: <Users className="w-5 h-5 text-slate-600 flex-shrink-0"/>, 
-            items: [
-                { id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage, icon: <ShieldCheck className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-            ] 
-        },
-        { 
-            name: 'Configuración de Denuncias', 
-            icon: <FileText className="w-5 h-5 text-slate-600 flex-shrink-0"/>, 
-            items: [
-                { id: 'form', label: 'Formulario Público', permission: 'config_puede_gestionar_formularios', component: FormSettings, icon: <ClipboardList className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-                { id: 'declaration', label: 'Declaración de Veracidad', permission: 'config_puede_gestionar_declaracion', component: DeclarationSettings, icon: <AlertTriangle className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-                { id: 'timeline', label: 'Líneas de Tiempo', permission: 'config_puede_gestionar_timelines', component: TimelineSettings, icon: <Clock className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-            ]
-        },
-        { 
-            name: 'Plantillas y Contenidos', 
-            icon: <Brush className="w-5 h-5 text-slate-600 flex-shrink-0"/>, 
-            items: [
-                { id: 'templates', label: 'Plantillas de Comunicación', permission: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings, icon: <MessageSquarePlus className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-                { id: 'measures', label: 'Medidas por Defecto', permission: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings, icon: <Shield className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-                { id: 'doc_categories', label: 'Categorías de Documentos', permission: 'documentacion_puede_gestionar', component: DocumentationSettings, icon: <LayoutList className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-            ]
-        },
-        { 
-            name: 'Módulos y Automatización', 
-            icon: <SlidersHorizontal className="w-5 h-5 text-slate-600 flex-shrink-0"/>, 
-            items: [
-                { id: 'accused_portal', label: 'Portal del Denunciado', permission: 'config_puede_gestionar_portal_denunciado', component: AccusedPortalSettings, icon: <Eye className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-                { id: 'notifications', label: 'Reglas de Notificación', permission: 'config_puede_gestionar_notificaciones', component: NotificationSettings, icon: <Bell className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
-            ]
-        },
+        { name: 'Gestión de Acceso', icon: <Users className="w-5 h-5 text-slate-600 flex-shrink-0"/>, items: [{ id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage, icon: <ShieldCheck className="w-5 h-5 text-slate-600 flex-shrink-0" /> }] },
+        { name: 'Configuración de Denuncias', icon: <FileText className="w-5 h-5 text-slate-600 flex-shrink-0"/>, items: [
+            { id: 'form', label: 'Formulario Público', permission: 'config_puede_gestionar_formularios', component: FormSettings, icon: <ClipboardList className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+            { id: 'declaration', label: 'Declaración de Veracidad', permission: 'config_puede_gestionar_declaracion', component: DeclarationSettings, icon: <AlertTriangle className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+            { id: 'timeline', label: 'Líneas de Tiempo', permission: 'config_puede_gestionar_timelines', component: TimelineSettings, icon: <Clock className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+        ]},
+        { name: 'Plantillas y Contenidos', icon: <Brush className="w-5 h-5 text-slate-600 flex-shrink-0"/>, items: [
+            { id: 'templates', label: 'Plantillas de Comunicación', permission: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings, icon: <MessageSquarePlus className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+            { id: 'measures', label: 'Medidas por Defecto', permission: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings, icon: <Shield className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+            { id: 'doc_categories', label: 'Categorías de Documentos', permission: 'documentacion_puede_gestionar', component: DocumentationSettings, icon: <LayoutList className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+        ]},
+        { name: 'Módulos y Automatización', icon: <SlidersHorizontal className="w-5 h-5 text-slate-600 flex-shrink-0"/>, items: [
+            { id: 'accused_portal', label: 'Portal del Denunciado', permission: 'config_puede_gestionar_portal_denunciado', component: AccusedPortalSettings, icon: <Eye className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+            { id: 'notifications', label: 'Reglas de Notificación', permission: 'config_puede_gestionar_notificaciones', component: NotificationSettings, icon: <Bell className="w-5 h-5 text-slate-600 flex-shrink-0" /> },
+        ]},
     ], []);
-    // --- FIN DE LA MODIFICACIÓN ---
-
+    
     const visibleCategories = useMemo(() => {
         return settingCategories.map(category => ({
             ...category,
@@ -125,12 +104,14 @@ const SettingsPage = () => {
             </div>
             
             <div className="md:flex md:gap-8 items-start">
+                {/* --- INICIO DE LA CORRECCIÓN: Clases de estilo modificadas --- */}
                 <aside 
-                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm md:shadow-none md:bg-transparent md:border-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <div className="space-y-6 overflow-hidden p-4 md:p-0">
+                {/* --- FIN DE LA CORRECCIÓN --- */}
+                    <div className="space-y-6 overflow-hidden p-4 md:p-2">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
                                 <h3 className={`px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2 transition-opacity duration-300 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>
@@ -145,9 +126,7 @@ const SettingsPage = () => {
                                             title={isSidebarExpanded ? '' : item.label}
                                             className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-3 ${activeSetting === item.id ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'}`}
                                         >
-                                            {/* --- INICIO DE LA MODIFICACIÓN: Usar el icono del item --- */}
                                             {item.icon}
-                                            {/* --- FIN DE LA MODIFICACIÓN --- */}
                                             <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100 delay-100' : 'opacity-0'}`}>{item.label}</span>
                                         </button>
                                     ))}
