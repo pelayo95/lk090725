@@ -8,19 +8,10 @@ import { uuidv4 } from '../../utils/uuid';
 
 const UserEditModal = ({ isOpen, onClose, onSave, user, roles }) => {
     const { user: currentUser } = useAuth();
-    // --- INICIO DE LA CORRECCIÓN ---
-    // Se inicializa el estado con una estructura base para evitar errores de 'undefined'.
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        rut: '',
-        position: '',
-        specializedTraining: '',
-        trainingDocuments: [],
-        roleId: '',
+        firstName: '', lastName: '', email: '', rut: '',
+        position: '', specializedTraining: '', trainingDocuments: [], roleId: '',
     });
-    // --- FIN DE LA CORRECCIÓN ---
 
     useEffect(() => {
         if (user) {
@@ -68,7 +59,6 @@ const UserEditModal = ({ isOpen, onClose, onSave, user, roles }) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Editar Usuario: ${user.firstName} ${user.lastName}`}>
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* --- SECCIÓN DE DATOS PERSONALES --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input label="Nombre" value={formData.firstName} onChange={e => handleChange('firstName', e.target.value)} required />
                     <Input label="Apellido" value={formData.lastName} onChange={e => handleChange('lastName', e.target.value)} required />
@@ -77,21 +67,19 @@ const UserEditModal = ({ isOpen, onClose, onSave, user, roles }) => {
                     <Input label="Email (Login)" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required className="md:col-span-2" />
                 </div>
 
-                {/* --- SECCIÓN DE ROL --- */}
                 {currentUser.permissions.config_usuarios_puede_asignar_rol && (
                     <Select label="Rol" id="edit-user-role" value={formData.roleId} onChange={e => handleChange('roleId', e.target.value)} disabled={user.uid === currentUser.uid}>
                         {roles.map(role => (<option key={role.id} value={role.id}>{role.name}</option>))}
                     </Select>
                 )}
 
-                {/* --- SECCIÓN DE FORMACIÓN --- */}
                 <div>
                     <TextArea label="Formación Especializada (Resumen)" value={formData.specializedTraining} onChange={e => handleChange('specializedTraining', e.target.value)} rows={3} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Antecedentes de Formación</label>
                     <div className="space-y-2">
-                        {formData.trainingDocuments.map(doc => (
+                        {(formData.trainingDocuments || []).map(doc => (
                             <div key={doc.id} className="flex items-center justify-between p-2 bg-slate-100 rounded-md">
                                 <div className="flex items-center gap-2 text-sm text-slate-700">
                                     <Paperclip className="w-4 h-4" />
