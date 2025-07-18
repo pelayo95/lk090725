@@ -3,13 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Card, TextArea, Button, Modal } from '../common';
-import { Send, MessageSquarePlus, Reply, X } from 'lucide-react'; // Íconos añadidos
+import { Send, MessageSquarePlus, Reply, X } from 'lucide-react';
 
 const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, currentUserColor, otherUserColor, complaintId }) => {
     const { user, allUsers } = useAuth();
     const { communicationTemplates } = useData();
     const [newComment, setNewComment] = useState("");
-    const [replyingTo, setReplyingTo] = useState(null); // Estado para el mensaje que se está respondiendo
+    const [replyingTo, setReplyingTo] = useState(null);
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
     const textAreaRef = useRef(null);
@@ -19,7 +19,6 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     useEffect(scrollToBottom, [messages]);
     
-    // Enfocar el área de texto cuando se selecciona un mensaje para responder
     useEffect(() => {
         if (replyingTo) {
             textAreaRef.current?.focus();
@@ -30,11 +29,13 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
         if (e) e.preventDefault();
         if (!newComment.trim()) return;
 
+        const baseSender = user || { uid: currentUserId };
+
         const newMessage = {
             id: uuidv4(),
             text: newComment,
-            senderId: user?.uid || 'complainant', // Asume 'complainant' si no hay admin
-            senderName: user?.name || 'Denunciante',
+            senderId: baseSender.uid,
+            senderName: `${baseSender.firstName || 'Denunciante'} ${baseSender.lastName || ''}`.trim(),
             timestamp: new Date().toISOString(),
         };
 
@@ -48,17 +49,44 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
 
         onSendMessage(newMessage);
         setNewComment("");
-        setReplyingTo(null); // Limpiar el estado de respuesta
+        setReplyingTo(null);
     };
     
-    const getUser = (senderId) => {
-        if (senderId === 'complainant') return { name: 'Denunciante', uid: 'complainant' };
-        if (senderId === 'accused') return { name: 'Denunciado', uid: 'accused' }; // Puede necesitar más detalles
-        return allUsers.find(u => u.uid === senderId) || { name: 'Usuario Desconocido' };
+    const getUserFullName = (userObject) => {
+        if (!userObject) return "Usuario Desconocido";
+        if (userObject.uid === 'complainant') return 'Denunciante';
+        return `${userObject.firstName || ''} ${userObject.lastName || ''}`.trim();
     };
 
-    const handleSelectTemplate = (template) => { /* ... */ };
-    const handleKeyDown = (e) => { /* ... */ };
+    const getUser = (senderId) => {
+        if (senderId === 'complainant') return { firstName: 'Denunciante', lastName: '', uid: 'complainant' };
+        const foundUser = allUsers.find(u => u.uid === senderId);
+        if (foundUser) return foundUser;
+        
+        // Check if it's an accused person ID
+        if (complaintId) {
+             const complaint = useData().complaints.find(c => c.id === complaintId);
+             if (complaint && complaint.originalData && complaint.originalData.accusedPersons) {
+                 const accused = complaint.originalData.accusedPersons.find(p => p.id === senderId);
+                 if (accused) return { firstName: accused.name, lastName: '(Denunciado)', uid: accused.id };
+             }
+        }
+        return { firstName: 'Usuario', lastName: 'Desconocido' };
+    };
+
+    const handleSelectTemplate = (template) => {
+        const processedContent = template.content.replace(/\[CODIGO_CASO\]/g, complaintId || '');
+        setNewComment(processedContent);
+        setIsTemplateModalOpen(false);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAddComment();
+        }
+    };
+
     const isInteractive = typeof onSendMessage === 'function';
 
     return (
@@ -68,11 +96,13 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                 {(messages || []).map(comment => {
                     const author = getUser(comment.senderId);
                     const isCurrentUser = author?.uid === currentUserId;
+                    const authorFullName = getUserFullName(author);
                     return (
                         <div key={comment.id} className={`flex items-start gap-3 group ${isCurrentUser ? 'flex-row-reverse' : ''}`}>
-                             <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold flex-shrink-0">{author?.name[0] || '?'}</div>
+                             <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold flex-shrink-0">
+                                {author?.firstName?.[0] || '?'}
+                             </div>
                             <div className={`relative p-3 rounded-lg max-w-lg ${isCurrentUser ? currentUserColor : otherUserColor}`}>
-                                {/* --- Renderizado de la Cita de Respuesta --- */}
                                 {comment.replyTo && (
                                     <div className="mb-2 p-2 border-l-2 border-slate-400 bg-black/5 rounded-md">
                                         <p className="font-semibold text-xs text-slate-600">{comment.replyTo.senderName}</p>
@@ -80,11 +110,10 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                                     </div>
                                 )}
                                 <p className="text-sm text-slate-800 whitespace-pre-wrap">{comment.text}</p>
-                                <p className={`text-xs text-slate-500 mt-1 ${isCurrentUser ? 'text-right' : ''}`}>{author?.name} - {new Date(comment.timestamp).toLocaleString()}</p>
+                                <p className={`text-xs text-slate-500 mt-1 ${isCurrentUser ? 'text-right' : ''}`}>{authorFullName} - {new Date(comment.timestamp).toLocaleString()}</p>
                             </div>
-                             {/* --- Botón para Responder --- */}
                             <div className={`opacity-0 group-hover:opacity-100 transition-opacity self-center ${isCurrentUser ? 'mr-2' : 'ml-2'}`}>
-                                <Button variant="ghost" className="p-1 h-auto" onClick={() => setReplyingTo(comment)} title="Responder">
+                                <Button variant="ghost" className="p-1 h-auto" onClick={() => setReplyingTo({ ...comment, senderName: authorFullName })} title="Responder">
                                     <Reply className="w-4 h-4 text-slate-500"/>
                                 </Button>
                             </div>
@@ -96,7 +125,6 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
             
             {isInteractive && (
                 <div className="border-t pt-4">
-                     {/* --- Vista Previa de la Respuesta --- */}
                     {replyingTo && (
                         <div className="flex justify-between items-center p-2 mb-2 bg-slate-100 rounded-md border border-slate-300">
                              <div className="flex-1 overflow-hidden">
@@ -132,7 +160,16 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
                     </form>
                 </div>
             )}
-            {user && ( <Modal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} title="Seleccionar Plantilla"> {/* ... */} </Modal> )}
+            {user && ( <Modal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} title="Seleccionar Plantilla">
+                <div className="space-y-2">
+                    {companyTemplates.map(template => (
+                        <button key={template.id} onClick={() => handleSelectTemplate(template)} className="w-full text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-md">
+                            <p className="font-semibold">{template.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{template.content}</p>
+                        </button>
+                    ))}
+                </div>
+            </Modal> )}
         </Card>
     );
 };
