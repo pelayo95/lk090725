@@ -11,7 +11,9 @@ import RoleManagementPage from './settings/RoleManagementPage';
 import CommunicationTemplatesSettings from './settings/CommunicationTemplatesSettings';
 import NotificationSettings from './settings/NotificationSettings';
 import DeclarationSettings from './settings/DeclarationSettings';
-import { FileText, Clock, Shield, Users, MessageSquare, Bell, AlertTriangle } from 'lucide-react';
+import AccusedPortalSettings from './settings/AccusedPortalSettings';
+import DocumentationSettings from './settings/DocumentationSettings';
+import { FileText, Clock, Shield, Users, MessageSquare, Bell, AlertTriangle, Eye, LayoutList } from 'lucide-react';
 import { userHasPermission } from '../../utils/userUtils';
 
 const SettingsPage = () => {
@@ -22,10 +24,12 @@ const SettingsPage = () => {
     
     const tabs = [
         { id: 'roles', label: 'Roles', icon: <Users className="w-5 h-5"/>, feature: 'config_puede_gestionar_roles', component: RoleManagementPage },
+        { id: 'doc_categories', label: 'Categorías Docs', icon: <LayoutList className="w-5 h-5"/>, feature: 'documentacion_puede_gestionar', component: DocumentationSettings },
         { id: 'templates', label: 'Plantillas', icon: <MessageSquare className="w-5 h-5"/>, feature: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings },
         { id: 'notifications', label: 'Notificaciones', icon: <Bell className="w-5 h-5"/>, feature: 'config_puede_gestionar_notificaciones', component: NotificationSettings },
         { id: 'form', label: 'Formulario', icon: <FileText className="w-5 h-5"/>, feature: 'config_puede_gestionar_formularios', component: FormSettings },
         { id: 'declaration', label: 'Declaración', icon: <AlertTriangle className="w-5 h-5"/>, feature: 'config_puede_gestionar_declaracion', component: DeclarationSettings },
+        { id: 'accused_portal', label: 'Portal Denunciado', icon: <Eye className="w-5 h-5"/>, feature: 'config_puede_gestionar_portal_denunciado', component: AccusedPortalSettings },
         { id: 'timeline', label: 'Línea de Tiempo', icon: <Clock className="w-5 h-5"/>, feature: 'config_puede_gestionar_timelines', component: TimelineSettings },
         { id: 'measures', label: 'Medidas', icon: <Shield className="w-5 h-5"/>, feature: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
     ];
