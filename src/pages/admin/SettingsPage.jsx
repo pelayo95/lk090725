@@ -101,12 +101,12 @@ const SettingsPage = () => {
 
              <div className="md:flex md:gap-8 items-start">
                  <aside
-                     // CORRECCIÓN: Se añade bg-transparent para asegurar que no tenga color de fondo propio.
                      className={`bg-transparent md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                      onMouseEnter={handleMouseEnter}
                      onMouseLeave={handleMouseLeave}
                  >
-                     <div className="space-y-4 overflow-hidden p-2">
+                     {/* CORRECCIÓN: Se elimina 'overflow-hidden' para que los íconos no se recorten */}
+                     <div className="space-y-4 p-2">
                          {visibleCategories.map(category => (
                              <div key={category.name}>
                                  <h3 className={`mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2 ${isSidebarExpanded ? 'px-3' : 'justify-center'}`}>
