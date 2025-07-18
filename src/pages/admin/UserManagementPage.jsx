@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import { Card, Button, Input, Select, ConfirmationModal } from '../../components/common';
+import { Card, Button, Input, Select, ConfirmationModal, TextArea } from '../../components/common';
 import { AddItemModal } from '../../components/common/AddItemModal';
 import { Plus, Trash, Edit } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
 import UserEditModal from './UserEditModal';
+import RutInput from '../../components/form-fields/RutInput';
 
 const UserManagementPage = () => {
     const { user, allUsers, setAllUsers, updateUser } = useAuth();
@@ -26,6 +27,7 @@ const UserManagementPage = () => {
             ...newUserData,
             uid: uuidv4(),
             companyId: user.companyId,
+            trainingDocuments: [], // Inicializar vacío
             lastVisited: {},
         };
         setAllUsers(prev => [...prev, newUser]);
@@ -46,6 +48,7 @@ const UserManagementPage = () => {
 
     const handleDeleteUser = () => {
         if (!userToDelete) return;
+        const userName = `${userToDelete.firstName} ${userToDelete.lastName}`;
         setAllUsers(prev => prev.filter(u => u.uid !== userToDelete.uid));
         addToast("Usuario eliminado con éxito.", "success");
         setUserToDelete(null);
@@ -99,18 +102,34 @@ const UserManagementPage = () => {
                     </tbody>
                  </table>
             </Card>
+
+            {/* --- INICIO DE LA MODIFICACIÓN: Modal de Creación Actualizado --- */}
             <AddItemModal
                  isOpen={isCreateModalOpen}
                  onClose={() => setIsCreateModalOpen(false)}
                  onSubmit={handleCreateUser}
                  title="Crear Nuevo Usuario"
-                 initialState={{ firstName: '', lastName: '', email: '', roleId: companyRoles[0]?.id || '', password: 'password' }}
+                 initialState={{ 
+                     firstName: '', 
+                     lastName: '', 
+                     email: '', 
+                     rut: '',
+                     position: '',
+                     specializedTraining: '',
+                     roleId: companyRoles[0]?.id || '', 
+                     password: 'password' 
+                 }}
             >
                 {(formData, handleChange) => (
-                     <>
-                        <Input label="Nombre" value={formData.firstName} onChange={e => handleChange('firstName', e.target.value)} required />
-                        <Input label="Apellido" value={formData.lastName} onChange={e => handleChange('lastName', e.target.value)} required />
-                        <Input label="Email" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required />
+                     <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input label="Nombre" value={formData.firstName} onChange={e => handleChange('firstName', e.target.value)} required />
+                            <Input label="Apellido" value={formData.lastName} onChange={e => handleChange('lastName', e.target.value)} required />
+                             <RutInput label="RUT" value={formData.rut} onChange={e => handleChange('rut', e.target.value)} />
+                            <Input label="Cargo" value={formData.position} onChange={e => handleChange('position', e.target.value)} />
+                        </div>
+                        <Input label="Email (Login)" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required />
+                         <TextArea label="Formación Especializada (Resumen)" value={formData.specializedTraining} onChange={e => handleChange('specializedTraining', e.target.value)} rows={3} />
                         {user.permissions.config_usuarios_puede_asignar_rol && (
                             <Select label="Rol" value={formData.roleId} onChange={e => handleChange('roleId', e.target.value)}>
                                 {companyRoles.map(role => (
@@ -119,9 +138,11 @@ const UserManagementPage = () => {
                             </Select>
                         )}
                         <Input label="Contraseña Temporal" type="text" value={formData.password} onChange={e => handleChange('password', e.target.value)} required />
-                    </>
+                        <p className="text-xs text-slate-500">Nota: La subida de archivos de antecedentes se puede realizar desde el modal de edición una vez creado el usuario.</p>
+                    </div>
                 )}
             </AddItemModal>
+            {/* --- FIN DE LA MODIFICACIÓN --- */}
             
             {isEditModalOpen && (
                 <UserEditModal
@@ -138,7 +159,7 @@ const UserManagementPage = () => {
                     isOpen={!!userToDelete}
                     onClose={() => setUserToDelete(null)}
                     onConfirm={handleDeleteUser}
-                    title={`Eliminar Usuario: ${editingUser?.firstName} ${editingUser?.lastName}`}
+                    title={`Eliminar Usuario: ${userToDelete.firstName} ${userToDelete.lastName}`}
                 >
                     <p>¿Está seguro de que desea eliminar a este usuario? Esta acción no se puede deshacer.</p>
                 </ConfirmationModal>
