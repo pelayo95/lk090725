@@ -7,7 +7,8 @@ import Dashboard from './Dashboard';
 import CaseDetailPage from './CaseDetailPage';
 import UserManagementPage from './UserManagementPage';
 import SettingsPage from './SettingsPage';
-import SupportPage from './SupportPage'; // Nuevo
+import SupportPage from './SupportPage';
+import DocumentationPage from './DocumentationPage';
 
 const AdminPortal = () => {
     const { user } = useAuth();
@@ -24,12 +25,14 @@ const AdminPortal = () => {
     let content;
     if (view === 'cases' && caseId) {
         content = <CaseDetailPage caseId={caseId} />
+    } else if (view === 'documentation') {
+        content = <DocumentationPage />;
     } else if (view === 'users') {
         content = <UserManagementPage />;
     } else if (view === 'settings') {
         content = <SettingsPage features={features} />;
     } else if (view === 'support') {
-        content = <SupportPage />; // Nuevo
+        content = <SupportPage />;
     } else {
         content = <Dashboard />;
     }
