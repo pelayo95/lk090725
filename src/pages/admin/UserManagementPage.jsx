@@ -7,7 +7,7 @@ import { Card, Button, Input, Select, ConfirmationModal } from '../../components
 import { AddItemModal } from '../../components/common/AddItemModal';
 import { Plus, Trash, Edit } from 'lucide-react';
 import { uuidv4 } from '../../utils/uuid';
-import UserEditModal from './UserEditModal'; // Importar el nuevo modal
+import UserEditModal from './UserEditModal';
 
 const UserManagementPage = () => {
     const { user, allUsers, setAllUsers, updateUser } = useAuth();
@@ -79,7 +79,7 @@ const UserManagementPage = () => {
                     <tbody>
                         {companyUsers.map(u => (
                             <tr key={u.uid} className="bg-white border-b hover:bg-slate-50">
-                                <td className="px-6 py-4 font-medium text-slate-900">{u.name}</td>
+                                <td className="px-6 py-4 font-medium text-slate-900">{`${u.firstName || ''} ${u.lastName || ''}`.trim()}</td>
                                 <td className="px-6 py-4">{u.email}</td>
                                 <td className="px-6 py-4 capitalize">{getRoleName(u.roleId)}</td>
                                 <td className="px-6 py-4 text-right flex justify-end gap-1">
@@ -104,20 +104,21 @@ const UserManagementPage = () => {
                  onClose={() => setIsCreateModalOpen(false)}
                  onSubmit={handleCreateUser}
                  title="Crear Nuevo Usuario"
-                 initialState={{ name: '', email: '', roleId: companyRoles[0]?.id || '', password: 'password' }}
+                 initialState={{ firstName: '', lastName: '', email: '', roleId: companyRoles[0]?.id || '', password: 'password' }}
             >
                 {(formData, handleChange) => (
                      <>
-                        <Input label="Nombre Completo" id="new-user-name" value={formData.name} onChange={e => handleChange('name', e.target.value)} required />
-                        <Input label="Email" id="new-user-email" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required />
+                        <Input label="Nombre" value={formData.firstName} onChange={e => handleChange('firstName', e.target.value)} required />
+                        <Input label="Apellido" value={formData.lastName} onChange={e => handleChange('lastName', e.target.value)} required />
+                        <Input label="Email" type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} required />
                         {user.permissions.config_usuarios_puede_asignar_rol && (
-                            <Select label="Rol" id="new-user-role" value={formData.roleId} onChange={e => handleChange('roleId', e.target.value)}>
+                            <Select label="Rol" value={formData.roleId} onChange={e => handleChange('roleId', e.target.value)}>
                                 {companyRoles.map(role => (
                                     <option key={role.id} value={role.id}>{role.name}</option>
                                 ))}
                             </Select>
                         )}
-                        <Input label="Contraseña Temporal" id="new-user-pass" type="text" value={formData.password} onChange={e => handleChange('password', e.target.value)} required />
+                        <Input label="Contraseña Temporal" type="text" value={formData.password} onChange={e => handleChange('password', e.target.value)} required />
                     </>
                 )}
             </AddItemModal>
@@ -137,7 +138,7 @@ const UserManagementPage = () => {
                     isOpen={!!userToDelete}
                     onClose={() => setUserToDelete(null)}
                     onConfirm={handleDeleteUser}
-                    title={`Eliminar Usuario: ${userToDelete.name}`}
+                    title={`Eliminar Usuario: ${editingUser?.firstName} ${editingUser?.lastName}`}
                 >
                     <p>¿Está seguro de que desea eliminar a este usuario? Esta acción no se puede deshacer.</p>
                 </ConfirmationModal>
