@@ -107,12 +107,14 @@ const SettingsPage = () => {
                     <div className="space-y-4 overflow-hidden p-4 md:p-2">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
-                                {/* --- INICIO DE LA MODIFICACIÓN: El título de la categoría siempre es visible --- */}
-                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                                    {React.cloneElement(category.icon, { className: 'w-5 h-5 text-slate-600 flex-shrink-0' })}
-                                    <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>{category.name}</span>
+                                {/* --- INICIO DE LA CORRECCIÓN: Lógica de clases del Título (h3) --- */}
+                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                                    {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0' })}
+                                    <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                                        {category.name}
+                                    </span>
                                 </h3>
-                                {/* --- FIN DE LA MODIFICACIÓN --- */}
+                                {/* --- FIN DE LA CORRECCIÓN --- */}
                                 <div className="space-y-1">
                                     {category.items.map(item => {
                                         const isActive = activeSetting === item.id;
