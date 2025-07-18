@@ -33,10 +33,14 @@ const SettingsPage = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
     const collapseTimeoutRef = useRef(null);
 
+    // 1. Lógica de colapso y expansión del menú lateral
     useEffect(() => {
+        // Colapsar automáticamente 3 segundos después de la carga inicial
         const initialCollapseTimer = setTimeout(() => {
             setIsSidebarExpanded(false);
         }, 3000);
+        
+        // Limpiar el temporizador si el componente se desmonta
         return () => clearTimeout(initialCollapseTimer);
     }, []);
 
@@ -48,9 +52,10 @@ const SettingsPage = () => {
     };
 
     const handleMouseLeave = () => {
+        // Colapsar 3 segundos después de que el mouse sale del menú
         collapseTimeoutRef.current = setTimeout(() => {
             setIsSidebarExpanded(false);
-        }, 1500);
+        }, 3000);
     };
 
     const settingCategories = useMemo(() => [
@@ -98,17 +103,19 @@ const SettingsPage = () => {
                  <Button onClick={handleSave} variant="primary">Guardar Cambios</Button>
              </div>
 
+             {/* 2. Contenedor principal ajustado con flexbox */}
              <div className="md:flex md:gap-8 items-start">
                  <aside
-                     className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                     className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                      onMouseEnter={handleMouseEnter}
                      onMouseLeave={handleMouseLeave}
                  >
-                     <div className="space-y-4 overflow-hidden p-4 md:p-2">
+                     <div className="space-y-4 overflow-hidden p-2">
                          {visibleCategories.map(category => (
                              <div key={category.name}>
                                  <h3 className={`mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2 ${isSidebarExpanded ? 'px-3' : 'justify-center'}`}>
-                                     {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0' })}
+                                     {/* 3. Icono de categoría con color más oscuro */}
+                                     {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0 text-slate-600' })}
                                      <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
                                          {category.name}
                                      </span>
@@ -116,24 +123,14 @@ const SettingsPage = () => {
                                  <div className="space-y-1">
                                      {category.items.map(item => {
                                          const isActive = activeSetting === item.id;
-
                                          return (
                                              <button
                                                  key={item.id}
                                                  onClick={() => setActiveSetting(item.id)}
                                                  title={isSidebarExpanded ? '' : item.label}
-                                                 className={`
-                                                     w-full text-sm py-2 px-3 rounded-md transition-colors flex items-center
-                                                     ${isActive
-                                                         ? 'bg-indigo-100 text-indigo-700 font-semibold'
-                                                         : 'text-slate-600 hover:bg-slate-100'
-                                                     }
-                                                     ${isSidebarExpanded
-                                                         ? 'gap-3'
-                                                         : 'justify-center'
-                                                     }
-                                                 `}
+                                                 className={`w-full text-sm py-2 px-3 rounded-md transition-colors flex items-center ${isActive ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'} ${isSidebarExpanded ? 'gap-3' : 'justify-center'}`}
                                              >
+                                                 {/* 4. Icono de item con color más claro */}
                                                  {React.cloneElement(item.icon, {
                                                      className: `w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-700' : 'text-slate-500'}`
                                                  })}
@@ -149,6 +146,7 @@ const SettingsPage = () => {
                      </div>
                  </aside>
 
+                 {/* 5. Contenedor del contenido principal con min-w-0 para evitar desbordamiento */}
                  <main className="flex-grow min-w-0">
                      {ActiveComponent && <ActiveComponent config={config} setConfig={setConfig} />}
                  </main>
