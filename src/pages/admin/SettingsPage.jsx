@@ -105,13 +105,13 @@ const SettingsPage = () => {
                      onMouseEnter={handleMouseEnter}
                      onMouseLeave={handleMouseLeave}
                  >
-                     {/* CORRECCIÓN: Se elimina 'overflow-hidden' para que los íconos no se recorten */}
                      <div className="space-y-4 p-2">
                          {visibleCategories.map(category => (
                              <div key={category.name}>
                                  <h3 className={`mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2 ${isSidebarExpanded ? 'px-3' : 'justify-center'}`}>
                                      {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0 text-slate-600' })}
-                                     <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                                     {/* CORRECCIÓN: Usar 'hidden' para remover el texto del layout */}
+                                     <span className={`whitespace-nowrap ${isSidebarExpanded ? 'opacity-100 transition-opacity' : 'hidden'}`}>
                                          {category.name}
                                      </span>
                                  </h3>
@@ -128,7 +128,8 @@ const SettingsPage = () => {
                                                  {React.cloneElement(item.icon, {
                                                      className: `w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-700' : 'text-slate-500'}`
                                                  })}
-                                                 <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100 delay-100' : 'opacity-0'}`}>
+                                                 {/* CORRECCIÓN: Usar 'hidden' para remover el texto del layout */}
+                                                 <span className={`whitespace-nowrap ${isSidebarExpanded ? 'opacity-100 transition-opacity' : 'hidden'}`}>
                                                      {item.label}
                                                  </span>
                                              </button>
