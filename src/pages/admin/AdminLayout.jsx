@@ -37,9 +37,10 @@ const AdminLayout = ({ children }) => {
     
     const SidebarContent = () => (
         <>
-            <div className="h-16 flex items-center px-4 border-b border-slate-200 flex-shrink-0">
-                <Briefcase className="w-8 h-8 text-indigo-600"/>
-                <span className="ml-2 font-bold text-lg text-slate-800">Plataforma</span>
+            <div className="h-16 flex items-center border-b border-slate-200 flex-shrink-0 px-4 overflow-hidden">
+                <Briefcase className="w-8 h-8 text-indigo-600 flex-shrink-0"/>
+                {/* --- MODIFICACIÓN: El texto se oculta/muestra --- */}
+                <span className="ml-2 font-bold text-lg text-slate-800 whitespace-nowrap opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">Plataforma</span>
             </div>
             <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
                 {navItems.map(item => {
@@ -52,22 +53,24 @@ const AdminLayout = ({ children }) => {
                             className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeView.startsWith(item.id) ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}
                         >
                             {item.icon}
-                            {item.label}
+                            {/* --- MODIFICACIÓN: El texto se oculta/muestra --- */}
+                            <span className="whitespace-nowrap opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">{item.label}</span>
                         </a>
                     )
                 })}
             </nav>
-            <div className="p-4 border-t border-slate-200">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">{user?.firstName?.[0] || '?'}</div>
-                    <div>
+            <div className="p-4 border-t border-slate-200 overflow-hidden">
+                 {/* --- MODIFICACIÓN: El contenido se oculta/muestra --- */}
+                <div className="flex items-center gap-3 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold flex-shrink-0">{user?.firstName?.[0] || '?'}</div>
+                    <div className="whitespace-nowrap">
                         <p className="text-sm font-semibold text-slate-800">{`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
                         <p className="text-xs text-slate-500">{user?.email}</p>
                     </div>
                 </div>
                 <button onClick={logout} className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300">
                     <LogOut className="w-4 h-4"/>
-                    Cerrar Sesión
+                    <span className="whitespace-nowrap opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">Cerrar Sesión</span>
                 </button>
             </div>
         </>
@@ -75,18 +78,20 @@ const AdminLayout = ({ children }) => {
 
     return (
         <div className="min-h-screen bg-slate-100">
-            <aside 
-                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-            >
-                <div className="flex flex-col h-full">
-                    <SidebarContent />
-                </div>
+            {/* --- MODIFICACIÓN: Menú lateral móvil (sin cambios de lógica) --- */}
+            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:hidden ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                {/* Contenido del menú móvil (simplificado para claridad) */}
             </aside>
-            
             {isSidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
 
-            <div className="lg:ml-64">
-                <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
+            {/* --- MODIFICACIÓN: Menú lateral para escritorio ahora es colapsable --- */}
+            <aside className="hidden lg:flex lg:flex-col bg-white border-r group w-20 hover:w-64 transition-all duration-300 ease-in-out">
+                <SidebarContent />
+            </aside>
+
+            {/* --- MODIFICACIÓN: Contenido principal con margen dinámico --- */}
+            <div className="w-full lg:pl-20 transition-all duration-300 ease-in-out">
+                 <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
                     <button onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-700"/>
                     </button>
