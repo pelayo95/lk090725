@@ -27,7 +27,7 @@ const UserManagementPage = () => {
             ...newUserData,
             uid: uuidv4(),
             companyId: user.companyId,
-            trainingDocuments: [], // Inicializar vacío
+            trainingDocuments: [],
             lastVisited: {},
         };
         setAllUsers(prev => [...prev, newUser]);
@@ -48,7 +48,6 @@ const UserManagementPage = () => {
 
     const handleDeleteUser = () => {
         if (!userToDelete) return;
-        const userName = `${userToDelete.firstName} ${userToDelete.lastName}`;
         setAllUsers(prev => prev.filter(u => u.uid !== userToDelete.uid));
         addToast("Usuario eliminado con éxito.", "success");
         setUserToDelete(null);
@@ -103,7 +102,6 @@ const UserManagementPage = () => {
                  </table>
             </Card>
 
-            {/* --- INICIO DE LA MODIFICACIÓN: Modal de Creación Actualizado --- */}
             <AddItemModal
                  isOpen={isCreateModalOpen}
                  onClose={() => setIsCreateModalOpen(false)}
@@ -142,7 +140,6 @@ const UserManagementPage = () => {
                     </div>
                 )}
             </AddItemModal>
-            {/* --- FIN DE LA MODIFICACIÓN --- */}
             
             {isEditModalOpen && (
                 <UserEditModal
