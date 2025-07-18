@@ -11,36 +11,28 @@ const AdminLayout = ({ children }) => {
     const [activeView, setActiveView] = useState('dashboard');
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     
-    // --- INICIO DE LA LÓGICA DEL MENÚ COLAPSABLE DINÁMICO ---
     const [isDesktopSidebarExpanded, setIsDesktopSidebarExpanded] = useState(true);
     const collapseTimeoutRef = useRef(null);
 
-    // Efecto para colapsar el menú 3 segundos después de cargar la página
     useEffect(() => {
         const initialCollapseTimer = setTimeout(() => {
             setIsDesktopSidebarExpanded(false);
-        }, 3000); // 3 segundos
-
-        // Limpia el temporizador si el componente se desmonta antes de que se cumpla
+        }, 3000);
         return () => clearTimeout(initialCollapseTimer);
-    }, []); // El array vacío [] asegura que esto solo se ejecute una vez
+    }, []);
 
     const handleMouseEnter = () => {
-        // Cancela cualquier temporizador de colapso pendiente
         if (collapseTimeoutRef.current) {
             clearTimeout(collapseTimeoutRef.current);
         }
-        // Expande el menú inmediatamente
         setIsDesktopSidebarExpanded(true);
     };
 
     const handleMouseLeave = () => {
-        // Creamos un nuevo temporizador que colapsará el menú después de 1.5 segundos
         collapseTimeoutRef.current = setTimeout(() => {
             setIsDesktopSidebarExpanded(false);
-        }, 1500); // 1.5 segundos
+        }, 1500);
     };
-    // --- FIN DE LA LÓGICA ---
 
     const handleNavigation = (view) => {
         setActiveView(view);
@@ -127,7 +119,8 @@ const AdminLayout = ({ children }) => {
                     </button>
                     <div className="flex-1 text-center font-bold text-lg text-slate-800">Plataforma</div>
                 </header>
-                <main>
+                {/* CORRECCIÓN: Se añade 'overflow-x-hidden' para prevenir desbordamiento horizontal */}
+                <main className="overflow-x-hidden">
                     <div className="p-4 sm:p-6 lg:p-8">
                         {children}
                     </div>
