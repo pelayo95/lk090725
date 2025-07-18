@@ -99,9 +99,51 @@ export const initialData = {
     { id: "empresa-a", name: "Empresa A", legalName: "Empresa A S.A.", rut: "76.123.456-7", address: "Av. Siempre Viva 123", abbreviation: "EMPA", commercialContact: {name: 'Juan Perez', rut: '12.345.678-9', position: 'Gerente Comercial', phone: '+56912345678', email: 'juan.perez@emp-a.com'}, admin: "admin-a@ejemplo.com", status: "activo", planId: 'plan-profesional' },
   ],
   users: [
-    { uid: "boss1", email: "boss@ejemplo.com", roleId: "boss_role", companyId: null, name: "Super Admin", password: "password", lastVisited: {} },
-    { uid: "adminA1", email: "admin-a@ejemplo.com", roleId: "rol_admin_empresa_a", companyId: "empresa-a", name: "Admin A", password: "password", rut: '1.111.111-1', position: 'Gerente RRHH', phone: '+56911111111', lastVisited: {} },
-    { uid: "investigadorA1", email: "investigador@ejemplo.com", roleId: "rol_investigador_empresa_a", companyId: "empresa-a", name: "Juan Investigador", password: "password", rut: '2.222.222-2', position: 'Investigador Interno', phone: '+56922222222', lastVisited: {} },
+    { 
+      uid: "boss1", 
+      email: "boss@ejemplo.com", 
+      roleId: "boss_role", 
+      companyId: null, 
+      firstName: "Super",
+      lastName: "Admin",
+      rut: "",
+      position: "Platform Owner",
+      phone: "",
+      specializedTraining: "",
+      trainingDocuments: [],
+      password: "password", 
+      lastVisited: {} 
+    },
+    { 
+      uid: "adminA1", 
+      email: "admin-a@ejemplo.com", 
+      roleId: "rol_admin_empresa_a", 
+      companyId: "empresa-a", 
+      firstName: "Admin",
+      lastName: "A",
+      rut: '1.111.111-1', 
+      position: 'Gerente RRHH',
+      phone: '+56911111111', 
+      specializedTraining: 'Experto en Mediación Laboral y Protocolos de Acoso.',
+      trainingDocuments: [],
+      password: "password", 
+      lastVisited: {} 
+    },
+    { 
+      uid: "investigadorA1", 
+      email: "investigador@ejemplo.com", 
+      roleId: "rol_investigador_empresa_a", 
+      companyId: "empresa-a", 
+      firstName: "Juan",
+      lastName: "Investigador",
+      rut: '2.222.222-2', 
+      position: 'Investigador Interno',
+      phone: '+56922222222', 
+      specializedTraining: 'Certificación en investigación de denuncias internas.',
+      trainingDocuments: [],
+      password: "password", 
+      lastVisited: {} 
+    },
   ],
   complaints: [
      {
@@ -145,6 +187,7 @@ export const initialData = {
        accusedChatMessages: [],
        accusedWitnesses: [],
        interviews: [],
+       costs: [],
      },
   ],
   configurations: {
