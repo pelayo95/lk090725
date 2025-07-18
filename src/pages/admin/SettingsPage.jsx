@@ -1,4 +1,3 @@
-// src/pages/admin/SettingsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfig } from '../../contexts/ConfigContext';
@@ -16,7 +15,7 @@ import DocumentationSettings from './settings/DocumentationSettings';
 import { FileText, Clock, Shield, Users, MessageSquare, Bell, AlertTriangle, Eye, LayoutList } from 'lucide-react';
 import { userHasPermission } from '../../utils/userUtils';
 
-const SettingsPage = () => {
+const SettingsPage = ({ features }) => {
     const { user } = useAuth();
     const { getCompanyConfig, updateCompanyConfig } = useConfig();
     const { addToast } = useNotification();
