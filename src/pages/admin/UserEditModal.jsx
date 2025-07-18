@@ -8,7 +8,19 @@ import { uuidv4 } from '../../utils/uuid';
 
 const UserEditModal = ({ isOpen, onClose, onSave, user, roles }) => {
     const { user: currentUser } = useAuth();
-    const [formData, setFormData] = useState({});
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Se inicializa el estado con una estructura base para evitar errores de 'undefined'.
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        rut: '',
+        position: '',
+        specializedTraining: '',
+        trainingDocuments: [],
+        roleId: '',
+    });
+    // --- FIN DE LA CORRECCIÓN ---
 
     useEffect(() => {
         if (user) {
