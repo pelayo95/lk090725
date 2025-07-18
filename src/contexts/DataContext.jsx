@@ -21,6 +21,8 @@ export const DataProvider = ({ children }) => {
     const [communicationTemplates, setCommunicationTemplates] = useLocalStorage('communicationTemplates', initialData.communicationTemplates || {});
     const [notificationRules, setNotificationRules] = useLocalStorage('notificationRules', initialData.notificationRules || {});
     const [supportTickets, setSupportTickets] = useLocalStorage('supportTickets', initialData.supportTickets || []);
+    const [documentCategories, setDocumentCategories] = useLocalStorage('documentCategories', initialData.documentCategories || {});
+    const [companyDocuments, setCompanyDocuments] = useLocalStorage('companyDocuments', initialData.companyDocuments || {});
 
     useEffect(() => {
         setIsLoading(false);
@@ -44,14 +46,16 @@ export const DataProvider = ({ children }) => {
             internalAction: null,
             dtComplaintDate: null,
             dtReceptionDate: null,
-            managements: [
-                { id: uuidv4(), text: "Definir si la investigación será interna o derivada a la Inspección del Trabajo", completed: false, dueDate: null, assignedTo: null }
-            ],
+            managements: [],
             safeguardMeasures: [],
             internalComments: [],
             auditLog: [{ id: uuidv4(), action: "Creación de Denuncia", userId: "public", timestamp: new Date().toISOString() }],
             timelineProgress: {},
             chatMessages: [],
+            accusedChatMessages: [],
+            accusedWitnesses: [],
+            interviews: [],
+            costs: [],
             caseFiles: [],
             sanctions: [],
             otherMeasures: [],
@@ -127,10 +131,12 @@ export const DataProvider = ({ children }) => {
         roles, setRoles,
         communicationTemplates, setCommunicationTemplates,
         notificationRules, setNotificationRules,
-        supportTickets, addSupportTicket, updateSupportTicket
+        supportTickets, addSupportTicket, updateSupportTicket,
+        documentCategories, setDocumentCategories,
+        companyDocuments, setCompanyDocuments
     }), [
-        companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules, supportTickets,
-        setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules, setSupportTickets,
+        companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules, supportTickets, documentCategories, companyDocuments,
+        setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules, setSupportTickets, setDocumentCategories, setCompanyDocuments,
         addComplaint, updateComplaint, updateCompany, addSupportTicket, updateSupportTicket
     ]);
 
