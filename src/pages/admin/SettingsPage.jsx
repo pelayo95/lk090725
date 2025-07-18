@@ -36,7 +36,7 @@ const SettingsPage = () => {
     useEffect(() => {
         const initialCollapseTimer = setTimeout(() => {
             setIsSidebarExpanded(false);
-        }, 3000); // 3 segundos de espera inicial
+        }, 3000);
         return () => clearTimeout(initialCollapseTimer);
     }, []);
 
@@ -50,7 +50,7 @@ const SettingsPage = () => {
     const handleMouseLeave = () => {
         collapseTimeoutRef.current = setTimeout(() => {
             setIsSidebarExpanded(false);
-        }, 3000); // 3 segundos de espera al salir
+        }, 1500);
     };
 
     const settingCategories = useMemo(() => [
@@ -100,14 +100,14 @@ const SettingsPage = () => {
             
             <div className="md:flex md:gap-8 items-start">
                 <aside 
-                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <div className="space-y-4">
+                    <div className="space-y-4 overflow-hidden p-4 md:p-2">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
-                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                                <h3 className={`mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2 ${isSidebarExpanded ? 'px-3' : 'justify-center'}`}>
                                     {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0' })}
                                     <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
                                         {category.name}
@@ -116,16 +116,20 @@ const SettingsPage = () => {
                                 <div className="space-y-1">
                                     {category.items.map(item => {
                                         const isActive = activeSetting === item.id;
-                                        let buttonClasses = 'w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-3';
+                                        // --- INICIO DE LA MODIFICACIÓN ---
+                                        let buttonClasses = 'w-full text-left text-sm py-2 rounded-md transition-colors flex items-center gap-3';
                                         let iconClasses = 'w-5 h-5 flex-shrink-0';
                                         
                                         if (isSidebarExpanded) {
+                                            buttonClasses += ' px-3'; // Padding normal si está expandido
                                             buttonClasses += isActive ? ' bg-indigo-100 text-indigo-700 font-semibold' : ' text-slate-600 hover:bg-slate-100';
                                             iconClasses += isActive ? ' text-indigo-700' : ' text-slate-500';
                                         } else {
-                                            buttonClasses += ' md:justify-center';
+                                            // Cuando está colapsado, centramos el contenido y removemos padding horizontal
+                                            buttonClasses += ' md:justify-center px-3'; 
                                             iconClasses += isActive ? ' text-indigo-600' : ' text-slate-500 hover:text-slate-900';
                                         }
+                                        // --- FIN DE LA MODIFICACIÓN ---
                                         
                                         return (
                                             <button 
