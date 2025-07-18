@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Button } from '../../components/common';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { userHasPermission } from '../../utils/userUtils';
 
 // Importar todos los componentes de configuración
@@ -22,7 +21,7 @@ import NotificationSettings from './settings/NotificationSettings';
 import { 
     Users, FileText, Brush, SlidersHorizontal, 
     ShieldCheck, ClipboardList, AlertTriangle, Clock, MessageSquarePlus, Shield, 
-    LayoutList, Eye, Bell, ChevronsLeft, ChevronsRight
+    LayoutList, Eye, Bell 
 } from 'lucide-react';
 
 const SettingsPage = () => {
@@ -30,8 +29,30 @@ const SettingsPage = () => {
     const { getCompanyConfig, updateCompanyConfig } = useConfig();
     const { addToast } = useNotification();
     const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
-    const [isSidebarExpanded, setIsSidebarExpanded] = useLocalStorage('settingsSidebarExpanded', true);
     
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+    const collapseTimeoutRef = useRef(null);
+
+    useEffect(() => {
+        const initialCollapseTimer = setTimeout(() => {
+            setIsSidebarExpanded(false);
+        }, 3000); // 3 segundos de espera inicial
+        return () => clearTimeout(initialCollapseTimer);
+    }, []);
+
+    const handleMouseEnter = () => {
+        if (collapseTimeoutRef.current) {
+            clearTimeout(collapseTimeoutRef.current);
+        }
+        setIsSidebarExpanded(true);
+    };
+
+    const handleMouseLeave = () => {
+        collapseTimeoutRef.current = setTimeout(() => {
+            setIsSidebarExpanded(false);
+        }, 3000); // 3 segundos de espera al salir
+    };
+
     const settingCategories = useMemo(() => [
         { name: 'Gestión de Acceso', icon: <Users className="w-5 h-5"/>, items: [{ id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage, icon: <ShieldCheck className="w-5 h-5" /> }] },
         { name: 'Configuración de Denuncias', icon: <FileText className="w-5 h-5"/>, items: [
@@ -77,27 +98,21 @@ const SettingsPage = () => {
                 <Button onClick={handleSave} variant="primary">Guardar Cambios</Button>
             </div>
             
-            <div className="md:flex md:gap-8 items-start relative">
-                <button 
-                    onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-                    className="hidden md:block absolute -left-4 top-0 z-10 bg-white border border-slate-300 rounded-full p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 focus:outline-none"
-                    title={isSidebarExpanded ? 'Colapsar menú' : 'Expandir menú'}
+            <div className="md:flex md:gap-8 items-start">
+                <aside 
+                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
                 >
-                    {isSidebarExpanded ? <ChevronsLeft className="w-4 h-4" /> : <ChevronsRight className="w-4 h-4" />}
-                </button>
-
-                <aside className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}>
-                    <div className="space-y-4 overflow-hidden p-4 md:p-2">
+                    <div className="space-y-4">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
-                                {/* --- INICIO DE LA MODIFICACIÓN --- */}
-                                <h3 className={`px-3 mb-2 text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2 ${!isSidebarExpanded && 'md:justify-center'}`}>
+                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                                     {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0' })}
                                     <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>
                                         {category.name}
                                     </span>
                                 </h3>
-                                {/* --- FIN DE LA MODIFICACIÓN --- */}
                                 <div className="space-y-1">
                                     {category.items.map(item => {
                                         const isActive = activeSetting === item.id;
