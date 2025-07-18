@@ -33,11 +33,6 @@ const AdminLayout = ({ children }) => {
         setIsDesktopSidebarExpanded(true);
     };
 
-    const handleNavigation = (view) => {
-        setActiveView(view);
-        window.location.hash = `#admin/${view}`;
-        setIsMobileSidebarOpen(false); 
-    };
 
     // --- FIN DE LA LÓGICA ---
     const handleNavigation = (view) => {
