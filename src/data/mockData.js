@@ -236,5 +236,44 @@ export const initialData = {
         }
       ]
     }
-  ]
+  ],
+  // --- NUEVAS ESTRUCTURAS DE DATOS AÑADIDAS ---
+  documentCategories: {
+    "empresa-a": [
+      { id: "cat-001", name: "Políticas Internas" },
+      { id: "cat-002", name: "Procedimientos de Seguridad" },
+      { id: "cat-003", name: "Manuales de Capacitación" }
+    ]
+  },
+
+  companyDocuments: {
+    "empresa-a": [
+      { 
+        id: "doc-001", 
+        categoryId: "cat-001", 
+        name: "Política de Acoso Laboral v1.2.pdf",
+        uploadedAt: "2025-07-15T10:00:00Z",
+        uploadedBy: "adminA1",
+        url: "#" // En una implementación real, aquí iría la URL del archivo
+      },
+      { 
+        id: "doc-002", 
+        categoryId: "cat-001", 
+        name: "Código de Ética y Conducta.pdf",
+        uploadedAt: "2025-06-20T14:30:00Z",
+        uploadedBy: "adminA1",
+        url: "#"
+      },
+      { 
+        id: "doc-003", 
+        categoryId: "cat-002", 
+        name: "Plan de Evacuación de Oficinas.pdf",
+        uploadedAt: "2025-05-01T09:00:00Z",
+        uploadedBy: "adminA1",
+        url: "#"
+      }
+    ]
+  }
+  // --- FIN DE NUEVAS ESTRUCTURAS ---
+};
 };
