@@ -99,24 +99,23 @@ const SettingsPage = () => {
             </div>
             
             <div className="md:flex md:gap-8 items-start">
-                {/* --- INICIO DE LA MODIFICACIÓN: Clases de estilo del <aside> --- */}
                 <aside 
-                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white border border-slate-200 rounded-lg shadow-sm ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                {/* --- FIN DE LA MODIFICACIÓN --- */}
-                    <div className="space-y-6 overflow-hidden">
+                    <div className="space-y-4 overflow-hidden p-4 md:p-2">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
-                                <h3 className={`px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2 transition-opacity duration-300 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>
-                                    {React.cloneElement(category.icon, { className: 'w-5 h-5 text-slate-500 flex-shrink-0' })}
-                                    <span className={`whitespace-nowrap ${isSidebarExpanded ? '' : 'md:hidden'}`}>{category.name}</span>
+                                {/* --- INICIO DE LA MODIFICACIÓN: El título de la categoría siempre es visible --- */}
+                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                    {React.cloneElement(category.icon, { className: 'w-5 h-5 text-slate-600 flex-shrink-0' })}
+                                    <span className={`whitespace-nowrap transition-opacity duration-200 ${isSidebarExpanded ? 'opacity-100' : 'opacity-0'}`}>{category.name}</span>
                                 </h3>
+                                {/* --- FIN DE LA MODIFICACIÓN --- */}
                                 <div className="space-y-1">
                                     {category.items.map(item => {
                                         const isActive = activeSetting === item.id;
-                                        // --- INICIO DE LA MODIFICACIÓN: Lógica de clases para los botones ---
                                         let buttonClasses = 'w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-3';
                                         let iconClasses = 'w-5 h-5 flex-shrink-0';
                                         
@@ -124,12 +123,10 @@ const SettingsPage = () => {
                                             buttonClasses += isActive ? ' bg-indigo-100 text-indigo-700 font-semibold' : ' text-slate-600 hover:bg-slate-100';
                                             iconClasses += isActive ? ' text-indigo-700' : ' text-slate-500';
                                         } else {
-                                            // Cuando está colapsado, los botones son transparentes y el ícono activo cambia de color.
                                             buttonClasses += ' md:justify-center';
                                             iconClasses += isActive ? ' text-indigo-600' : ' text-slate-500 hover:text-slate-900';
                                         }
-                                        // --- FIN DE LA MODIFICACIÓN ---
-
+                                        
                                         return (
                                             <button 
                                                 key={item.id}
