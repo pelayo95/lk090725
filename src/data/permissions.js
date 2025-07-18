@@ -57,6 +57,11 @@ export const allPermissions = {
   // Módulo: Auditoría
   auditoria_puede_ver: "Acceder a la pestaña de auditoría",
 
+  // --- NUEVOS PERMISOS AÑADIDOS ---
+  documentacion_puede_ver: "Acceder al módulo de documentación",
+  documentacion_puede_gestionar: "Gestionar documentos y categorías",
+  // --- FIN DE NUEVOS PERMISOS ---
+  
   // Módulo: Configuración
   config_puede_gestionar_roles: "Crear, editar y eliminar roles",
   config_usuarios_puede_ver_lista: "Ver la lista de usuarios de la empresa",
