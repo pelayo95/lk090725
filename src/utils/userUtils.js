@@ -4,12 +4,16 @@
  * Finds a user's name by their ID from a list of all users.
  * @param {string} userId - The ID of the user to find.
  * @param {Array} allUsers - The array of all user objects.
- * @returns {string} The user's name or "N/A" if not found.
+ * @returns {string} The user's full name or "N/A" if not found.
  */
 export const getUserNameById = (userId, allUsers) => {
     if (!userId || !allUsers) return "N/A";
     const user = allUsers.find(u => u.uid === userId);
-    return user?.name || "N/A";
+    // --- LÓGICA ACTUALIZADA ---
+    if (user) {
+        return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    }
+    return "N/A";
 };
 
 /**
@@ -20,9 +24,6 @@ export const getUserNameById = (userId, allUsers) => {
  */
 export const userHasPermission = (user, requiredPermissions) => {
     if (!user || !user.permissions) return false;
-
     const permissionsToCheck = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
-    
-    // If a feature module is available if ANY of its sub-permissions is true.
     return permissionsToCheck.some(p => user.permissions[p]);
 };
