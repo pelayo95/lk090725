@@ -17,7 +17,8 @@ import DocumentationSettings from './settings/DocumentationSettings';
 import AccusedPortalSettings from './settings/AccusedPortalSettings';
 import NotificationSettings from './settings/NotificationSettings';
 
-import { Users, FileText, Brush, SlidersHorizontal } from 'lucide-react';
+// Importar los nuevos iconos para las categorías
+import { Users, FileText, Brush, SlidersHorizontal, Eye, LayoutList } from 'lucide-react';
 
 const SettingsPage = () => {
     const { user } = useAuth();
@@ -28,10 +29,11 @@ const SettingsPage = () => {
     const [isSettingsSidebarExpanded, setIsSettingsSidebarExpanded] = useState(true);
     const collapseTimeoutRef = useRef(null);
 
+    // Efecto para colapsar el menú automáticamente al cargar la página
     useEffect(() => {
         const initialCollapseTimer = setTimeout(() => {
             setIsSettingsSidebarExpanded(false);
-        }, 3000);
+        }, 3000); // 3 segundos
         return () => clearTimeout(initialCollapseTimer);
     }, []);
 
@@ -45,30 +47,32 @@ const SettingsPage = () => {
     const handleMouseLeave = () => {
         collapseTimeoutRef.current = setTimeout(() => {
             setIsSettingsSidebarExpanded(false);
-        }, 1500);
+        }, 1500); // 1.5 segundos
     };
 
     const settingCategories = useMemo(() => [
-        { name: 'Gestión de Acceso', icon: <Users className="w-5 h-5 text-slate-600"/>, items: [{ id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage }] },
-        { name: 'Configuración de Denuncias', icon: <FileText className="w-5 h-5 text-slate-600"/>, items: [
+        { name: 'Gestión de Acceso', icon: <Users className="w-5 h-5 flex-shrink-0"/>, items: [{ id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage }] },
+        { name: 'Configuración de Denuncias', icon: <FileText className="w-5 h-5 flex-shrink-0"/>, items: [
             { id: 'form', label: 'Formulario Público', permission: 'config_puede_gestionar_formularios', component: FormSettings },
             { id: 'declaration', label: 'Declaración de Veracidad', permission: 'config_puede_gestionar_declaracion', component: DeclarationSettings },
             { id: 'timeline', label: 'Líneas de Tiempo', permission: 'config_puede_gestionar_timelines', component: TimelineSettings },
         ]},
-        { name: 'Plantillas y Contenidos', icon: <Brush className="w-5 h-5 text-slate-600"/>, items: [
+        { name: 'Plantillas y Contenidos', icon: <Brush className="w-5 h-5 flex-shrink-0"/>, items: [
             { id: 'templates', label: 'Plantillas de Comunicación', permission: 'config_puede_gestionar_plantillas', component: CommunicationTemplatesSettings },
             { id: 'measures', label: 'Medidas por Defecto', permission: 'config_puede_gestionar_medidas_defecto', component: MeasuresSettings },
             { id: 'doc_categories', label: 'Categorías de Documentos', permission: 'documentacion_puede_gestionar', component: DocumentationSettings },
         ]},
-        { name: 'Módulos y Automatización', icon: <SlidersHorizontal className="w-5 h-5 text-slate-600"/>, items: [
+        { name: 'Módulos y Automatización', icon: <SlidersHorizontal className="w-5 h-5 flex-shrink-0"/>, items: [
             { id: 'accused_portal', label: 'Portal del Denunciado', permission: 'config_puede_gestionar_portal_denunciado', component: AccusedPortalSettings },
             { id: 'notifications', label: 'Reglas de Notificación', permission: 'config_puede_gestionar_notificaciones', component: NotificationSettings },
         ]},
     ], []);
     
     const visibleCategories = useMemo(() => {
-        return settingCategories.map(category => ({ ...category, items: category.items.filter(item => userHasPermission(user, item.permission)) }))
-            .filter(category => category.items.length > 0);
+        return settingCategories.map(category => ({
+            ...category,
+            items: category.items.filter(item => userHasPermission(user, item.permission))
+        })).filter(category => category.items.length > 0);
     }, [user, settingCategories]);
     
     const [activeSetting, setActiveSetting] = useState(() => visibleCategories[0]?.items[0]?.id || '');
@@ -98,16 +102,19 @@ const SettingsPage = () => {
             
             <div className="md:flex md:gap-8 items-start">
                 <aside 
-                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSettingsSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
+                    className={`md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 bg-white md:bg-transparent rounded-lg md:rounded-none shadow-sm md:shadow-none ${isSettingsSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <div className="space-y-6 overflow-hidden">
+                    <div className="space-y-6 overflow-hidden p-4 md:p-0">
                         {visibleCategories.map(category => (
                             <div key={category.name}>
-                                <h3 className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                <h3 
+                                    className={`px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2 transition-opacity duration-300 ${isSettingsSidebarExpanded ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}
+                                    // El título es visible en móvil, y siempre visible en desktop
+                                >
                                     {category.icon}
-                                    <span className={`transition-opacity duration-200 whitespace-nowrap ${isSettingsSidebarExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>{category.name}</span>
+                                    <span className={`whitespace-nowrap ${isSettingsSidebarExpanded ? '' : 'md:hidden'}`}>{category.name}</span>
                                 </h3>
                                 <div className="space-y-1">
                                     {category.items.map(item => (
@@ -117,8 +124,8 @@ const SettingsPage = () => {
                                             title={isSettingsSidebarExpanded ? '' : item.label}
                                             className={`w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-3 ${activeSetting === item.id ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'}`}
                                         >
-                                            <span className="flex-shrink-0">{item.icon}</span>
-                                            <span className={`whitespace-nowrap transition-opacity duration-200 ${isSettingsSidebarExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>{item.label}</span>
+                                            <div className="flex-shrink-0 text-slate-600">{category.icon}</div>
+                                            <span className={`whitespace-nowrap transition-opacity duration-200 ${isSettingsSidebarExpanded ? 'opacity-100 delay-100' : 'opacity-0'}`}>{item.label}</span>
                                         </button>
                                     ))}
                                 </div>
