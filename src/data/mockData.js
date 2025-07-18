@@ -237,7 +237,6 @@ export const initialData = {
       ]
     }
   ],
-  // --- NUEVAS ESTRUCTURAS DE DATOS AÑADIDAS ---
   documentCategories: {
     "empresa-a": [
       { id: "cat-001", name: "Políticas Internas" },
@@ -245,7 +244,6 @@ export const initialData = {
       { id: "cat-003", name: "Manuales de Capacitación" }
     ]
   },
-
   companyDocuments: {
     "empresa-a": [
       { 
@@ -254,7 +252,7 @@ export const initialData = {
         name: "Política de Acoso Laboral v1.2.pdf",
         uploadedAt: "2025-07-15T10:00:00Z",
         uploadedBy: "adminA1",
-        url: "#" // En una implementación real, aquí iría la URL del archivo
+        url: "#"
       },
       { 
         id: "doc-002", 
@@ -274,6 +272,4 @@ export const initialData = {
       }
     ]
   }
-  // --- FIN DE NUEVAS ESTRUCTURAS ---
-};
 };
