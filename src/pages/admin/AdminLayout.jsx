@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
-    Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy, Menu
+    Briefcase, LogOut, LayoutDashboard, Users, Settings, LifeBuoy, Menu, FolderKanban
 } from 'lucide-react';
 import { userHasPermission } from '../../utils/userUtils';
 
@@ -29,9 +29,10 @@ const AdminLayout = ({ children }) => {
 
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5"/>, permission: ['dashboard_ver_kpis', 'casos_ver_listado', 'dashboard_ver_agenda'] },
+        { id: 'documentation', label: 'Documentación', icon: <FolderKanban className="w-5 h-5"/>, permission: 'documentacion_puede_ver' },
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5"/>, permission: 'config_usuarios_puede_ver_lista' },
         { id: 'support', label: 'Soporte', icon: <LifeBuoy className="w-5 h-5"/>, permission: 'soporte_puede_crear_ver_tickets' },
-        { id: 'settings', label: 'Configuración', icon: <Settings className="w-5 h-5"/>, permission: ['config_puede_gestionar_roles', 'config_puede_gestionar_formularios', 'config_puede_gestionar_timelines', 'config_puede_gestionar_medidas_defecto', 'config_puede_gestionar_plantillas', 'config_puede_gestionar_notificaciones'] },
+        { id: 'settings', label: 'Configuración', icon: <Settings className="w-5 h-5"/>, permission: ['config_puede_gestionar_roles', 'config_puede_gestionar_formularios', 'config_puede_gestionar_timelines', 'config_puede_gestionar_medidas_defecto', 'config_puede_gestionar_plantillas', 'config_puede_gestionar_notificaciones', 'documentacion_puede_gestionar'] },
     ];
     
     const SidebarContent = () => (
@@ -58,15 +59,11 @@ const AdminLayout = ({ children }) => {
             </nav>
             <div className="p-4 border-t border-slate-200">
                 <div className="flex items-center gap-3">
-                    {/* --- INICIO DE LA CORRECCIÓN --- */}
-                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">
-                        {user?.firstName?.[0] || '?'}
-                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">{user?.firstName?.[0] || '?'}</div>
                     <div>
                         <p className="text-sm font-semibold text-slate-800">{`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
                         <p className="text-xs text-slate-500">{user?.email}</p>
                     </div>
-                    {/* --- FIN DE LA CORRECCIÓN --- */}
                 </div>
                 <button onClick={logout} className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300">
                     <LogOut className="w-4 h-4"/>
@@ -77,14 +74,18 @@ const AdminLayout = ({ children }) => {
     );
 
     return (
-        <div className="relative min-h-screen lg:flex">
-            <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="min-h-screen bg-slate-100">
+            <aside 
+                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            >
                 <div className="flex flex-col h-full">
                     <SidebarContent />
                 </div>
             </aside>
+            
             {isSidebarOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
-            <div className="lg:ml-64 flex-1 flex flex-col">
+
+            <div className="lg:ml-64">
                 <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4 sticky top-0 z-10">
                     <button onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-700"/>
