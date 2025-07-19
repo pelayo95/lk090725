@@ -119,7 +119,6 @@ const AdminLayout = ({ children }) => {
                     </button>
                     <div className="flex-1 text-center font-bold text-lg text-slate-800">Plataforma</div>
                 </header>
-                {/* CORRECCIÓN: Se añade 'overflow-x-hidden' para prevenir desbordamiento horizontal */}
                 <main className="overflow-x-hidden">
                     <div className="p-4 sm:p-6 lg:p-8">
                         {children}
