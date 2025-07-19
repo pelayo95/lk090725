@@ -9,11 +9,6 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
-// Función para despachar eventos personalizados que podremos escuchar en otros lugares
-const dispatchSuggestionEvent = (eventName, detail) => {
-    window.dispatchEvent(new CustomEvent(eventName, { detail }));
-};
-
 export const DataProvider = ({ children }) => {
     const { addToast } = useNotification();
     const [isLoading, setIsLoading] = useState(true);
@@ -67,72 +62,40 @@ export const DataProvider = ({ children }) => {
         };
         
         setComplaints(prev => [...prev, newComplaint]);
-
-        // En lugar de llamar a showSuggestion, despachamos un evento
-        const templates = communicationTemplates[companyId] || [];
-        const creationTemplate = templates.find(t => t.triggerPoint === 'case_created');
-        if (creationTemplate) {
-            dispatchSuggestionEvent('showSuggestion', {
-                trigger: 'case_created',
-                caseId: newComplaint.id,
-                template: creationTemplate
-            });
-        }
-        
         return newComplaint;
-    }, [setComplaints, communicationTemplates]);
+    }, [setComplaints]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
-        let originalComplaint = null;
-
-        setComplaints(prevComplaints => {
-            originalComplaint = prevComplaints.find(c => c.id === complaintId);
-            return prevComplaints.map(c => {
-                if (c.id === complaintId) {
-                    const finalUpdates = {...updates};
-                    
-                    if(updates.status === 'Cerrada' && c.status !== 'Cerrada') {
-                        finalUpdates.closedAt = new Date().toISOString();
-                    } else if (updates.status !== 'Cerrada' && c.status === 'Cerrada') {
-                        finalUpdates.closedAt = null;
-                    }
-
-                    const auditLogEntries = [];
-                    for (const key in finalUpdates) {
-                        if (Object.prototype.hasOwnProperty.call(finalUpdates, key) && !Array.isArray(finalUpdates[key]) && key !== 'timelineProgress' && key !== 'auditLog' && JSON.stringify(finalUpdates[key]) !== JSON.stringify(c[key])) {
-                            auditLogEntries.push({
-                                id: uuidv4(),
-                                action: `Campo '${key}' actualizado.`,
-                                userId: user?.uid || 'system',
-                                timestamp: new Date().toISOString()
-                            });
-                        }
-                    }
-
-                    const newAuditLog = finalUpdates.auditLog ? finalUpdates.auditLog : [...c.auditLog, ...auditLogEntries];
-
-                    return { ...c, ...finalUpdates, auditLog: newAuditLog };
+        setComplaints(prevComplaints => prevComplaints.map(c => {
+            if (c.id === complaintId) {
+                const finalUpdates = {...updates};
+                
+                if(updates.status === 'Cerrada' && c.status !== 'Cerrada') {
+                    finalUpdates.closedAt = new Date().toISOString();
+                } else if (updates.status !== 'Cerrada' && c.status === 'Cerrada') {
+                    finalUpdates.closedAt = null;
                 }
-                return c;
-            });
-        });
 
-        if (originalComplaint) {
-            const templates = communicationTemplates[originalComplaint.companyId] || [];
+                const auditLogEntries = [];
+                for (const key in finalUpdates) {
+                    if (Object.prototype.hasOwnProperty.call(finalUpdates, key) && !Array.isArray(finalUpdates[key]) && key !== 'timelineProgress' && key !== 'auditLog' && JSON.stringify(finalUpdates[key]) !== JSON.stringify(c[key])) {
+                        auditLogEntries.push({
+                            id: uuidv4(),
+                            action: `Campo '${key}' actualizado.`,
+                            userId: user?.uid || 'system',
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                }
 
-            if (updates.investigatorIds && originalComplaint.investigatorIds.length === 0 && updates.investigatorIds.length > 0) {
-                const template = templates.find(t => t.triggerPoint === 'investigators_assigned');
-                if (template) dispatchSuggestionEvent('showSuggestion', { trigger: 'investigators_assigned', caseId: complaintId, template });
+                const newAuditLog = finalUpdates.auditLog ? finalUpdates.auditLog : [...c.auditLog, ...auditLogEntries];
+
+                return { ...c, ...finalUpdates, auditLog: newAuditLog };
             }
-
-            if (updates.status === 'Cerrada' && originalComplaint.status !== 'Cerrada') {
-                const template = templates.find(t => t.triggerPoint === 'case_closed');
-                if (template) dispatchSuggestionEvent('showSuggestion', { trigger: 'case_closed', caseId: complaintId, template });
-            }
-        }
-
+            return c;
+        }));
         addToast("Caso actualizado correctamente", "success");
-    }, [setComplaints, addToast, communicationTemplates]);
+    }, [setComplaints, addToast]);
     
     const updateCompany = useCallback((companyId, updates) => {
         setCompanies(prevCompanies => prevCompanies.map(c => c.id === companyId ? { ...c, ...updates } : c));
