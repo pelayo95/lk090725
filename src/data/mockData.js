@@ -199,7 +199,7 @@ export const initialData = {
         id: "tpl_001",
         name: "Acuse de Recibo (Denunciante)",
         content: "Estimado/a,\n\nHemos recibido correctamente su denuncia, registrada bajo el código [CODIGO_CASO].\n\nLe confirmamos que hemos iniciado el proceso de investigación interno de acuerdo a nuestros protocolos. Un gestor/a se pondrá en contacto con usted a la brevedad para coordinar los próximos pasos.\n\nPuede utilizar este mismo chat para aportar cualquier antecedente adicional que considere relevante.\n\nAtentamente,\nEl Equipo de Cumplimiento.",
-        triggerPoint: "case_created"
+        triggerPoint: "ti1"
       },
       {
         id: "tpl_002",
@@ -223,7 +223,7 @@ export const initialData = {
         id: "tpl_005",
         name: "Cierre de Etapa de Investigación",
         content: "Estimado/a,\n\nLe comunicamos que la etapa de recopilación de antecedentes y entrevistas para el caso [CODIGO_CASO] ha concluido.\n\nEl equipo investigador procederá ahora a analizar la información para elaborar el informe de conclusiones. Le mantendremos informado/a sobre las siguientes etapas del proceso.\n\nAtentamente.",
-        triggerPoint: "manual"
+        triggerPoint: "ti3"
       },
       {
         id: "tpl_006",
