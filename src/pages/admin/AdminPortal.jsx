@@ -9,6 +9,7 @@ import UserManagementPage from './UserManagementPage';
 import SettingsPage from './SettingsPage';
 import SupportPage from './SupportPage';
 import DocumentationPage from './DocumentationPage';
+import TemplateSuggestionModal from '../../components/admin/TemplateSuggestionModal';
 
 const AdminPortal = () => {
     const { user } = useAuth();
@@ -40,6 +41,7 @@ const AdminPortal = () => {
     return (
         <AdminLayout features={features}>
             {content}
+            <TemplateSuggestionModal />
         </AdminLayout>
     );
 };
