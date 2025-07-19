@@ -12,6 +12,19 @@ const triggerOptions = [
     { value: 'case_created', label: 'Al crearse un nuevo caso' },
     { value: 'investigators_assigned', label: 'Al asignar investigadores por primera vez' },
     { value: 'case_closed', label: 'Al cerrar un caso' },
+    // Activadores de Línea de Tiempo (Interna)
+    { value: 'ti1', label: 'Timeline: Al completar "Recepción de denuncia"' },
+    { value: 'ti2', label: 'Timeline: Al completar "Gestiones iniciales"' },
+    { value: 'ti3', label: 'Timeline: Al completar "Investigación"' },
+    { value: 'ti4', label: 'Timeline: Al completar "Redacción y envío de informe"' },
+    { value: 'ti5', label: 'Timeline: Al completar "Revisión por Inspección del Trabajo"' },
+    { value: 'ti6', label: 'Timeline: Al completar "Aplicación de sanciones y medidas"' },
+    // Activadores de Línea de Tiempo (Derivada)
+    { value: 'td1', label: 'Timeline (D): Al completar "Recepción de la denuncia"' },
+    { value: 'td2', label: 'Timeline (D): Al completar "Gestiones iniciales y derivación"' },
+    // Activadores de Línea de Tiempo (Notificada)
+    { value: 'tn1', label: 'Timeline (N): Al completar "Recepción de notificación DT"' },
+    { value: 'tn2', label: 'Timeline (N): Al completar "Aplicación y comunicación de medidas"' },
 ];
 
 const CommunicationTemplatesSettings = () => {
