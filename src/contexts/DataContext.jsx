@@ -23,6 +23,7 @@ export const DataProvider = ({ children }) => {
     const [supportTickets, setSupportTickets] = useLocalStorage('supportTickets', initialData.supportTickets || []);
     const [documentCategories, setDocumentCategories] = useLocalStorage('documentCategories', initialData.documentCategories || {});
     const [companyDocuments, setCompanyDocuments] = useLocalStorage('companyDocuments', initialData.companyDocuments || {});
+    const [pendingTimelineCompletion, setPendingTimelineCompletion] = useLocalStorage('pendingTimelineCompletion', null);
 
     useEffect(() => {
         setIsLoading(false);
@@ -64,6 +65,25 @@ export const DataProvider = ({ children }) => {
         setComplaints(prev => [...prev, newComplaint]);
         return newComplaint;
     }, [setComplaints]);
+
+    const completePendingTimelineStage = useCallback((user) => {
+        if (!pendingTimelineCompletion) return;
+
+        const { caseId, stageId, stageName } = pendingTimelineCompletion;
+        
+        setComplaints(prev => prev.map(c => {
+            if (c.id === caseId) {
+                const newProgress = { ...c.timelineProgress, [stageId]: true };
+                const logAction = `Etapa '${stageName}' marcada como completada tras enviar comunicación.`;
+                const newAuditLog = [...c.auditLog, { id: uuidv4(), action: logAction, userId: user.uid, timestamp: new Date().toISOString() }];
+                return { ...c, timelineProgress: newProgress, auditLog: newAuditLog };
+            }
+            return c;
+        }));
+        
+        addToast(`Etapa "${stageName}" completada.`, "success");
+        setPendingTimelineCompletion(null); // Limpiar el estado
+    }, [pendingTimelineCompletion, setComplaints, addToast, setPendingTimelineCompletion]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
         setComplaints(prevComplaints => prevComplaints.map(c => {
@@ -133,11 +153,15 @@ export const DataProvider = ({ children }) => {
         notificationRules, setNotificationRules,
         supportTickets, addSupportTicket, updateSupportTicket,
         documentCategories, setDocumentCategories,
-        companyDocuments, setCompanyDocuments
+        companyDocuments, setCompanyDocuments,
+        pendingTimelineCompletion, 
+        setPendingTimelineCompletion,
+        completePendingTimelineStage
     }), [
         companies, complaints, holidays, plans, roles, communicationTemplates, notificationRules, supportTickets, documentCategories, companyDocuments,
         setCompanies, setComplaints, setHolidays, setPlans, setRoles, setCommunicationTemplates, setNotificationRules, setSupportTickets, setDocumentCategories, setCompanyDocuments,
-        addComplaint, updateComplaint, updateCompany, addSupportTicket, updateSupportTicket
+        addComplaint, updateComplaint, updateCompany, addSupportTicket, updateSupportTicket,
+        pendingTimelineCompletion, setPendingTimelineCompletion, completePendingTimelineStage
     ]);
 
     if (isLoading) {
