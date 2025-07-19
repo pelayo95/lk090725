@@ -11,7 +11,7 @@ import { useTemplateSuggestion } from '../../../contexts/TemplateSuggestionConte
 
 const TimelineTab = ({ complaint, onNavigate }) => {
     const { getCompanyConfig } = useConfig();
-    const { holidays, updateComplaint, communicationTemplates } = useData();
+    const { holidays, updateComplaint, communicationTemplates, setPendingTimelineCompletion } = useData();
     const { user } = useAuth();
     const { showSuggestion } = useTemplateSuggestion();
     const config = getCompanyConfig(complaint.companyId);
@@ -59,51 +59,49 @@ const TimelineTab = ({ complaint, onNavigate }) => {
         });
     }, [complaint, getTimelineSettings, holidays]);
 
-    const handleToggle = (stageId, subStepIndex = null) => {
+    const handleToggle = (stageId, stageName, subStepIndex = null) => {
+        const templates = communicationTemplates[complaint.companyId] || [];
+        const associatedTemplate = templates.find(t => t.triggerPoint === stageId);
+
+        // Si la etapa tiene una plantilla asociada y aún no está completada, activamos la sugerencia.
+        if (associatedTemplate && !complaint.timelineProgress[stageId] && subStepIndex === null) {
+            setPendingTimelineCompletion({ caseId: complaint.id, stageId, stageName });
+            showSuggestion(stageId, complaint.id, associatedTemplate);
+            return; // Detenemos la ejecución aquí, la etapa se completará al enviar el mensaje.
+        }
+
+        // Si no tiene plantilla o si ya está completada (para desmarcarla), se comporta como antes.
         let newProgress = { ...complaint.timelineProgress };
-        const settings = getTimelineSettings();
-        const stage = settings.find(s => s.id === stageId);
+        const stage = getTimelineSettings().find(s => s.id === stageId);
         let logAction = '';
-        let wasJustCompleted = false;
         
         if (subStepIndex === null) {
             const isCompleted = !newProgress[stageId];
-            if (isCompleted) wasJustCompleted = true; // Se acaba de completar
             newProgress[stageId] = isCompleted;
-            logAction = `Etapa '${stage.name}' marcada como ${isCompleted ? 'completada' : 'pendiente'}`;
+            logAction = `Etapa '${stageName}' marcada como ${isCompleted ? 'completada' : 'pendiente'}`;
             if (stage.subSteps) stage.subSteps.forEach((_, index) => { newProgress[`${stageId}_${index}`] = isCompleted; });
         } else {
             const key = `${stageId}_${subStepIndex}`;
             const isCompleted = !newProgress[key];
             newProgress[key] = isCompleted;
             logAction = `Sub-etapa '${stage.subSteps[subStepIndex].name}' marcada como ${isCompleted ? 'completada' : 'pendiente'}`;
-            const allSubStepsCompleted = stage.subSteps.every((_, index) => newProgress[`${stageId}_${index}`]);
-            if (allSubStepsCompleted && !complaint.timelineProgress[stageId]) {
-                wasJustCompleted = true; // La etapa principal se completó al marcar la última sub-etapa
-            }
-            newProgress[stageId] = allSubStepsCompleted;
+            newProgress[stageId] = stage.subSteps.every((_, index) => newProgress[`${stageId}_${index}`]);
         }
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: logAction, userId: user.uid, timestamp: new Date().toISOString() }];
         updateComplaint(complaint.id, { timelineProgress: newProgress, auditLog: newAuditLog }, user);
-
-        // Lógica de sugerencia de plantilla
-        if (wasJustCompleted) {
-            const templates = communicationTemplates[complaint.companyId] || [];
-            const template = templates.find(t => t.triggerPoint === stageId);
-            if (template) {
-                showSuggestion(stageId, complaint.id, template);
-            }
-        }
     };
     
     const handleSubStepClick = (subStep) => {
+        const interviewSteps = ['sub6', 'sub7', 'sub8'];
+        const fileSteps = ['sub9', 'sub10'];
         const communicationSteps = ['sub2', 'sub3', 'sub5', 'sub15'];
-        const managementSteps = ['sub6', 'sub7', 'sub8', 'sub9', 'sub10'];
 
-        if (communicationSteps.includes(subStep.id)) {
+        if (interviewSteps.includes(subStep.id)) {
+            onNavigate('interviews');
+        } else if (fileSteps.includes(subStep.id)) {
+            onNavigate('expediente');
+        } else if (communicationSteps.includes(subStep.id)) {
             onNavigate('communications');
-        } else if (managementSteps.includes(subStep.id)) {
-            onNavigate('managements');
         } else if (subStep.id === 'sub4') {
             onNavigate('measures');
         }
@@ -128,7 +126,7 @@ const TimelineTab = ({ complaint, onNavigate }) => {
                                 <div className={`p-4 bg-white border rounded-lg shadow-sm`}>
                                     <div className="flex items-center gap-4">
                                         <Tooltip text={isDisabled ? "No tiene permiso o debe completar la etapa anterior." : ""}>
-                                            <input type="checkbox" checked={isCompleted || false} disabled={isDisabled} onChange={() => handleToggle(event.id)}
+                                            <input type="checkbox" checked={isCompleted || false} disabled={isDisabled} onChange={() => handleToggle(event.id, event.name)}
                                                 className={`h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}/>
                                         </Tooltip>
                                         <div>
@@ -145,7 +143,7 @@ const TimelineTab = ({ complaint, onNavigate }) => {
 
                                             return (
                                                 <li key={sub.id || i} className="flex items-center gap-2">
-                                                    <input type="checkbox" checked={isSubCompleted || false} disabled={isSubDisabled} onChange={() => handleToggle(event.id, i)}
+                                                    <input type="checkbox" checked={isSubCompleted || false} disabled={isSubDisabled} onChange={() => handleToggle(event.id, event.name, i)}
                                                         className={`h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 ${isSubDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}/>
                                                     <div 
                                                         className={`flex items-center gap-1 text-xs ${isInteractive ? 'cursor-pointer hover:underline text-blue-600' : ''} ${isSubCompleted ? 'line-through text-slate-400' : 'text-slate-600'}`}
