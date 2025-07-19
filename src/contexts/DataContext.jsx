@@ -2,7 +2,6 @@
 import React, { useContext, createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotification } from './NotificationContext';
-import { useTemplateSuggestion } from './TemplateSuggestionContext';
 import { initialData } from '../data/mockData';
 import { uuidv4 } from '../utils/uuid';
 
@@ -10,9 +9,13 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
+// Función para despachar eventos personalizados que podremos escuchar en otros lugares
+const dispatchSuggestionEvent = (eventName, detail) => {
+    window.dispatchEvent(new CustomEvent(eventName, { detail }));
+};
+
 export const DataProvider = ({ children }) => {
     const { addToast } = useNotification();
-    const { showSuggestion } = useTemplateSuggestion();
     const [isLoading, setIsLoading] = useState(true);
 
     const [holidays, setHolidays] = useLocalStorage('holidays', initialData.holidays);
@@ -65,15 +68,19 @@ export const DataProvider = ({ children }) => {
         
         setComplaints(prev => [...prev, newComplaint]);
 
-        // LÓGICA DE SUGERENCIA AL CREAR CASO
+        // En lugar de llamar a showSuggestion, despachamos un evento
         const templates = communicationTemplates[companyId] || [];
         const creationTemplate = templates.find(t => t.triggerPoint === 'case_created');
         if (creationTemplate) {
-            showSuggestion('case_created', newComplaint.id, creationTemplate);
+            dispatchSuggestionEvent('showSuggestion', {
+                trigger: 'case_created',
+                caseId: newComplaint.id,
+                template: creationTemplate
+            });
         }
         
         return newComplaint;
-    }, [setComplaints, communicationTemplates, showSuggestion]);
+    }, [setComplaints, communicationTemplates]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
         let originalComplaint = null;
@@ -110,25 +117,22 @@ export const DataProvider = ({ children }) => {
             });
         });
 
-        // LÓGICA DE DETECCIÓN DE EVENTOS PARA SUGERENCIAS
         if (originalComplaint) {
             const templates = communicationTemplates[originalComplaint.companyId] || [];
 
-            // Evento: Se asignan investigadores por primera vez
             if (updates.investigatorIds && originalComplaint.investigatorIds.length === 0 && updates.investigatorIds.length > 0) {
                 const template = templates.find(t => t.triggerPoint === 'investigators_assigned');
-                if (template) showSuggestion('investigators_assigned', complaintId, template);
+                if (template) dispatchSuggestionEvent('showSuggestion', { trigger: 'investigators_assigned', caseId: complaintId, template });
             }
 
-            // Evento: El caso se cierra
             if (updates.status === 'Cerrada' && originalComplaint.status !== 'Cerrada') {
                 const template = templates.find(t => t.triggerPoint === 'case_closed');
-                if (template) showSuggestion('case_closed', complaintId, template);
+                if (template) dispatchSuggestionEvent('showSuggestion', { trigger: 'case_closed', caseId: complaintId, template });
             }
         }
 
         addToast("Caso actualizado correctamente", "success");
-    }, [setComplaints, addToast, communicationTemplates, showSuggestion]);
+    }, [setComplaints, addToast, communicationTemplates]);
     
     const updateCompany = useCallback((companyId, updates) => {
         setCompanies(prevCompanies => prevCompanies.map(c => c.id === companyId ? { ...c, ...updates } : c));
