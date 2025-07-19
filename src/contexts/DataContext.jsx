@@ -2,6 +2,7 @@
 import React, { useContext, createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotification } from './NotificationContext';
+import { useTemplateSuggestion } from './TemplateSuggestionContext';
 import { initialData } from '../data/mockData';
 import { uuidv4 } from '../utils/uuid';
 
@@ -11,6 +12,7 @@ export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
     const { addToast } = useNotification();
+    const { showSuggestion } = useTemplateSuggestion();
     const [isLoading, setIsLoading] = useState(true);
 
     const [holidays, setHolidays] = useLocalStorage('holidays', initialData.holidays);
@@ -62,40 +64,71 @@ export const DataProvider = ({ children }) => {
         };
         
         setComplaints(prev => [...prev, newComplaint]);
+
+        // LÓGICA DE SUGERENCIA AL CREAR CASO
+        const templates = communicationTemplates[companyId] || [];
+        const creationTemplate = templates.find(t => t.triggerPoint === 'case_created');
+        if (creationTemplate) {
+            showSuggestion('case_created', newComplaint.id, creationTemplate);
+        }
+        
         return newComplaint;
-    }, [setComplaints]);
+    }, [setComplaints, communicationTemplates, showSuggestion]);
     
     const updateComplaint = useCallback((complaintId, updates, user) => {
-        setComplaints(prevComplaints => prevComplaints.map(c => {
-            if (c.id === complaintId) {
-                const finalUpdates = {...updates};
-                
-                if(updates.status === 'Cerrada' && c.status !== 'Cerrada') {
-                    finalUpdates.closedAt = new Date().toISOString();
-                } else if (updates.status !== 'Cerrada' && c.status === 'Cerrada') {
-                    finalUpdates.closedAt = null;
-                }
+        let originalComplaint = null;
 
-                const auditLogEntries = [];
-                for (const key in finalUpdates) {
-                    if (Object.prototype.hasOwnProperty.call(finalUpdates, key) && !Array.isArray(finalUpdates[key]) && key !== 'timelineProgress' && key !== 'auditLog' && JSON.stringify(finalUpdates[key]) !== JSON.stringify(c[key])) {
-                        auditLogEntries.push({
-                            id: uuidv4(),
-                            action: `Campo '${key}' actualizado.`,
-                            userId: user?.uid || 'system',
-                            timestamp: new Date().toISOString()
-                        });
+        setComplaints(prevComplaints => {
+            originalComplaint = prevComplaints.find(c => c.id === complaintId);
+            return prevComplaints.map(c => {
+                if (c.id === complaintId) {
+                    const finalUpdates = {...updates};
+                    
+                    if(updates.status === 'Cerrada' && c.status !== 'Cerrada') {
+                        finalUpdates.closedAt = new Date().toISOString();
+                    } else if (updates.status !== 'Cerrada' && c.status === 'Cerrada') {
+                        finalUpdates.closedAt = null;
                     }
+
+                    const auditLogEntries = [];
+                    for (const key in finalUpdates) {
+                        if (Object.prototype.hasOwnProperty.call(finalUpdates, key) && !Array.isArray(finalUpdates[key]) && key !== 'timelineProgress' && key !== 'auditLog' && JSON.stringify(finalUpdates[key]) !== JSON.stringify(c[key])) {
+                            auditLogEntries.push({
+                                id: uuidv4(),
+                                action: `Campo '${key}' actualizado.`,
+                                userId: user?.uid || 'system',
+                                timestamp: new Date().toISOString()
+                            });
+                        }
+                    }
+
+                    const newAuditLog = finalUpdates.auditLog ? finalUpdates.auditLog : [...c.auditLog, ...auditLogEntries];
+
+                    return { ...c, ...finalUpdates, auditLog: newAuditLog };
                 }
+                return c;
+            });
+        });
 
-                const newAuditLog = finalUpdates.auditLog ? finalUpdates.auditLog : [...c.auditLog, ...auditLogEntries];
+        // LÓGICA DE DETECCIÓN DE EVENTOS PARA SUGERENCIAS
+        if (originalComplaint) {
+            const templates = communicationTemplates[originalComplaint.companyId] || [];
 
-                return { ...c, ...finalUpdates, auditLog: newAuditLog };
+            // Evento: Se asignan investigadores por primera vez
+            if (updates.investigatorIds && originalComplaint.investigatorIds.length === 0 && updates.investigatorIds.length > 0) {
+                const template = templates.find(t => t.triggerPoint === 'investigators_assigned');
+                if (template) showSuggestion('investigators_assigned', complaintId, template);
             }
-            return c;
-        }));
+
+            // Evento: El caso se cierra
+            if (updates.status === 'Cerrada' && originalComplaint.status !== 'Cerrada') {
+                const template = templates.find(t => t.triggerPoint === 'case_closed');
+                if (template) showSuggestion('case_closed', complaintId, template);
+            }
+        }
+
         addToast("Caso actualizado correctamente", "success");
-    }, [setComplaints, addToast]);
+    }, [setComplaints, addToast, communicationTemplates, showSuggestion]);
     
     const updateCompany = useCallback((companyId, updates) => {
         setCompanies(prevCompanies => prevCompanies.map(c => c.id === companyId ? { ...c, ...updates } : c));
