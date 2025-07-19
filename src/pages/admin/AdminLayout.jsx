@@ -62,7 +62,10 @@ const AdminLayout = ({ children }) => {
         <div className="flex flex-col h-full overflow-hidden">
             <div className="h-16 flex items-center border-b border-slate-200 flex-shrink-0 px-4">
                 <Briefcase className="w-8 h-8 text-indigo-600 flex-shrink-0"/>
-                <span className={`ml-2 font-bold text-lg text-slate-800 whitespace-nowrap transition-opacity duration-200 ${isExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>Plataforma</span>
+                {/* CORRECCIÓN: Usar 'hidden' para ocultar el texto */}
+                <span className={`ml-2 font-bold text-lg text-slate-800 whitespace-nowrap ${isExpanded ? '' : 'hidden'}`}>
+                    Plataforma
+                </span>
             </div>
             <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
                 {navItems.map(item => {
@@ -76,7 +79,8 @@ const AdminLayout = ({ children }) => {
                             className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeView.startsWith(item.id) ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'}`}
                         >
                             <span className="flex-shrink-0">{item.icon}</span>
-                            <span className={`whitespace-nowrap transition-opacity duration-200 ${isExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>{item.label}</span>
+                            {/* CORRECCIÓN: Usar 'hidden' para ocultar el texto */}
+                            <span className={`whitespace-nowrap ${isExpanded ? '' : 'hidden'}`}>{item.label}</span>
                         </a>
                     )
                 })}
@@ -84,15 +88,24 @@ const AdminLayout = ({ children }) => {
             <div className="p-4 border-t border-slate-200 flex-shrink-0">
                  <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold flex-shrink-0">{user?.firstName?.[0] || '?'}</div>
-                    <div className={`whitespace-nowrap overflow-hidden transition-opacity duration-200 ${isExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>
+                    {/* CORRECCIÓN: Usar 'hidden' para ocultar el texto */}
+                    <div className={`whitespace-nowrap overflow-hidden ${isExpanded ? '' : 'hidden'}`}>
                         <p className="text-sm font-semibold text-slate-800 truncate">{`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
                         <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     </div>
                 </div>
-                <button onClick={logout} className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300">
-                    <LogOut className="w-4 h-4 flex-shrink-0"/>
-                    <span className={`whitespace-nowrap transition-opacity duration-200 ${isExpanded ? 'opacity-100 delay-200' : 'opacity-0'}`}>Cerrar Sesión</span>
-                </button>
+                
+                {/* CORRECCIÓN: Botón de logout condicional */}
+                {isExpanded ? (
+                    <button onClick={logout} className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300">
+                        <LogOut className="w-4 h-4 flex-shrink-0"/>
+                        <span className="whitespace-nowrap">Cerrar Sesión</span>
+                    </button>
+                ) : (
+                    <button onClick={logout} title="Cerrar Sesión" className="w-full mt-4 flex items-center justify-center p-2 rounded-md font-semibold bg-slate-200 text-slate-800 hover:bg-slate-300">
+                        <LogOut className="w-5 h-5"/>
+                    </button>
+                )}
             </div>
         </div>
     );
