@@ -1,5 +1,5 @@
 // src/pages/admin/SettingsPage.jsx
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -30,29 +30,7 @@ const SettingsPage = () => {
     const { addToast } = useNotification();
     const [config, setConfig] = useState(() => getCompanyConfig(user.companyId));
 
-    const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
-    const collapseTimeoutRef = useRef(null);
-
-    // Lógica de colapso y expansión del menú lateral (basada 100% en hover)
-    useEffect(() => {
-        const initialCollapseTimer = setTimeout(() => {
-            setIsSidebarExpanded(false);
-        }, 3000);
-        return () => clearTimeout(initialCollapseTimer);
-    }, []);
-
-    const handleMouseEnter = () => {
-        if (collapseTimeoutRef.current) {
-            clearTimeout(collapseTimeoutRef.current);
-        }
-        setIsSidebarExpanded(true);
-    };
-
-    const handleMouseLeave = () => {
-        collapseTimeoutRef.current = setTimeout(() => {
-            setIsSidebarExpanded(false);
-        }, 3000);
-    };
+    // Se eliminó toda la lógica de estado (useState, useEffect, useRef) para el menú colapsable.
 
     const settingCategories = useMemo(() => [
         { name: 'Gestión de Acceso', icon: <Users className="w-5 h-5"/>, items: [{ id: 'roles', label: 'Roles y Permisos', permission: 'config_puede_gestionar_roles', component: RoleManagementPage, icon: <ShieldCheck className="w-5 h-5" /> }] },
@@ -100,20 +78,14 @@ const SettingsPage = () => {
              </div>
 
              <div className="md:flex md:gap-8 items-start">
-                 <aside
-                     className={`bg-transparent md:flex-shrink-0 transition-all duration-300 ease-in-out mb-6 md:mb-0 ${isSidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
-                     onMouseEnter={handleMouseEnter}
-                     onMouseLeave={handleMouseLeave}
-                 >
+                 {/* El menú ahora tiene un ancho fijo y no tiene lógica de hover */}
+                 <aside className="bg-transparent md:flex-shrink-0 md:w-64 mb-6 md:mb-0">
                      <div className="space-y-4 p-2">
                          {visibleCategories.map(category => (
                              <div key={category.name}>
-                                 <h3 className={`mb-2 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2 ${isSidebarExpanded ? 'px-3' : 'justify-center'}`}>
+                                 <h3 className="mb-2 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                                      {React.cloneElement(category.icon, { className: 'w-5 h-5 flex-shrink-0 text-slate-600' })}
-                                     {/* CORRECCIÓN: Usar 'hidden' para remover el texto del layout */}
-                                     <span className={`whitespace-nowrap ${isSidebarExpanded ? 'opacity-100 transition-opacity' : 'hidden'}`}>
-                                         {category.name}
-                                     </span>
+                                     <span className="whitespace-nowrap">{category.name}</span>
                                  </h3>
                                  <div className="space-y-1">
                                      {category.items.map(item => {
@@ -122,16 +94,13 @@ const SettingsPage = () => {
                                              <button
                                                  key={item.id}
                                                  onClick={() => setActiveSetting(item.id)}
-                                                 title={isSidebarExpanded ? '' : item.label}
-                                                 className={`w-full text-sm py-2 px-3 rounded-md transition-colors flex items-center ${isActive ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'} ${isSidebarExpanded ? 'gap-3' : 'justify-center'}`}
+                                                 title={item.label}
+                                                 className={`w-full text-sm py-2 px-3 rounded-md transition-colors flex items-center gap-3 ${isActive ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-slate-600 hover:bg-slate-100'}`}
                                              >
                                                  {React.cloneElement(item.icon, {
                                                      className: `w-5 h-5 flex-shrink-0 ${isActive ? 'text-indigo-700' : 'text-slate-500'}`
                                                  })}
-                                                 {/* CORRECCIÓN: Usar 'hidden' para remover el texto del layout */}
-                                                 <span className={`whitespace-nowrap ${isSidebarExpanded ? 'opacity-100 transition-opacity' : 'hidden'}`}>
-                                                     {item.label}
-                                                 </span>
+                                                 <span className="whitespace-nowrap">{item.label}</span>
                                              </button>
                                          );
                                      })}
