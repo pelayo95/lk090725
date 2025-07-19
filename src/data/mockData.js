@@ -194,7 +194,44 @@ export const initialData = {
     "empresa-a": defaultConfig,
   },
   communicationTemplates: {
-    "empresa-a": []
+    "empresa-a": [
+      {
+        id: "tpl_001",
+        name: "Acuse de Recibo (Denunciante)",
+        content: "Estimado/a,\n\nHemos recibido correctamente su denuncia, registrada bajo el código [CODIGO_CASO].\n\nLe confirmamos que hemos iniciado el proceso de investigación interno de acuerdo a nuestros protocolos. Un gestor/a se pondrá en contacto con usted a la brevedad para coordinar los próximos pasos.\n\nPuede utilizar este mismo chat para aportar cualquier antecedente adicional que considere relevante.\n\nAtentamente,\nEl Equipo de Cumplimiento.",
+        triggerPoint: "case_created"
+      },
+      {
+        id: "tpl_002",
+        name: "Notificación Inicial (Denunciado)",
+        content: "Estimado/a,\n\nLe informamos que la empresa ha recibido una denuncia en su contra en el marco de la Ley N°21.643. Se ha iniciado una investigación interna para esclarecer los hechos, proceso durante el cual se garantizará su derecho a ser oído y a la confidencialidad.\n\nEn los próximos días, un investigador/a asignado al caso se pondrá en contacto con usted para coordinar una entrevista y entregar más detalles.\n\nAtentamente,\nEl Equipo de Cumplimiento.",
+        triggerPoint: "investigators_assigned"
+      },
+      {
+        id: "tpl_003",
+        name: "Citación a Entrevista (General)",
+        content: "Estimado/a,\n\nEn el marco de la investigación del caso [CODIGO_CASO], necesitamos coordinar una entrevista con usted para recoger su testimonio sobre los hechos denunciados.\n\nPor favor, indíquenos su disponibilidad horaria para los próximos días para poder agendar una reunión (presencial o telemática).\n\nQuedamos a su disposición.",
+        triggerPoint: "manual"
+      },
+      {
+        id: "tpl_004",
+        name: "Notificación de Medidas de Resguardo",
+        content: "Estimado/a,\n\nLe informamos que, como parte del protocolo de investigación del caso [CODIGO_CASO], y con el fin de proteger la integridad de todos los involucrados, se han determinado ciertas medidas de resguardo de carácter temporal.\n\nEstas medidas le serán comunicadas formalmente por el área de Recursos Humanos. Su objetivo es asegurar que la investigación se desarrolle en un ambiente adecuado y no constituyen una sanción.\n\nAtentamente.",
+        triggerPoint: "manual"
+      },
+      {
+        id: "tpl_005",
+        name: "Cierre de Etapa de Investigación",
+        content: "Estimado/a,\n\nLe comunicamos que la etapa de recopilación de antecedentes y entrevistas para el caso [CODIGO_CASO] ha concluido.\n\nEl equipo investigador procederá ahora a analizar la información para elaborar el informe de conclusiones. Le mantendremos informado/a sobre las siguientes etapas del proceso.\n\nAtentamente.",
+        triggerPoint: "manual"
+      },
+      {
+        id: "tpl_006",
+        name: "Resolución Final del Caso",
+        content: "Estimado/a,\n\nLe informamos que la investigación asociada al caso [CODIGO_CASO] ha finalizado y se ha emitido una resolución.\n\nLos resultados y las medidas adoptadas (si las hubiere) le serán comunicadas a través de los canales formales establecidos por la empresa.\n\nCon esto, damos por cerrado el caso en esta plataforma. Agradecemos su participación en el proceso.",
+        triggerPoint: "case_closed"
+      }
+    ]
   },
   roles: {
     "empresa-a": [
@@ -271,46 +308,5 @@ export const initialData = {
         url: "#"
       }
     ]
-  },
-  communicationTemplates: {
-    "empresa-a": [
-      {
-        id: "tpl_001",
-        name: "Acuse de Recibo (Denunciante)",
-        content: "Estimado/a,\n\nHemos recibido correctamente su denuncia, registrada bajo el código [CODIGO_CASO].\n\nLe confirmamos que hemos iniciado el proceso de investigación interno de acuerdo a nuestros protocolos. Un gestor/a se pondrá en contacto con usted a la brevedad para coordinar los próximos pasos.\n\nPuede utilizar este mismo chat para aportar cualquier antecedente adicional que considere relevante.\n\nAtentamente,\nEl Equipo de Cumplimiento.",
-        triggerPoint: "case_created"
-      },
-      {
-        id: "tpl_002",
-        name: "Notificación Inicial (Denunciado)",
-        content: "Estimado/a,\n\nLe informamos que la empresa ha recibido una denuncia en su contra en el marco de la Ley N°21.643. Se ha iniciado una investigación interna para esclarecer los hechos, proceso durante el cual se garantizará su derecho a ser oído y a la confidencialidad.\n\nEn los próximos días, un investigador/a asignado al caso se pondrá en contacto con usted para coordinar una entrevista y entregar más detalles.\n\nAtentamente,\nEl Equipo de Cumplimiento.",
-        triggerPoint: "investigators_assigned"
-      },
-      {
-        id: "tpl_003",
-        name: "Citación a Entrevista (General)",
-        content: "Estimado/a,\n\nEn el marco de la investigación del caso [CODIGO_CASO], necesitamos coordinar una entrevista con usted para recoger su testimonio sobre los hechos denunciados.\n\nPor favor, indíquenos su disponibilidad horaria para los próximos días para poder agendar una reunión (presencial o telemática).\n\nQuedamos a su disposición.",
-        triggerPoint: "manual"
-      },
-      {
-        id: "tpl_004",
-        name: "Notificación de Medidas de Resguardo",
-        content: "Estimado/a,\n\nLe informamos que, como parte del protocolo de investigación del caso [CODIGO_CASO], y con el fin de proteger la integridad de todos los involucrados, se han determinado ciertas medidas de resguardo de carácter temporal.\n\nEstas medidas le serán comunicadas formalmente por el área de Recursos Humanos. Su objetivo es asegurar que la investigación se desarrolle en un ambiente adecuado y no constituyen una sanción.\n\nAtentamente.",
-        triggerPoint: "manual"
-      },
-      {
-        id: "tpl_005",
-        name: "Cierre de Etapa de Investigación",
-        content: "Estimado/a,\n\nLe comunicamos que la etapa de recopilación de antecedentes y entrevistas para el caso [CODIGO_CASO] ha concluido.\n\nEl equipo investigador procederá ahora a analizar la información para elaborar el informe de conclusiones. Le mantendremos informado/a sobre las siguientes etapas del proceso.\n\nAtentamente.",
-        triggerPoint: "manual"
-      },
-      {
-        id: "tpl_006",
-        name: "Resolución Final del Caso",
-        content: "Estimado/a,\n\nLe informamos que la investigación asociada al caso [CODIGO_CASO] ha finalizado y se ha emitido una resolución.\n\nLos resultados y las medidas adoptadas (si las hubiere) le serán comunicadas a través de los canales formales establecidos por la empresa.\n\nCon esto, damos por cerrado el caso en esta plataforma. Agradecemos su participación en el proceso.",
-        triggerPoint: "case_closed"
-      }
-    ]
-  },
-
+  }
 };
