@@ -6,12 +6,14 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { Card, Tooltip } from '../../../components/common';
 import { calculateEndDate } from '../../../services/dateUtils';
 import { uuidv4 } from '../../../utils/uuid';
-import { CheckCircle, ListChecks, ArrowUpRight } from 'lucide-react'; // Ícono añadido
+import { CheckCircle, ListChecks, ArrowUpRight } from 'lucide-react';
+import { useTemplateSuggestion } from '../../../contexts/TemplateSuggestionContext';
 
 const TimelineTab = ({ complaint, onNavigate }) => {
     const { getCompanyConfig } = useConfig();
-    const { holidays, updateComplaint } = useData();
+    const { holidays, updateComplaint, communicationTemplates } = useData();
     const { user } = useAuth();
+    const { showSuggestion } = useTemplateSuggestion();
     const config = getCompanyConfig(complaint.companyId);
     
     const getTimelineSettings = useCallback(() => {
@@ -62,9 +64,11 @@ const TimelineTab = ({ complaint, onNavigate }) => {
         const settings = getTimelineSettings();
         const stage = settings.find(s => s.id === stageId);
         let logAction = '';
+        let wasJustCompleted = false;
         
         if (subStepIndex === null) {
             const isCompleted = !newProgress[stageId];
+            if (isCompleted) wasJustCompleted = true; // Se acaba de completar
             newProgress[stageId] = isCompleted;
             logAction = `Etapa '${stage.name}' marcada como ${isCompleted ? 'completada' : 'pendiente'}`;
             if (stage.subSteps) stage.subSteps.forEach((_, index) => { newProgress[`${stageId}_${index}`] = isCompleted; });
@@ -73,10 +77,23 @@ const TimelineTab = ({ complaint, onNavigate }) => {
             const isCompleted = !newProgress[key];
             newProgress[key] = isCompleted;
             logAction = `Sub-etapa '${stage.subSteps[subStepIndex].name}' marcada como ${isCompleted ? 'completada' : 'pendiente'}`;
-            newProgress[stageId] = stage.subSteps.every((_, index) => newProgress[`${stageId}_${index}`]);
+            const allSubStepsCompleted = stage.subSteps.every((_, index) => newProgress[`${stageId}_${index}`]);
+            if (allSubStepsCompleted && !complaint.timelineProgress[stageId]) {
+                wasJustCompleted = true; // La etapa principal se completó al marcar la última sub-etapa
+            }
+            newProgress[stageId] = allSubStepsCompleted;
         }
         const newAuditLog = [...complaint.auditLog, { id: uuidv4(), action: logAction, userId: user.uid, timestamp: new Date().toISOString() }];
         updateComplaint(complaint.id, { timelineProgress: newProgress, auditLog: newAuditLog }, user);
+
+        // Lógica de sugerencia de plantilla
+        if (wasJustCompleted) {
+            const templates = communicationTemplates[complaint.companyId] || [];
+            const template = templates.find(t => t.triggerPoint === stageId);
+            if (template) {
+                showSuggestion(stageId, complaint.id, template);
+            }
+        }
     };
     
     const handleSubStepClick = (subStep) => {
