@@ -14,15 +14,16 @@ import App from './App';
 export default function AppWrapper() {
   return (
     <NotificationProvider>
-        <DataProvider>
-            <ConfigProvider>
-                <AuthProvider>
-                    <TemplateSuggestionProvider>
+        {/* CORRECCIÓN: TemplateSuggestionProvider ahora envuelve a DataProvider */}
+        <TemplateSuggestionProvider>
+            <DataProvider>
+                <ConfigProvider>
+                    <AuthProvider>
                         <App />
-                    </TemplateSuggestionProvider>
-                </AuthProvider>
-            </ConfigProvider>
-        </DataProvider>
+                    </AuthProvider>
+                </ConfigProvider>
+            </DataProvider>
+        </TemplateSuggestionProvider>
     </NotificationProvider>
   );
 }
