@@ -14,13 +14,9 @@ const TemplateSuggestionModal = () => {
     const { caseId, template } = suggestion;
     const processedContent = template.content.replace(/\[CODIGO_CASO\]/g, caseId || '');
 
-    const handleCopy = () => {
+    const handleCopyAndGo = () => {
         navigator.clipboard.writeText(processedContent);
         addToast('Mensaje copiado al portapapeles.', 'success');
-        clearSuggestion();
-    };
-
-    const handleGoToCase = () => {
         window.location.hash = `#admin/cases/${caseId}`;
         clearSuggestion();
     };
@@ -41,11 +37,8 @@ const TemplateSuggestionModal = () => {
                 </div>
             </div>
             <div className="bg-slate-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-lg mt-6">
-                <Button onClick={handleGoToCase} variant="primary" className="w-full sm:ml-3 sm:w-auto">
-                    Ir al Caso y Pegar
-                </Button>
-                <Button onClick={handleCopy} variant="secondary" className="mt-3 w-full sm:mt-0 sm:w-auto">
-                    <Copy className="w-4 h-4" /> Copiar Texto
+                <Button onClick={handleCopyAndGo} variant="primary" className="w-full sm:ml-3 sm:w-auto">
+                    <Copy className="w-4 h-4" /> Copiar e Ir al Caso
                 </Button>
                  <Button onClick={clearSuggestion} variant="ghost" className="mr-auto text-red-600">
                     <X className="w-4 h-4" /> Descartar
