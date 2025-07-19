@@ -4,10 +4,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
 import { Card, TextArea, Button, Modal } from '../common';
 import { Send, MessageSquarePlus, Reply, X } from 'lucide-react';
+import { useTemplateSuggestion } from '../../contexts/TemplateSuggestionContext';
+import { uuidv4 } from '../../utils/uuid';
 
 const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, currentUserColor, otherUserColor, complaintId }) => {
     const { user, allUsers } = useAuth();
-    const { communicationTemplates } = useData();
+    const { communicationTemplates, pendingTimelineCompletion, completePendingTimelineStage } = useData();
+    const { textToPaste, setTextToPaste } = useTemplateSuggestion();
     const [newComment, setNewComment] = useState("");
     const [replyingTo, setReplyingTo] = useState(null);
     const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -15,6 +18,14 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
     const textAreaRef = useRef(null);
 
     const companyTemplates = user ? (communicationTemplates[user.companyId] || []) : [];
+
+    useEffect(() => {
+        if (textToPaste && textToPaste.caseId === complaintId) {
+            setNewComment(textToPaste.text);
+            textAreaRef.current?.focus();
+            setTextToPaste(null); // Limpiar para que no se vuelva a pegar
+        }
+    }, [textToPaste, complaintId, setTextToPaste]);
 
     const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     useEffect(scrollToBottom, [messages]);
@@ -29,13 +40,13 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
         if (e) e.preventDefault();
         if (!newComment.trim()) return;
 
-        const baseSender = user || { uid: currentUserId };
+        const baseSender = user || { uid: currentUserId, firstName: 'Denunciante', lastName: '' };
 
         const newMessage = {
             id: uuidv4(),
             text: newComment,
             senderId: baseSender.uid,
-            senderName: `${baseSender.firstName || 'Denunciante'} ${baseSender.lastName || ''}`.trim(),
+            senderName: `${baseSender.firstName || ''} ${baseSender.lastName || ''}`.trim(),
             timestamp: new Date().toISOString(),
         };
 
@@ -48,6 +59,12 @@ const ChatTab = ({ title, messages, onSendMessage, currentUserId, placeholder, c
         }
 
         onSendMessage(newMessage);
+
+        // Si había una etapa de timeline pendiente, la completamos.
+        if (pendingTimelineCompletion && pendingTimelineCompletion.caseId === complaintId) {
+            completePendingTimelineStage(user);
+        }
+
         setNewComment("");
         setReplyingTo(null);
     };
