@@ -3,10 +3,10 @@ import React from 'react';
 import { useTemplateSuggestion } from '../../contexts/TemplateSuggestionContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { Modal, Button, TextArea } from '../common';
-import { MessageSquarePlus, Copy, X } from 'lucide-react';
+import { MessageSquarePlus, Send, X } from 'lucide-react';
 
 const TemplateSuggestionModal = () => {
-    const { suggestion, clearSuggestion } = useTemplateSuggestion();
+    const { suggestion, clearSuggestion, setTextToPaste } = useTemplateSuggestion();
     const { addToast } = useNotification();
 
     if (!suggestion) return null;
@@ -14,10 +14,12 @@ const TemplateSuggestionModal = () => {
     const { caseId, template } = suggestion;
     const processedContent = template.content.replace(/\[CODIGO_CASO\]/g, caseId || '');
 
-    const handleCopyAndGo = () => {
-        navigator.clipboard.writeText(processedContent);
-        addToast('Mensaje copiado al portapapeles.', 'success');
+    const handlePasteAndGo = () => {
+        setTextToPaste({ caseId, text: processedContent });
+        addToast('Texto listo para ser enviado.', 'info');
         window.location.hash = `#admin/cases/${caseId}`;
+        // Navega a la pestaña de comunicaciones
+        setTimeout(() => window.dispatchEvent(new CustomEvent('navigateToTab', { detail: 'communications' })), 50);
         clearSuggestion();
     };
 
@@ -29,7 +31,7 @@ const TemplateSuggestionModal = () => {
                     Sugerencia para el caso {caseId}
                 </h3>
                 <p className="mt-2 text-sm text-slate-600">
-                    Hemos detectado un evento relevante y te sugerimos usar la siguiente plantilla de comunicación: 
+                    Te sugerimos usar la siguiente plantilla de comunicación: 
                     <strong className="text-indigo-600"> "{template.name}"</strong>.
                 </p>
                 <div className="mt-4 text-left">
@@ -37,8 +39,8 @@ const TemplateSuggestionModal = () => {
                 </div>
             </div>
             <div className="bg-slate-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-lg mt-6">
-                <Button onClick={handleCopyAndGo} variant="primary" className="w-full sm:ml-3 sm:w-auto">
-                    <Copy className="w-4 h-4" /> Copiar e Ir al Caso
+                <Button onClick={handlePasteAndGo} variant="primary" className="w-full sm:ml-3 sm:w-auto">
+                    <Send className="w-4 h-4" /> Usar este Mensaje
                 </Button>
                  <Button onClick={clearSuggestion} variant="ghost" className="mr-auto text-red-600">
                     <X className="w-4 h-4" /> Descartar
