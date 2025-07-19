@@ -4,6 +4,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { DataProvider } from './contexts/DataContext';
 import { ConfigProvider } from './contexts/ConfigContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { TemplateSuggestionProvider } from './contexts/TemplateSuggestionContext';
 import App from './App';
 
 /**
@@ -16,7 +17,9 @@ export default function AppWrapper() {
         <DataProvider>
             <ConfigProvider>
                 <AuthProvider>
-                    <App />
+                    <TemplateSuggestionProvider>
+                        <App />
+                    </TemplateSuggestionProvider>
                 </AuthProvider>
             </ConfigProvider>
         </DataProvider>
